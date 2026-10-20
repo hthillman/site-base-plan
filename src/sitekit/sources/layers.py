@@ -25,7 +25,7 @@ NFHL_URL = "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer"
 # which it does often under load. It drops minimal-hazard Zone X areas, so "empty" means something different.
 NFHL_MIRROR_URL = ("https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/"
                    "USA_Flood_Hazard_Reduced_Set_gdb/FeatureServer/0")
-FEMA_TIMEOUT_S = 20
+FEMA_TIMEOUT_S = 12  # one try, then the mirror
 NWI_URL = "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0"
 SDA_URL = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest"
 DEM_URL = "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer"
@@ -101,7 +101,7 @@ def fetch_flood(clip: BaseGeometry, epsg: int) -> LayerResult:
     try:
         try:
             feats = query_features(f"{NFHL_URL}/28", geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields,
-                                   max_offset=0.5, timeout=FEMA_TIMEOUT_S)
+                                   max_offset=0.5, timeout=FEMA_TIMEOUT_S, retry=False)
         except Exception as primary:  # noqa: BLE001
             feats = query_features(NFHL_MIRROR_URL, geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields, max_offset=0.5)
             return _flood_from_mirror(r, feats, clip, primary)
@@ -647,6 +647,52 @@ def fetch_roads(clip: BaseGeometry, epsg: int) -> LayerResult:
         r.status = "ok" if r.features else "empty"
         if not r.features:
             r.notes.append("No mapped roads in the extent.")
+    except Exception as e:  # noqa: BLE001
+        return _fail(r, e)
+    r.retrieved_at = now_iso()
+    return r
+
+
+# ---------------------------------------------------------------- buildings
+STRUCTURES_URL = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/USA_Structures_View/FeatureServer/0"
+ASSUMED_HEIGHT_M = 4.5  # one story, when a structure has no height
+
+
+def fetch_buildings(clip: BaseGeometry, epsg: int, ft_per_m: float) -> LayerResult:
+    """Existing building footprints with heights (FEMA / ORNL USA Structures), for plan footprints and 3D massing."""
+    r = LayerResult(
+        key="buildings", title="Existing buildings", source="FEMA / Oak Ridge National Laboratory USA Structures (via Esri)",
+        url=STRUCTURES_URL,
+        resolution="Footprints traced from imagery; heights estimated from LiDAR or imagery. Structures under 450 sq ft are not included.",
+        limitations=["Footprints and heights are estimates from imagery and LiDAR, not measured.",
+                     "Buildings built or removed since the source imagery date won't match.",
+                     "Massing is a simple flat-roofed block at each building's estimated height."],
+    )
+    try:
+        feats = query_features(STRUCTURES_URL, geometry=clip, in_sr=epsg, out_sr=epsg,
+                               out_fields="HEIGHT,OCC_CLS,PRIM_OCC,IMAGE_DATE,SOURCE,VAL_METHOD,OUTBLDG")
+        dates, assumed = set(), 0
+        for f in feats:
+            g = f.geom if f.geom.is_valid else make_valid(f.geom)
+            if g.is_empty or not clip.contains(g.representative_point()):
+                continue
+            h = f.props.get("HEIGHT")
+            est = isinstance(h, (int, float)) and 2 <= h <= 400
+            if not est:
+                assumed += 1
+            d = _ms_date(f.props.get("IMAGE_DATE"))
+            if d:
+                dates.add(d[:4])
+            r.features.append(Feature(g, {"height_ft": round((h if est else ASSUMED_HEIGHT_M) * ft_per_m, 1), "height_assumed": not est,
+                                          "use": f.props.get("OCC_CLS") or "", "type": f.props.get("PRIM_OCC") or "",
+                                          "image_date": d or "", "verified": f.props.get("VAL_METHOD") or ""}))
+        if dates:
+            r.vintage = "Source imagery " + (min(dates) if min(dates) == max(dates) else f"{min(dates)} to {max(dates)}")
+        if assumed:
+            r.notes.append(f"{assumed} building(s) had no height in the source and are drawn one story ({ASSUMED_HEIGHT_M * ft_per_m:.0f} ft) tall.")
+        r.status = "ok" if r.features else "empty"
+        if not r.features:
+            r.notes.append("No structures over 450 sq ft mapped in the extent.")
     except Exception as e:  # noqa: BLE001
         return _fail(r, e)
     r.retrieved_at = now_iso()

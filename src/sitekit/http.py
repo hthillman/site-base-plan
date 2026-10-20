@@ -26,6 +26,20 @@ def session() -> requests.Session:
     return _session
 
 
+_plain = None
+
+
+def plain_session() -> requests.Session:
+    """No automatic retries: for services with a fallback, where retries only multiply the wait."""
+    global _plain
+    if _plain is None:
+        s = requests.Session()
+        s.mount("https://", HTTPAdapter(max_retries=0, pool_maxsize=16))
+        s.headers["User-Agent"] = USER_AGENT
+        _plain = s
+    return _plain
+
+
 # The ArcGIS key is restricted to the site's referrer; server-side calls must
 # send it explicitly.
 ESRI_REFERER = os.environ.get("ESRI_REFERER", "")

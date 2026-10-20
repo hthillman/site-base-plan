@@ -45,6 +45,7 @@ class Options:
     extra_queries: list = field(default_factory=list)   # more addresses / APNs to combine into one site
     layer_preset: str = "default"                       # default | ncs
     layer_custom: dict = field(default_factory=dict)    # {"SITE-PARCEL": "L-PROP-LINE", ...}
+    skip: set = field(default_factory=set)              # optional layers left out: aerial, soils, flood, wetland, massing
 
 
 @dataclass
@@ -57,6 +58,7 @@ class RunResult:
     timings: dict[str, float] = field(default_factory=dict)
     testfit: object = None
     zoning: dict | None = None  # free zoning lookup summary, where covered
+    envelope: dict | None = None  # zoning envelope for massing: {geom, height_ft, zone, label}
 
 
 def _slug(s: str) -> str:
@@ -415,7 +417,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     log(f"Site: {site.matched_address} | {site.county} County, {site.state} | {site.crs_label}")
 
     t1 = time.time()
-    log("Fetching layers in parallel: DEM, imagery, soils, flood, wetlands")
+    log("Fetching layers in parallel: DEM, imagery, soils, flood, wetlands, buildings")
     jobs = {
         "dem": lambda: L.fetch_dem(site.clip, site.epsg, cell_ft=opts.dem_cell_ft, ft_per_m=site.ft_per_m),
         "aerial": lambda: L.fetch_imagery(site.clip, site.epsg),
@@ -424,7 +426,10 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         "wetland": lambda: L.fetch_wetlands(site.clip, site.epsg),
         "roads": lambda: L.fetch_roads(site.clip, site.epsg),
         "adjacent": lambda: L.fetch_adjacent(site.clip, site.epsg, source_for(site.state, site.county), site.parcel.geom if site.parcel else None),
+        "buildings": lambda: L.fetch_buildings(site.clip, site.epsg, site.ft_per_m),
     }
+    skip_keys = {("buildings" if k == "massing" else k) for k in opts.skip} & set(jobs)
+    jobs = {k: fn for k, fn in jobs.items() if k not in skip_keys}
     # One overall budget: a service that hasn't answered by then is reported
     # as timed out (never silently dropped) and the run finishes without it.
     ex = ThreadPoolExecutor(max_workers=len(jobs))
@@ -432,7 +437,8 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     deadline = time.time() + FETCH_BUDGET_S
     fetched = {}
     titles = {"dem": "Topography (LiDAR DEM)", "aerial": "Aerial imagery", "soils": "Soils (SSURGO)", "flood": "FEMA flood hazard zones",
-              "wetland": "Wetlands (NWI)", "roads": "Road centerlines", "adjacent": "Adjacent parcels"}
+              "wetland": "Wetlands (NWI)", "roads": "Road centerlines", "adjacent": "Adjacent parcels",
+              "buildings": "Existing buildings"}
     for k, fut in futs.items():
         try:
             fetched[k] = fut.result(timeout=max(0.1, deadline - time.time()))
@@ -441,6 +447,9 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
             lr.error = f"source didn't respond within {FETCH_BUDGET_S} s" if isinstance(e, TimeoutError) or "Timeout" in type(e).__name__ else f"{type(e).__name__}: {e}"
             fetched[k] = lr
     ex.shutdown(wait=False, cancel_futures=True)
+    for k in sorted(skip_keys):
+        fetched[k] = LayerResult(k, titles[k], "", "", status="skipped", retrieved_at=now_iso(),
+                                 error="Left out: unchecked under Options.")
     for k, lr in fetched.items():
         log(f"  {lr.title}: {lr.status}" + (f" ({lr.error})" if lr.error else f", {len(lr.features)} features" if lr.features else ""))
     timings["fetch"] = time.time() - t1
@@ -506,7 +515,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
 
     tf = None
     zoning = None
-    from .plugins import testfit_available, zoning_summary
+    from .plugins import testfit_available, zoning_envelope, zoning_summary
 
     if opts.testfit and testfit_available():
         from .testfit.export import flags as tf_flags
@@ -529,10 +538,28 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         flags = zflags + flags
         timings["zoning"] = time.time() - t4
 
+    envelope = None
+    if "massing" not in opts.skip and tf is not None and getattr(tf, "envelope", None) is not None and getattr(tf, "rules", None) is not None and tf.rules.get("height", "max_ft"):
+        h = tf.rules.get("height", "max_ft").value
+        envelope = {"geom": tf.envelope.building, "height_ft": h, "zone": tf.rules.zone,
+                    "label": f"Zoning envelope, {tf.rules.zone}: buildable area after setbacks, up to {h:g} ft"}
+    elif "massing" not in opts.skip and zoning and zoning.get("details") and any(d.get("facts") for d in zoning["details"]):
+        envelope = zoning_envelope(site, layers, grid)
+    bl = layers.get("buildings")
+    if bl is not None and bl.ok():
+        on_site = [f for f in bl.features if site.parcel is not None and f.geom.intersects(site.parcel.geom)]
+        msg = f"{len(bl.features)} existing building(s) in the extent are drawn as 3D massing from FEMA USA Structures footprints and heights"
+        if site.parcel is not None:
+            msg += f" ({len(on_site)} on the parcel)"
+        flags.append({"level": "info", "text": msg + ". Heights are estimates."})
+    if envelope:
+        flags.append({"level": "info", "text": f"{envelope['label']}. Shown as a translucent block in the 3D files; a quick volume check, not a design."})
+
     stamp = date.today().isoformat()
     out = Path(opts.out_dir) / f"{_slug(site.matched_address)}-{stamp}"
     out.mkdir(parents=True, exist_ok=True)
-    res = RunResult(site, layers, flags, out, timings=timings, testfit=tf, zoning=zoning)
+    res = RunResult(site, layers, flags, out, timings=timings, testfit=tf, zoning=zoning, envelope=envelope)
+    res.grid = grid  # DEM, for exporters that place 3D massing on the ground
 
     from .export_dxf import write_dxf
     from .export_pdf import write_pdf

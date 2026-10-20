@@ -92,12 +92,24 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
             if len(pts) > 1:
                 lines.append([(x - bx, y - by, z) for x, y, z in pts])
 
+    from .massing import blocks, mesh
+
+    groups: dict[str, tuple[list, list]] = {}
+    for blk in blocks(res, grid):
+        vs, ts = mesh(blk, bx, by)
+        gv, gt = groups.setdefault(blk.kind, ([], []))
+        off = len(gv)
+        gv += vs
+        gt += [(a + off, b + off, c + off) for a, b, c in ts]
+    mats = {"existing": ("buildings", "Existing buildings (massing)", "0.86 0.85 0.81", 1.0),
+            "envelope": ("envelope", "Zoning envelope (massing)", "0.30 0.56 0.88", 0.35)}
+
     files = {}
     # ---- OBJ
     with open(out / "terrain.obj", "w") as f:
         f.write(f"# Terrain mesh, {site.units}, origin at base point E {bx:.0f} N {by:.0f} ({site.crs_label}); Z = elevation NAVD88\n")
         f.write("# Planning-level data only; not a survey.\n")
-        if tex:
+        if tex or groups:
             f.write("mtllib terrain.mtl\n")
         f.writelines(f"v {x:.2f} {y:.2f} {z:.2f}\n" for x, y, z in V)
         if tex:
@@ -111,8 +123,16 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
             f.writelines(f"v {x:.2f} {y:.2f} {z:.2f}\n" for x, y, z in ln)
             f.write("l " + " ".join(str(base + i + 1) for i in range(len(ln))) + "\n")
             base += len(ln)
-    if tex:
-        (out / "terrain.mtl").write_text(f"newmtl aerial\nKa 1 1 1\nKd 1 1 1\nmap_Kd {tex}\n")
+        for kind, (gv, gt) in groups.items():
+            mid, label, _, _ = mats[kind]
+            f.write(f"o {label.replace(' ', '_')}\nusemtl {mid}\n")
+            f.writelines(f"v {x:.2f} {y:.2f} {z:.2f}\n" for x, y, z in gv)
+            f.writelines(f"f {base + a + 1} {base + b + 1} {base + c + 1}\n" for a, b, c in gt)
+            base += len(gv)
+    if tex or groups:
+        mtl = f"newmtl aerial\nKa 1 1 1\nKd 1 1 1\nmap_Kd {tex}\n" if tex else ""
+        mtl += "".join(f"newmtl {mid}\nKd {rgb}\nd {alpha}\n" for mid, _, rgb, alpha in mats.values())
+        (out / "terrain.mtl").write_text(mtl)
     files["terrain_obj"] = str(out / "terrain.obj")
 
     # ---- COLLADA 1.4.1
@@ -132,6 +152,24 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
       <lines count="{len(ln) - 1}" material="red"><input semantic="VERTEX" source="#parcel{k}-v" offset="0"/><p>{" ".join(f"{i} {i + 1}" for i in range(len(ln) - 1))}</p></lines>
     </mesh></geometry>"""
         line_nodes += f'<node id="parcel-node{k}" name="Parcel line"><instance_geometry url="#parcel{k}"><bind_material><technique_common><instance_material symbol="red" target="#red-mat"/></technique_common></bind_material></instance_geometry></node>'
+    mass_geoms = ""
+    mass_nodes = ""
+    mass_fx = ""
+    mass_mats = ""
+    for kind, (gv, gt) in groups.items():
+        mid, label, rgb, alpha = mats[kind]
+        mass_geoms += f"""
+    <geometry id="{mid}" name="{label}"><mesh>
+      <source id="{mid}-pos"><float_array id="{mid}-pos-a" count="{len(gv) * 3}">{floats(gv)}</float_array>
+        <technique_common><accessor source="#{mid}-pos-a" count="{len(gv)}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>
+      <vertices id="{mid}-v"><input semantic="POSITION" source="#{mid}-pos"/></vertices>
+      <triangles count="{len(gt)}" material="{mid}"><input semantic="VERTEX" source="#{mid}-v" offset="0"/><p>{" ".join(str(i) for t in gt for i in t)}</p></triangles>
+    </mesh></geometry>"""
+        mass_nodes += f'<node id="{mid}-node" name="{label}"><instance_geometry url="#{mid}"><bind_material><technique_common><instance_material symbol="{mid}" target="#{mid}-mat"/></technique_common></bind_material></instance_geometry></node>'
+        mass_fx += (f'<effect id="{mid}-fx"><profile_COMMON><technique sid="t"><lambert><diffuse><color>{rgb} 1</color></diffuse>'
+                    + (f'<transparent opaque="A_ONE"><color>{rgb} {alpha}</color></transparent><transparency><float>1</float></transparency>' if alpha < 1 else "")
+                    + "</lambert></technique></profile_COMMON></effect>")
+        mass_mats += f'<material id="{mid}-mat" name="{label}"><instance_effect url="#{mid}-fx"/></material>'
     uv_src = ""
     uv_in = ""
     if tex:
@@ -149,8 +187,8 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
     <unit name="foot" meter="0.3048"/><up_axis>Z_UP</up_axis></asset>
   {'<library_images><image id="tex-img"><init_from>' + tex + '</init_from></image></library_images>' if tex else ''}
   <library_effects>{effect}
-    <effect id="red-fx"><profile_COMMON><technique sid="t"><constant><emission><color>0.84 0.15 0.16 1</color></emission></constant></technique></profile_COMMON></effect></library_effects>
-  <library_materials><material id="aerial-mat"><instance_effect url="#aerial-fx"/></material><material id="red-mat"><instance_effect url="#red-fx"/></material></library_materials>
+    <effect id="red-fx"><profile_COMMON><technique sid="t"><constant><emission><color>0.84 0.15 0.16 1</color></emission></constant></technique></profile_COMMON></effect>{mass_fx}</library_effects>
+  <library_materials><material id="aerial-mat"><instance_effect url="#aerial-fx"/></material><material id="red-mat"><instance_effect url="#red-fx"/></material>{mass_mats}</library_materials>
   <library_geometries>
     <geometry id="terrain" name="terrain"><mesh>
       <source id="terrain-pos"><float_array id="terrain-pos-a" count="{len(V) * 3}">{floats(V)}</float_array>
@@ -158,15 +196,19 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
       {uv_src}
       <vertices id="terrain-v"><input semantic="POSITION" source="#terrain-pos"/></vertices>
       <triangles count="{len(tris)}" material="aerial"><input semantic="VERTEX" source="#terrain-v" offset="0"/>{uv_in}<p>{tri_p}</p></triangles>
-    </mesh></geometry>{line_geoms}
+    </mesh></geometry>{line_geoms}{mass_geoms}
   </library_geometries>
-  <library_visual_scenes><visual_scene id="scene"><node id="terrain-node" name="Terrain"><instance_geometry url="#terrain"><bind_material><technique_common><instance_material symbol="aerial" target="#aerial-mat">{'<bind_vertex_input semantic="UV" input_semantic="TEXCOORD" input_set="0"/>' if tex else ''}</instance_material></technique_common></bind_material></instance_geometry></node>{line_nodes}</visual_scene></library_visual_scenes>
+  <library_visual_scenes><visual_scene id="scene"><node id="terrain-node" name="Terrain"><instance_geometry url="#terrain"><bind_material><technique_common><instance_material symbol="aerial" target="#aerial-mat">{'<bind_vertex_input semantic="UV" input_semantic="TEXCOORD" input_set="0"/>' if tex else ''}</instance_material></technique_common></bind_material></instance_geometry></node>{line_nodes}{mass_nodes}</visual_scene></library_visual_scenes>
   <scene><instance_visual_scene url="#scene"/></scene>
 </COLLADA>
 """
     (out / "terrain.dae").write_text(dae)
     files["terrain_dae"] = str(out / "terrain.dae")
     res.layers["dem"].notes.append(f"Terrain mesh: {len(tris):,} triangles at {spacing:.1f} ft spacing.")
+    if groups:
+        n_b = sum(1 for b in blocks(res, grid) if b.kind == "existing")
+        res.layers["dem"].notes.append(f"3D massing in terrain.dae / terrain.obj: {n_b} existing building block(s)"
+                                       + (" plus the zoning envelope" if "envelope" in groups else "") + ".")
     return files
 
 
@@ -246,6 +288,12 @@ def write_gis(res, out: Path) -> dict[str, str]:
         lr = res.layers.get(key)
         if lr is not None and lr.ok():
             layers[key] = [(f.geom, _clean(f.props)) for f in lr.features]
+    bl = res.layers.get("buildings")
+    if bl is not None and bl.ok():
+        layers["buildings"] = [(f.geom, dict(f.props)) for f in bl.features]
+    env = getattr(res, "envelope", None)
+    if env:
+        layers["zoning_envelope"] = [(env["geom"], {"height_ft": env["height_ft"], "zone": env["zone"], "note": env["label"]})]
     tf = getattr(res, "testfit", None)
     if tf is not None and tf.envelope is not None:
         layers["testfit_buildable"] = [(tf.envelope.building, {"lot_sf": round(tf.envelope.parcel.area)})]
@@ -281,7 +329,8 @@ def _kml_coords(g, epsg: int) -> list[str]:
 
 def write_kml(res, out: Path) -> str:
     site = res.site
-    styles = {"parcel": ("ff2827d6", "00ffffff", 3), "flood": ("ffb4771f", "551f77b4", 1.5), "wetland": ("ff2ca02c", "552ca02c", 1.5), "contour": ("ff2b5a8a", "00ffffff", 1.2)}
+    styles = {"parcel": ("ff2827d6", "00ffffff", 3), "flood": ("ffb4771f", "551f77b4", 1.5), "wetland": ("ff2ca02c", "552ca02c", 1.5), "contour": ("ff2b5a8a", "00ffffff", 1.2),
+              "bldg": ("ff8a8a8a", "ccd9d9d9", 1), "envelope": ("ffe08f4d", "554d8fe0", 1.2)}
     head = "".join(f'<Style id="{k}"><LineStyle><color>{lc}</color><width>{w}</width></LineStyle><PolyStyle><color>{pc}</color></PolyStyle></Style>' for k, (lc, pc, w) in styles.items())
     folders = []
 
@@ -299,6 +348,27 @@ def write_kml(res, out: Path) -> str:
     if res.layers["wetland"].ok():
         folder("NWI wetlands", "wetland", [(f.geom, f.props.get("ATTRIBUTE")) for f in res.layers["wetland"].features])
     folder("Major contours", "contour", [(f.geom, f"{f.props['elev']:g} ft") for f in res.layers["contours"].features if f.props["major"]])
+
+    def extruded(name, style, items):
+        pm = []
+        for g, h_ft, label in items:
+            gl = _to_ll(g, site.epsg)
+            polys = [gl] if isinstance(gl, Polygon) else list(getattr(gl, "geoms", []))
+            h_m = h_ft / site.ft_per_m
+            body = "".join("<Polygon><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><outerBoundaryIs><LinearRing><coordinates>"
+                           + " ".join(f"{x:.7f},{y:.7f},{h_m:.1f}" for x, y in p.exterior.coords) + "</coordinates></LinearRing></outerBoundaryIs></Polygon>"
+                           for p in polys if isinstance(p, Polygon))
+            if body:
+                pm.append(f"<Placemark><name>{escape(label)}</name><styleUrl>#{style}</styleUrl><MultiGeometry>{body}</MultiGeometry></Placemark>")
+        if pm:
+            folders.append(f"<Folder><name>{escape(name)}</name>{''.join(pm)}</Folder>")
+
+    bl = res.layers.get("buildings")
+    if bl is not None and bl.ok():
+        extruded("Existing buildings (3D)", "bldg", [(f.geom, f.props["height_ft"], f"{f.props.get('type') or 'Building'}, {f.props['height_ft']:g} ft") for f in bl.features])
+    env = getattr(res, "envelope", None)
+    if env:
+        extruded("Zoning envelope (3D)", "envelope", [(env["geom"], env["height_ft"], env["label"])])
     kml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>{escape(site.matched_address)}</name>
 <description>Planning-level data only; not a survey. Sources and dates in provenance.md.</description>{head}{''.join(folders)}</Document></kml>
@@ -332,7 +402,9 @@ def write_readme(res, files: dict[str, str]) -> str:
     lines += ["", "SKETCHUP"]
     if "terrain_dae" in have:
         lines += ["  3D ground: File > Import, choose 'COLLADA (*.dae)', pick terrain.dae (SketchUp Pro, desktop or web; the",
-                  "  free web plan may not allow imports). It's textured with the aerial, has the parcel line draped on it, in feet."]
+                  "  free web plan may not allow imports). It's textured with the aerial, has the parcel line draped on it, in feet.",
+                  "  Existing buildings come in as grey 3D blocks (and, where zoning rules exist, the zoning envelope as a",
+                  "  translucent blue block). Each is its own group, so you can hide or delete it."]
     lines += [f"  Linework (SketchUp Pro): File > Import site-local.dxf, Options > units Feet. It lines up with terrain.dae:",
               f"  both are moved so the base point (E {bx:,.0f}, N {by:,.0f} in State Plane) sits at 0,0."]
     if "terrain_obj" in have:

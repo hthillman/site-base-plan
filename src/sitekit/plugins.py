@@ -22,3 +22,16 @@ def zoning_summary(site) -> tuple[list[dict], dict | None]:
         return summarize(site)
     except Exception as e:  # noqa: BLE001 - never break a base plan over zoning
         return [{"level": "caution", "text": f"Zoning lookup failed ({type(e).__name__}); the rest of the plan is unaffected."}], None
+
+
+def zoning_envelope(site, layers: dict, grid) -> dict | None:
+    """Zoning envelope for 3D massing where the hosted site has rule sheets; None otherwise."""
+    if importlib.util.find_spec("sitekit.zoning") is None or importlib.util.find_spec("sitekit.testfit") is None:
+        return None
+    from .zoning.summary import envelope
+
+    try:
+        return envelope(site, layers, grid)
+    except Exception as e:  # noqa: BLE001 - massing is optional
+        print(f"WARN zoning envelope failed: {type(e).__name__}: {e}", flush=True)
+        return None

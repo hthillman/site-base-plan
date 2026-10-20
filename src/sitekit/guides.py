@@ -169,7 +169,8 @@ terrain is coarse and can't be trusted for grades, steps or drainage.</p>
 <h2>Option 3: import a terrain mesh</h2>
 <p>A COLLADA (.dae) mesh built straight from the DEM, with the aerial already applied as a texture, imports with File > Import
 in any desktop SketchUp. This is what Basesheet produces as <code>terrain.dae</code>, already shifted near the origin with the
-parcel line on it, plus a <code>site-local.dxf</code> in the same coordinates for linework.</p>
+parcel line on it and the existing buildings as simple 3D blocks at their estimated heights, plus a
+<code>site-local.dxf</code> in the same coordinates for linework.</p>
 <h2>Why near the origin</h2>
 <p>State Plane coordinates are millions of feet from 0,0. SketchUp works in single-precision for display, so geometry that far
 out jitters and faces fail to form. Record the offset you subtract so you can put things back in CAD.</p>

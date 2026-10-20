@@ -9,7 +9,7 @@ from shapely.geometry import LinearRing, MultiPolygon, Polygon, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.validation import make_valid
 
-from ..http import get_json, session
+from ..http import get_json, plain_session, session
 from ..model import Feature
 
 
@@ -64,6 +64,7 @@ def query_features(
     page_size: int | None = None,
     return_geometry: bool = True,
     timeout: float = 45,
+    retry: bool = True,
 ) -> list[Feature]:
     params: dict[str, Any] = {
         "where": where,
@@ -97,7 +98,7 @@ def query_features(
             if page_size:
                 p["resultRecordCount"] = page_size
         # Long polygon geometries blow past URL limits; POST is always safe.
-        r = session().post(f"{layer_url}/query", data=p, timeout=timeout)
+        r = (session() if retry else plain_session()).post(f"{layer_url}/query", data=p, timeout=timeout)
         r.raise_for_status()
         data = r.json()
         if "error" in data:

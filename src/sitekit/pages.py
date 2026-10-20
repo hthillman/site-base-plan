@@ -98,6 +98,7 @@ fieldset.checks{border:1px solid var(--line);border-radius:8px;padding:10px 14px
 fieldset.checks legend{font-size:13px;color:var(--muted);padding:0 4px}
 fieldset.checks label{display:flex;flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-size:14.5px}
 fieldset.checks input{width:auto}
+.panel .incl{margin-top:12px;font-size:14px}.panel .incl legend{font-size:12.5px}
 .linkbtn{background:none;border:0;color:var(--accent);padding:6px 0 0;font-weight:500;font-size:14px;cursor:pointer}
 #also .search{margin-top:8px}#also input{font-size:15px;padding:10px 12px}
 #also button{background:transparent;color:var(--muted);border:1px solid var(--line);padding:0 12px}
@@ -209,7 +210,7 @@ def index(parcel_states: list[str], needs_code: bool) -> str:
         actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>')
     body = f"""
 <h1>A site base plan from any US address</h1>
-<p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands and aerial, ready for AutoCAD, SketchUp, Civil 3D and GIS.
+<p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands, aerial and 3D building massing, ready for AutoCAD, SketchUp, Civil 3D and GIS.
 Free, no account.</p>
 
 <form id="gate" hidden class="search">
@@ -241,6 +242,13 @@ Free, no account.</p>
 <label>Layers <select name="layers" aria-label="CAD layer names"><option value="default">Default (SITE-*)</option><option value="ncs">NCS-style (V-PROP-LINE…)</option><option value="custom">Custom…</option></select></label>
 <label id="tfwrap" class="check" hidden><input type="checkbox" name="testfit"> Apartment test fit (experimental, Thurston Co. WA)</label>
 </div>
+<fieldset class="checks incl"><legend>Include (fewer layers can be faster)</legend>
+<label><input type="checkbox" id="inc-aerial" data-k="aerial" checked> Aerial</label>
+<label><input type="checkbox" id="inc-soils" data-k="soils" checked> Soils</label>
+<label><input type="checkbox" id="inc-flood" data-k="flood" checked> Flood zones</label>
+<label><input type="checkbox" id="inc-wetland" data-k="wetland" checked> Wetlands</label>
+<label><input type="checkbox" id="inc-massing" data-k="massing" checked> 3D massing</label>
+</fieldset>
 <div id="layermap" hidden>
 <label class="note" style="display:block;margin:12px 0 4px">Your layer names: edit the right side of each line. Saved in this browser.</label>
 <textarea name="layer_map" rows="10" spellcheck="false" style="width:100%;font:12.5px/1.5 ui-monospace,Menlo,monospace">{escape(layer_lines)}</textarea>
@@ -280,7 +288,11 @@ document.getElementById('addparcel').onclick=()=>{if(alsoBox.children.length>=4)
 const sum=document.getElementById('optsum'),panel=document.getElementById('optpanel'),optbtn=document.getElementById('optbtn');
 const LAYER_LABEL={default:'SITE-* layers',ncs:'NCS-style layers',custom:'custom layers'};
 ['buffer','interval'].forEach(n=>{const v=(()=>{try{return localStorage.getItem('sitekit-'+n)}catch(e){return null}})();if(v)f[n].value=v;});
-function updSum(){sum.textContent=(f.buffer.value||0)+' ft buffer · '+f.interval.value+' ft contours · '+LAYER_LABEL[f.layers.value];}
+const INC=[...document.querySelectorAll('.incl input')],INC_LABEL={aerial:'aerial',soils:'soils',flood:'flood',wetland:'wetlands',massing:'massing'};
+try{(JSON.parse(localStorage.getItem('sitekit-skip')||'[]')).forEach(k=>{const c=INC.find(i=>i.dataset.k===k);if(c)c.checked=false})}catch(e){}
+const skipped=()=>INC.filter(i=>!i.checked).map(i=>i.dataset.k);
+INC.forEach(i=>i.addEventListener('change',()=>{updSum();try{localStorage.setItem('sitekit-skip',JSON.stringify(skipped()))}catch(e){}}));
+function updSum(){const sk=skipped();sum.textContent=(f.buffer.value||0)+' ft buffer · '+f.interval.value+' ft contours · '+LAYER_LABEL[f.layers.value]+(sk.length?' · no '+sk.map(k=>INC_LABEL[k]).join(', '):'');}
 ['buffer','interval','layers'].forEach(n=>f[n].addEventListener('change',()=>{updSum();if(n!=='layers'){try{localStorage.setItem('sitekit-'+n,f[n].value)}catch(e){}}}));
 f.buffer.addEventListener('input',updSum);
 optbtn.onclick=()=>{const open=panel.hidden;panel.hidden=!open;optbtn.textContent=open?'Done':'Change';optbtn.setAttribute('aria-expanded',open)};
@@ -304,7 +316,7 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
  gate.onsubmit=async e=>{e.preventDefault();const c=gate.code.value.trim();
   if(await tryCode(c))unlock(c);else document.getElementById('gateerr').hidden=false}}
 f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working…';
- const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;
+ const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();
  body.also=[...alsoBox.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
  out.innerHTML='<div class="result"><pre id="log">Starting…</pre></div>';
  const log=document.getElementById('log');const lines=[];
@@ -337,7 +349,7 @@ function render(j){
  zoningBox(j.zoning)+
  '<details class="files rsec"><summary>What\\'s in the zip and how to open it</summary><ul class="contents">'+
  '<li><b>AutoCAD / Civil 3D</b> · site.dxf (open it directly), surface.xml (LandXML surface)</li>'+
- '<li><b>SketchUp</b> · File › Import › terrain.dae for textured 3D ground; site-local.dxf for linework (SketchUp Pro)</li>'+
+ '<li><b>SketchUp</b> · File › Import › terrain.dae for textured 3D ground with existing buildings as blocks; site-local.dxf for linework (SketchUp Pro)</li>'+
  '<li><b>Rhino, Blender</b> · terrain.obj</li>'+
  '<li><b>GIS</b> · gis/*.geojson, dem.tif</li>'+
  '<li><b>Google Earth</b> · site.kml</li>'+
@@ -428,7 +440,8 @@ def faq_items() -> list[tuple[str, str]]:
          "model where there's no LiDAR. The tool raises the contour interval to what the data supports (5 ft at 10 m) and says so."),
         ("Can I use it with SketchUp?",
          "Yes. In SketchUp, use File, Import, choose COLLADA (.dae) and pick terrain.dae for textured 3D ground with the parcel "
-         "line on it. site-local.dxf has the linework in the same coordinates for SketchUp Pro."),
+         "line on it and the existing buildings as simple 3D blocks (plus the zoning envelope where zoning rules exist). "
+         "site-local.dxf has the linework in the same coordinates for SketchUp Pro."),
         ("Does it cost anything? Is it open source?",
          "It's free with no account. The base plan code and parcel source list are open source under the MIT license on GitHub."),
     ]
@@ -464,7 +477,8 @@ data came from. It's built for landscape architects, civil engineers, architects
 
 <h2>What you get</h2>
 <ul>
-<li><b>Base plan</b> in State Plane feet: parcel line, neighboring parcels (ID, and owner and deed/plat reference where the county publishes them), road centerlines and names, approximate right-of-way, contours (LiDAR where available), slope bands, soils, FEMA flood zones, NWI wetlands, aerial underlay.</li>
+<li><b>Base plan</b> in State Plane feet: parcel line, neighboring parcels (ID, and owner and deed/plat reference where the county publishes them), road centerlines and names, approximate right-of-way, existing building footprints, contours (LiDAR where available), slope bands, soils, FEMA flood zones, NWI wetlands, aerial underlay.</li>
+<li><b>3D massing:</b> existing buildings as flat-roofed blocks at estimated heights, sitting on the LiDAR terrain, in the SketchUp, OBJ, DXF and KML files. Where zoning rules exist (Thurston County, WA so far), the zoning envelope too: the buildable area after setbacks, up to the height limit.</li>
 <li><b>Files:</b> DXF (true coordinates, and a copy moved near 0,0 for SketchUp), textured 3D terrain (COLLADA for SketchUp, OBJ for Rhino/Blender), LandXML surface for Civil 3D, GeoJSON layers and a GeoTIFF elevation model for GIS, KML for Google Earth.</li>
 <li><b>PDF summary:</b> scaled sheets with north arrow, scale bar and legend, plus a findings sheet that flags floodplain, wetlands, steep slopes and problem soils in plain language.</li>
 <li><b>Provenance log:</b> every layer's source, date, resolution and known limits. Layers that fail to load are marked as missing, never silently dropped.</li>
@@ -511,6 +525,7 @@ def sources() -> str:
         ("Flood zones", "FEMA National Flood Hazard Layer", "Public domain (FEMA)"),
         ("Wetlands", "U.S. Fish & Wildlife Service National Wetlands Inventory", "Public domain (USFWS)"),
         ("Road centerlines and names", "U.S. Census Bureau TIGER/Line via TIGERweb", "Public domain (U.S. Census Bureau)"),
+        ("Existing buildings (footprints and heights)", "FEMA / Oak Ridge National Laboratory USA Structures, via Esri", "CC BY 4.0; credit FEMA, ORNL, Esri"),
         ("Aerial imagery", "Esri World Imagery (Vantor/Maxar, Earthstar Geographics, local contributors); USDA NAIP fallback",
          "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community. NAIP: public domain (USDA)"),
         ("Geocoding", "Esri World Geocoder, U.S. Census Geocoder, OpenStreetMap Nominatim", "Esri terms; Census public domain; © OpenStreetMap contributors (ODbL)"),

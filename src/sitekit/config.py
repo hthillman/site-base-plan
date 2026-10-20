@@ -87,6 +87,7 @@ PRESETS: dict[str, dict[str, str]] = {
         "soils": "V-SOIL", "soils_label": "V-SOIL-TEXT", "flood": "C-FLOD", "flood_label": "C-FLOD-TEXT",
         "wetland": "V-WETL", "wetland_label": "V-WETL-TEXT", "slope": "C-TOPO-SLOP",
         "aerial": "G-IMAG", "basepoint": "V-CTRL-BASE", "notes": "G-ANNO-NOTE",
+        "bldg": "V-BLDG-OTLN", "bldg_mass": "A-MASS-EXST", "envelope_mass": "A-MASS-ENVL",
         "tf_buildable": "C-STDY-ENVL", "tf_constraint": "C-STDY-CNST", "tf_bldg": "A-STDY-{n}-BLDG",
         "tf_parking": "C-STDY-{n}-PRKG", "tf_stall": "C-STDY-{n}-STAL", "tf_drive": "C-STDY-{n}-DRIV", "tf_label": "A-STDY-{n}-TEXT",
     },

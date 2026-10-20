@@ -236,6 +236,10 @@ def _context(ax, res, scale, labels=True):
                 lines = [l for l in (f.props.get("_APN"), (f.props.get("_OWNER") or "")[:26], f.props.get("_DEED"), f.props.get("_PLAT")) if l]
                 ax.text(c.x, c.y, "\n".join(lines), fontsize=4.6, color="#55554f", ha="center", va="center", zorder=7, linespacing=1.15,
                         bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.75))
+    bl = L.get("buildings")
+    if bl is not None and bl.ok():
+        for f in bl.features:
+            _add(ax, f.geom, facecolor=matplotlib.colors.to_rgba("#9d9a90", 0.35), edgecolor="#7d7a72", lw=0.35, zorder=3)
     roads = L.get("roads")
     if roads is not None and roads.ok():
         from .export_dxf import _road_label_spots

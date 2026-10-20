@@ -187,6 +187,22 @@ def write_dxf(res, cfg: Config, opts) -> dict[str, str]:
             for p in _polys(site.parcel.geom):
                 _add_poly(msp, p, cfg.layer("parcel").name)
 
+    # Existing building footprints (plan) and 3D massing blocks.
+    bl = layers.get("buildings")
+    if bl is not None and bl.ok():
+        for f in bl.features:
+            for p in _polys(f.geom):
+                _add_poly(msp, p, cfg.layer("bldg").name)
+    from .massing import blocks, mesh
+
+    for blk in blocks(res, getattr(res, "grid", None)):
+        verts, tris = mesh(blk)
+        if not tris:
+            continue
+        pf = msp.add_polyface(dxfattribs={"layer": cfg.layer("bldg_mass" if blk.kind == "existing" else "envelope_mass").name})
+        pf.append_faces([[verts[i] for i in t] for t in tris])
+        pf.optimize()
+
     from .plugins import testfit_available
 
     if getattr(res, "testfit", None) is not None and testfit_available():

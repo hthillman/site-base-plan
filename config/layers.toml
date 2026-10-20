@@ -127,6 +127,24 @@ color = 6          # magenta
 linetype = "CONTINUOUS"
 description = "Shared base point. site.dxf has it at its State Plane coordinates; site-local.dxf has it at 0,0."
 
+[layers.bldg]
+name = "SITE-BLDG"
+color = 8
+linetype = "CONTINUOUS"
+description = "Existing building footprints (FEMA USA Structures, traced from imagery)."
+
+[layers.bldg_mass]
+name = "SITE-BLDG-MASS"
+color = 9
+linetype = "CONTINUOUS"
+description = "Existing buildings as 3D blocks at estimated heights, sitting on the terrain."
+
+[layers.envelope_mass]
+name = "SITE-ENVELOPE-MASS"
+color = 4
+linetype = "CONTINUOUS"
+description = "Zoning envelope as a 3D block: buildable area after setbacks, up to the height limit (where zoning rules exist)."
+
 [layers.notes]
 name = "SITE-NOTES"
 color = 7

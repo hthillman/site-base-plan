@@ -141,6 +141,9 @@ def cleanup():
     return jsonify(deleted=prune_runs(KEEP_HOURS))
 
 
+OPTIONAL_LAYERS = {"aerial", "soils", "flood", "wetland", "massing"}
+
+
 @app.post("/api/run")
 def start():
     d = request.get_json(force=True)
@@ -161,6 +164,7 @@ def start():
         extra_queries=[str(x).strip()[:200] for x in (d.get("also") or []) if str(x).strip()][:4],
         layer_preset="ncs" if d.get("layers") == "ncs" else "default",
         layer_custom=parse_layer_map(d.get("layer_map") or "") if d.get("layers") == "custom" else {},
+        skip={k for k in (d.get("skip") or []) if k in OPTIONAL_LAYERS},
     )
     run_id = uuid.uuid4().hex[:10]
     events: queue.Queue = queue.Queue()
@@ -506,7 +510,7 @@ Built for landscape architects, site designers and civil engineers doing early s
 
 ## Outputs
 - DXF in State Plane feet (AutoCAD, Civil 3D), plus a copy near 0,0 for SketchUp; layer names configurable (default or US National CAD Standard)
-- Textured 3D terrain (COLLADA .dae and OBJ) for SketchUp, Rhino, Blender
+- Textured 3D terrain (COLLADA .dae and OBJ) for SketchUp, Rhino, Blender, with existing buildings as 3D massing blocks (FEMA USA Structures heights) and, where zoning rules exist, the zoning envelope
 - LandXML surface (Civil 3D), GeoTIFF elevation model, GeoJSON layers, KML for Google Earth
 - PDF with scaled sheets and plain-language site flags (floodplain, wetlands, steep slopes, soils)
 - Provenance file listing each layer's source, date and resolution, and any layer that failed
