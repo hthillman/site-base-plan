@@ -421,8 +421,8 @@ FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hoste
 def firms() -> str:
     body = """
 <h1>Using this at a firm?</h1>
-<p class="lede">The base plan stays free, with no account, for everyone. I'm exploring a few things for offices that run
-site studies regularly, and I'd like to build them with a handful of firms rather than guess.</p>
+<p class="lede">The base tool is free and <a href="https://github.com/hthillman/site-base-plan">open source</a>. After getting a lot of
+positive feedback and feature requests, I'm exploring a few things for offices that run regular site studies.</p>
 
 <h2>Free, and staying free</h2>
 <ul>
