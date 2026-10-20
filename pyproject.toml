@@ -11,6 +11,7 @@ dependencies = [
     "flask>=3.1.3",
     "matplotlib>=3.11.2",
     "numpy>=2.5.4",
+    "pg8000>=1.31.5",
     "pillow>=12.3.0",
     "pyproj>=3.8.0",
     "requests>=2.34.2",

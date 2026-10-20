@@ -36,6 +36,13 @@ from .accounts import bp as accounts_bp  # noqa: E402
 
 app.register_blueprint(accounts_bp)
 
+try:  # one-time setup endpoints (hosted site only; removed after use)
+    from .admin_setup import bp as _admin_bp
+
+    app.register_blueprint(_admin_bp)
+except ImportError:
+    pass
+
 # Old hostnames (e.g. site-toolkit.vercel.app) that should 301 to SITE_URL. Pages only; /api keeps
 # working everywhere so runs started on an old tab still finish.
 REDIRECT_HOSTS = {h.strip().lower() for h in os.environ.get("REDIRECT_HOSTS", "").split(",") if h.strip()}
@@ -175,6 +182,8 @@ def start():
     )
     run_id = uuid.uuid4().hex[:10]
     events: queue.Queue = queue.Queue()
+    _tok = os.environ.get("ADMIN_TOKEN", "")
+    live = {"live_check": True} if _tok and hmac.compare_digest(request.headers.get("X-Live-Check", ""), _tok) else {}
 
     def worker():
         t0 = time.time()
@@ -183,7 +192,7 @@ def start():
             events.put({"log": "Publishing files"})
             urls = publish(run_id, res.out_dir, res.files)
             record_usage({
-                "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
+                **live, "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
                 "parcels": len(res.site.parcels) or (1 if res.site.parcel is not None else 0), "layers": opts.layer_preset + ("+custom" if opts.layer_custom else ""),
                 "parcel": res.site.parcel is not None, "testfit": getattr(res.testfit, "status", None),
                 "seconds": round(time.time() - t0, 1), "interval": opts.contour_interval,
@@ -193,7 +202,7 @@ def start():
             events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
                                    "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address}})
         except Exception as e:  # noqa: BLE001
-            record_usage({"outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
+            record_usage({**live, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
                           "hint": getattr(e, "hint", ""),
                           "seconds": round(time.time() - t0, 1)})

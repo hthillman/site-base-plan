@@ -14,6 +14,8 @@ from .plugins import testfit_available
 SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
 TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>' if TIP_URL else ""
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # hosted site only; kept out of the open-source code
+CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>' if CONTACT_EMAIL else ""
 FIRMS_FOOTER = ' · <a href="/firms">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
 CSS = """
@@ -193,7 +195,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a></p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -278,7 +280,7 @@ Free, no account.</p>
 
 <footer>
 <p class="fine">Planning-level public data, not a survey. Parcel lines in <a href="/about#coverage">{n} states{county_txt}</a>.</p>
-<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a></p>
+<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>{(" · Contact: " + CONTACT_HTML) if CONTACT_HTML else ""}</p>
 <p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
 <form id="fb" hidden>
 <textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
@@ -541,6 +543,7 @@ contour interval to what the data supports (5 ft at 10 m) and says so.</p>
 
 {TF_SECTION}
 
+{f'<h2 id="contact">Contact</h2><p>Questions, a bug, or a county whose parcels you want added: email {CONTACT_HTML}, or use Send feedback on the home page.</p>' if CONTACT_HTML else ''}
 <h2 id="faq">Common questions</h2>
 {"".join(f'<h3>{escape(q)}</h3><p>{escape(ans)}</p>' for q, ans in faq_items())}
 """
@@ -613,7 +616,8 @@ and the run's state. Nothing that identifies you.</p>
 about it. Never shared or sold; ask to have them deleted any time.</p>
 <h2>Saved plans</h2>
 <p>Saving is optional. If you sign in to save a plan, your email address and the plans you save (address, files and date) are
-stored privately and kept until you delete them. Your email is used only to send sign-in links. Never shared or sold. Delete a
+stored privately and kept until you delete them. Accounts and saved-plan records are held by Supabase (our database provider)
+and sign-in emails are sent through Resend. Your email is used only to send sign-in links. Never shared or sold. Delete a
 plan from My plans any time; ask through the feedback form to have your account removed.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
