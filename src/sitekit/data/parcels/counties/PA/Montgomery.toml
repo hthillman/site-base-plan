@@ -1,0 +1,26 @@
+state = "PA"
+county = "Montgomery"
+name = "Montgomery County Parcels"
+publisher = "Montgomery County, PA GIS (Montco_GIS on ArcGIS Online)"
+url = "https://services1.arcgis.com/kOChldNuKsox8qZD/arcgis/rest/services/Montgomery_County_Parcels/FeatureServer/6"
+apn_fields = ["TAXPIN", "PARCEL", "ALT_ID"]
+situs_field = "LOCATION1"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Montgomery County"
+vintage = "Assessment database download, updated monthly"
+max_record_count = 1000
+terms = "Montgomery County provides this data as a free and open resource; as is, no warranty, not a legal description."
+owner_field = "OWN1"
+deed_book_field = "DEED_BOOK"
+deed_page_field = "DEED_PAGE"
+legal_field = "LEGAL1"
+subdivision_field = "SUBDIVISIO"
+notes = "Layer id is 6, not 0. TAXPIN is the 12-digit parcel number with no separators, e.g. '130021836003' (displayed as 13-00-21836-00-3); strip dashes before matching. ALT_ID is the block/unit form ('13025 006'). LOCATION1 is the full situs ('43 E MAIN ST'); Muni_Name is the municipality, not a postal city. ADDR1-3 are the owner mailing address."
+
+[verified]
+date = "2026-10-20"
+point = [-75.3433, 40.1146]
+point_result = "TAXPIN '130021836003', 43 E MAIN ST, Norristown, owner MONTGOMERY COUNTY, deed 6031/01308; outSR 2272 returned State Plane PA South ft coords (2641713, 293824)"
+apn_test = "TAXPIN = '130021836003' returned 1 polygon"

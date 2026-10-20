@@ -1,0 +1,23 @@
+state = "IL"
+county = "Lake"
+name = "Lake County IL Tax Parcel Information (WABParcels)"
+publisher = "Lake County, Illinois GIS Division (maps.lakecountyil.gov)"
+url = "https://maps.lakecountyil.gov/arcgis/rest/services/GISMapping/WABParcels/MapServer/12"
+apn_fields = ["PIN"]
+situs_field = "situs_addr_line_1"
+city_field = "situs_addr_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Lake County, Illinois"
+vintage = "Current assessment/tax roll joined to tax parcels (Chief County Assessment Office data)"
+max_record_count = 1000
+terms = "Public, no token; Lake County, Illinois GIS Division / CCAO; standard disclaimer"
+owner_field = "taxpayer_name"
+legal_field = "legdesc1"
+notes = "MapServer layer 12 'Tax Parcel Information' (native SR 3857, reprojects fine). PIN is a 10-digit string with no dashes, e.g. '0821410004' (printed 08-21-410-004). situs_addr_line_1 is situs street ('18 N COUNTY ST'), situs_addr_city is the situs city. taxpayer_name is the tax-bill name. Legal is split across legdesc1..legdesc3; legal_field holds only the first part. doc_num1 is the latest sale document number, not a book/page reference. Layer 11 'Tax Parcel Lines' in the same service is geometry with fewer attributes. Do not confuse with Lake County, Indiana or other Lake counties."
+
+[verified]
+date = "2026-10-20"
+point = [-87.8337, 42.3609]
+point_result = "PIN '0821410004' at 18 N COUNTY ST, WAUKEGAN (Lake County administrative center), taxpayer COUNTY OF LAKE, 2.99 ac; outSR 3435 returned IL East ftUS coords (1119541, 2074476)"
+apn_test = "PIN = '0821410004' returned 1 polygon"

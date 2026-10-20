@@ -1,0 +1,21 @@
+state = "CA"
+county = "Alameda"
+name = "Alameda County Parcel Boundaries"
+publisher = "Alameda County Information Technology Department (ArcGIS Online org AlamedaCounty.CA.US)"
+url = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/Parcels/FeatureServer/0"
+apn_fields = ["APN", "APN_SORT"]
+situs_field = "SitusAddress"
+city_field = "SitusCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Alameda County (about 490,000 parcels)"
+vintage = "Parcel boundaries with current Assessor roll attributes, maintained by Alameda County ITD"
+max_record_count = 2000
+terms = "County of Alameda standard disclaimer: dynamic data, not a legal survey, no warranty, County not liable for use. Public county open data, no token."
+notes = "Hosted FeatureServer, native SR Web Mercator; reprojects on request (2227 and 2229 tested). APN is the unpadded printed form book-page-parcel[-subparcel], e.g. '2-91-2' or '48-5597-3-1' (PrintParcel is identical). Zero-padded input such as '002-0091-002-00' returns nothing, so strip leading zeros from each part and drop a trailing '-00'/'-0' sub-parcel. APN_SORT is the padded sort key ('002 009100200': 3-digit book, space, 4-digit page, 3-digit parcel, 2-digit sub-parcel). SitusAddress is the full situs line including city and ZIP ('1225 FALLON ST OAKLAND 94612'); SitusStreetNumber/SitusStreetName/SitusUnit hold the parts and SitusCity the situs city. MailingAddress* fields are the owner mailing address. No owner name, legal or plat fields; LatestDocument_Prefix + LatestDocumentSeries give the latest recorded document (e.g. 2000-071033)."
+
+[verified]
+date = "2026-10-20"
+point = [-122.2633, 37.8000]
+point_result = "APN '2-91-2' at 1225 FALLON ST OAKLAND 94612 (Rene C. Davidson Courthouse, beside the County Administration Building), mailing 1401 LAKESIDE DR (County GSA); outSR=2227 returned projected coordinates"
+apn_test = "APN = '2-91-2' returned 1 polygon (outSR=2229); '002-0091-002-00' returned 0"

@@ -1,0 +1,25 @@
+state = "SC"
+county = "Beaufort"
+name = "Beaufort County Parcels (EnerGov service)"
+publisher = "Beaufort County GIS (gis.beaufortcountysc.gov), Assessor GisFile attributes"
+url = "https://gis.beaufortcountysc.gov/server/rest/services/EnerGov/MapServer/1"
+apn_fields = ["GisFile_PIN", "ParcelPIN", "GisFile_AIN"]
+situs_field = "GisFile_SitusAddre"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Beaufort County"
+vintage = "County parcel layer joined to the Assessor GIS file (current roll)"
+max_record_count = 10000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "GisFile_Owner1"
+deed_book_field = "GisFile_Book"
+deed_page_field = "GisFile_Page"
+legal_field = "GisFile_LegalDescr"
+notes = "MapServer layer 1 of the county's EnerGov service (also feeds the permitting system). GisFile_PIN (same as ParcelPIN) is the TMS PIN with single spaces between groups, e.g. 'R120 003 000 0097 0000' (district letter R/H etc., then 3-3-3-4-4 digits); it is stored only in that spaced form, so a run-together 'R12000300000970000' will not match. GisFile_AIN is the numeric assessor account as a string ('205860'). GisFile_Book/GisFile_Page are the last sale's deed book/page. GisFile_City/State/ZIP belong to the mailing address; GisFile_AreaName is an assessor neighborhood, not a city. Hosted/AddressParcels/FeatureServer/1 is a partial (~39,000 parcel) copy and was not used. First query after idle can be slow; retry."
+
+[verified]
+date = "2026-10-20"
+point = [-80.68779, 32.43955]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); GisFile_PIN 'R120 003 000 0097 0000' at 106 RIBAUT RD, Beaufort, owner BEAUFORT COUNTY, legal 'BEAUFORT COUNTY ADMIN BLDG' (county government center, 100 Ribaut Rd), deed 555/1254"
+apn_test = "GisFile_PIN = 'R120 003 000 0097 0000' returned 1 polygon; GisFile_AIN = '205860' returned the same"

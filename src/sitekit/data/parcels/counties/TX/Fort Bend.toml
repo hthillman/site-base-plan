@@ -1,0 +1,25 @@
+state = "TX"
+county = "Fort Bend"
+name = "FBCAD Public Parcel Data"
+publisher = "Fort Bend Central Appraisal District (gisweb.fbcad.org)"
+url = "https://gisweb.fbcad.org/arcgis/rest/services/Hosted/FBCADPublicData/FeatureServer/0"
+apn_fields = ["quickrefid", "propnumber"]
+situs_field = "situs"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Fort Bend County"
+vintage = "FBCAD public parcel layer (current roll)"
+max_record_count = 2000
+terms = "Public FBCAD FeatureServer, no token; no license text on the service."
+owner_field = "ownername"
+deed_book_field = "deedbook"
+deed_page_field = "deedpage"
+legal_field = "legal"
+notes = "Hosted FeatureServer on FBCAD's own ArcGIS Enterprise. quickrefid is the FBCAD Quick Ref ID used on its property search, e.g. 'R112624'; propnumber is the long account/geo number like '7395-00-099-0000-901'. situs is mixed case with city and ZIP ('407 Jackson ST, Richmond, TX  77469'), so match case-insensitively; situssno/situssnm hold number and street name. No separate situs city field (ownercity is mailing). deedbook/deedpage are often blank for instrument-recorded deeds (instrunum)."
+
+[verified]
+date = "2026-10-20"
+point = [-95.76167, 29.58161]
+point_result = "quickrefid 'R112624' / propnumber '7395-00-099-0000-901' at 407 Jackson ST, Richmond (Fort Bend County courthouse block 99), owner Fort Bend County; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "propnumber = '7395-00-099-0000-901' returned 1 polygon; quickrefid = 'R112624' returned 1 polygon"

@@ -1,0 +1,22 @@
+state = "MI"
+county = "Ingham"
+name = "Ingham County Parcels 2025"
+publisher = "Ingham County Drain Commissioner's Office (county ArcGIS Online org)"
+url = "https://services3.arcgis.com/ySzhFSJfYeginRjx/arcgis/rest/services/Ingham_County_Parcels_2025_view/FeatureServer/1"
+apn_fields = ["PARCELNUM"]
+situs_field = ""
+city_field = "PROPCITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Ingham County including Lansing and East Lansing (about 102,000 parcels)"
+vintage = "2025 parcel layer (annual)"
+max_record_count = 2000
+terms = "Public view layer from the Ingham County Drain Office ArcGIS Online org; no license text. No token."
+owner_field = "OWNERNAME"
+notes = "Layer id is 1. PARCELNUM is dashed 'CC-UU-TT-SS-BBB-PPP', e.g. '33-01-01-16-182-001' (33 = Ingham, 01 = Lansing). Road right-of-way is mapped as large multi-ring polygons with PARCELNUM ending '-ROW'; ignore those in point hits. No single situs field: PROPADDRNU + PROPADDRDI + PROPSTREET (+ UNITORAPT). PROPCITY is the situs city. OWNER* fields are owner mailing. Annual layer: check for a newer 'Ingham_County_Parcels_<year>_view' each spring."
+
+[verified]
+date = "2026-10-20"
+point = [-84.5555, 42.7336]
+point_result = "PARCELNUM '33-01-01-16-182-001', 100 N CAPITOL AVE, LANSING (Michigan State Capitol), owner STATE OF MICHIGAN; outSR 2253 returned State Plane MI South intl-ft coords (13073015, 449931)"
+apn_test = "PARCELNUM = '33-01-01-16-182-001' returned 1 polygon"

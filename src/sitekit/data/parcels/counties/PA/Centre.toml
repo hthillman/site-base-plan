@@ -1,0 +1,22 @@
+state = "PA"
+county = "Centre"
+name = "Centre County Parcels (Open Data)"
+publisher = "Centre County, PA (Centre Region COG / county GIS, gissites4.centrecountypa.gov)"
+url = "https://gissites4.centrecountypa.gov/arcgis/rest/services/OpenData/MapServer/9"
+apn_fields = ["TAXIDNUM", "OLDTAXIDNU"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Centre County"
+vintage = "County open data parcel layer"
+max_record_count = 75000
+terms = "County open data map service; no license text on the service. No ownership information included. No token."
+plat_ref_field = "PLATREF1"
+notes = "MapServer layer 9 of OpenData. TAXIDNUM is stored with odd comma separators, e.g. '32-101-,096-,0000-' (municipality-map, parcel, sub-parcel); users write it 32-101-096-0000, so normalize by removing ',' and comparing digits, or use LIKE '32-101-%096-%'. LOCATION holds only the house number ('307'), so it is not a usable situs. No owner, deed or address fields. Centre is in the PA North State Plane zone (EPSG 2271)."
+
+[verified]
+date = "2026-10-20"
+point = [-77.77645, 40.91675]
+point_result = "TAXIDNUM '32-101-,096-,0000-', Bellefonte borough, 0.23 ac; outSR 2271 returned State Plane PA North ft coords (1961200, 273195)"
+apn_test = "TAXIDNUM = '32-101-,096-,0000-' returned 1 polygon"

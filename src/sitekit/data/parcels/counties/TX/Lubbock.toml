@@ -1,0 +1,25 @@
+state = "TX"
+county = "Lubbock"
+name = "Lubbock CAD Parcels"
+publisher = "Lubbock Central Appraisal District (gis.lubbockcad.org)"
+url = "https://gis.lubbockcad.org/arcgis/rest/services/LubbockCADWebService/MapServer/129"
+apn_fields = ["PROP_ID", "QuickRefID"]
+situs_field = "Situs"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Lubbock County (about 137,000 parcels)"
+vintage = "Current LCAD parcel layer (deed dates current through late 2026 at verification)"
+max_record_count = 1000
+terms = "Public Lubbock CAD MapServer, no token; no license text on the service."
+owner_field = "OName"
+deed_book_field = "DeedBook"
+deed_page_field = "DeedPage"
+legal_field = "Legal"
+notes = "MapServer layer 129 ('Parcels') of the LubbockCADWebService; the service has many annotation/label sublayers, so always use /129. PROP_ID is the LCAD property ID with an R prefix as a string, e.g. 'R153323' (QuickRefID is identical). Situs includes city and ZIP ('904 BROADWAY, LUBBOCK, TX  79401'); SitusSNo/SitusSNm hold number and street name; OwnerCity is mailing. DeedBook/DeedPage use '9999'/'999' as placeholders on some records; InstrNum holds newer instrument numbers."
+
+[verified]
+date = "2026-10-20"
+point = [-101.84503, 33.58504]
+point_result = "PROP_ID 'R153323' at 904 BROADWAY, Lubbock (Lubbock County Courthouse, ORIG T LUBBOCK PUBLIC SQUARE), owner LUBBOCK COUNTY; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "PROP_ID = 'R153323' returned 1 polygon"

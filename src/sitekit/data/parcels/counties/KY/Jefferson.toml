@@ -1,0 +1,21 @@
+state = "KY"
+county = "Jefferson"
+name = "Jefferson County KY Parcels (LOJIC Open Data PVA)"
+publisher = "LOJIC (Louisville/Jefferson County Information Consortium: Louisville Metro Government, Jefferson County PVA, MSD, Louisville Water)"
+url = "https://gis.lojic.org/maps/rest/services/LojicSolutions/OpenDataPVA/MapServer/1"
+apn_fields = ["PARCELID", "LRSN", "PIN"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Jefferson County / Louisville Metro"
+vintage = "Updated daily (per LOJIC open data catalog)"
+max_record_count = 2000
+terms = "LOJIC open data, published publicly (also listed on data.gov); no license text on the service. No token."
+notes = "MapServer layer 1 (layer 0 is right-of-way). Geometry and ids only: no situs, owner, deed or plat fields. PARCELID is the 12-character PVA parcel id with no separators, e.g. '014E00010000' (block 014E, lot 0001, sub 0000); LRSN is the PVA's unique numeric record key (49611, no quotes). PIN was empty on the features tested."
+
+[verified]
+date = "2026-10-20"
+point = [-85.7590, 38.2546]
+point_result = "PARCELID '014E00010000', LRSN 49611, downtown Louisville at Louisville Metro Hall (527 W Jefferson St); outSR 3089 returned KY Single Zone ft coords (4918349, 3980500)"
+apn_test = "PARCELID = '014E00010000' returned 1 polygon"

@@ -1,0 +1,23 @@
+state = "NM"
+county = "Doña Ana"
+name = "Doña Ana County Assessed Parcels"
+publisher = "Doña Ana County Assessor's Office / County GIS (ArcGIS Online org)"
+url = "https://services7.arcgis.com/JMIoqakAkedEx0oU/arcgis/rest/services/DAC_Parcels/FeatureServer/0"
+apn_fields = ["PARCELNUMBER", "MAP_CODE", "ACCOUNTNUMBER"]
+situs_field = "SITUSADDRS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Doña Ana County (about 96,000 parcels)"
+vintage = "Assessor CAMA extract (copyright text says as of 2026-08-12; layer last edited 2026-09-30)"
+max_record_count = 2000
+terms = "Public item, no token. Copyright text: 'Dona Ana County Assessor's Office Data extracted from Tyler Technologies Assessor Plus CAMA System'. No license text; assessment-purpose disclaimer in description."
+owner_field = "OWNERNAME"
+subdivision_field = "SUBNAME"
+notes = "Hosted FeatureServer, native EPSG:2258 (NM Central ftUS, reported as wkid 102713); reprojects on outSR. PARCELNUMBER is the 13-digit map code with no dashes, e.g. '4005135120360'; MAP_CODE is the dashed form '4-005-135-120-360'; ACCOUNTNUMBER is the Assessor account ('R0237271'). Normalize user input by stripping dashes and match PARCELNUMBER. SITUSADDRS has no city; CITY/STATE/ZIP are the mailing address. LOT and BLOCK are separate fields; no deed, plat or full legal field. The Census geocoder names this county 'Doña Ana' (with ñ, GEOID 35013); geocoders that return 'Dona Ana' without the tilde will not match this key unless an alias is added. A county-server copy at gis.donaanacounty.org/server/rest/services/Parcel/MapServer/0 did not return JSON on 2026-10-20."
+
+[verified]
+date = "2026-10-20"
+point = [-106.81583, 32.30576]
+point_result = "PARCELNUMBER '4005135120360', 845 N MOTEL BLVD, Las Cruces (Doña Ana County Government Center), owner DONA ANA COUNTY BOARD OF COMMISSIONERS, 19.59 ac; returned in EPSG:2903 (NM Central ftUS HARN) to confirm reprojection"
+apn_test = "PARCELNUMBER = '4005135120360' returned 1 polygon; MAP_CODE = '4-005-135-120-360' also returned 1"

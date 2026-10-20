@@ -1,0 +1,22 @@
+state = "PA"
+county = "Bucks"
+name = "Bucks County Parcels"
+publisher = "Bucks County GIS (BucksCountyGIS on ArcGIS Online)"
+url = "https://services3.arcgis.com/SP47Tddf7RK32lBU/arcgis/rest/services/Bucks_County_Parcels/FeatureServer/0"
+apn_fields = ["PARCEL_NUM"]
+situs_field = "ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Bucks County"
+vintage = "County parcel layer with assessment attributes (MODIFY_DATE per record, 2025-2026)"
+max_record_count = 2000
+terms = "Item license: 'Not for commercial use or resale.' User holds Bucks County harmless; as is, no warranty. Public, no token."
+owner_field = "OWNER1"
+notes = "PARCEL_NUM is dashed text 'MM-BBB-LLL', e.g. '08-008-335' (municipality-block-lot); condo/sub-lots add a suffix. ADDRESS is the situs without city and sometimes without a house number; MUNICIPALITY is the township/borough, not a postal city. No deed/plat fields. NOTE the non-commercial clause in the license."
+
+[verified]
+date = "2026-10-20"
+point = [-75.1290, 40.3101]
+point_result = "PARCEL_NUM '08-008-335', E OAKLAND AVE, Doylestown Borough (next to the county admin building), owner DOYLESTOWN BORO; outSR 2272 returned State Plane PA South ft coords (2699389, 366655)"
+apn_test = "PARCEL_NUM = '08-008-335' returned 1 polygon"

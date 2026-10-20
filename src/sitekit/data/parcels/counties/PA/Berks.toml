@@ -1,0 +1,25 @@
+state = "PA"
+county = "Berks"
+name = "Berks County Parcels"
+publisher = "County of Berks, PA GIS (BerksCountyGIS on ArcGIS Online)"
+url = "https://services3.arcgis.com/dGYe1jDYrTw1wwpc/arcgis/rest/services/Berks_County_Parcels_V2/FeatureServer/2"
+apn_fields = ["PIN", "PROPID"]
+situs_field = "FULLSITEADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Berks County"
+vintage = "County parcel layer with assessment attributes (DATADATE per record)"
+max_record_count = 2000
+terms = "County of Berks ArcGIS Online public layer; no license text on the item. No token."
+owner_field = "NAME1"
+deed_book_field = "DEEDBOOK"
+deed_page_field = "DEEDPAGE"
+plat_ref_field = "PLANBKPG"
+notes = "Layer id is 2. PIN is the 12-digit map PIN with no separators, e.g. '530783706997' (shown as 5307-83-70-6997); PROPID prefixes the 2-digit tax district ('07530783706997'). FULLSITEADDRESS is the situs with a trailing space ('112 N 5TH ST '), trim before matching. MUNI / MUNICIPALNAME is the municipality; SITEADDRESS_CSZ is a combined city-state-zip. Older 'Berks_County_Parcels_Public' service in the same org is superseded."
+
+[verified]
+date = "2026-10-20"
+point = [-75.9283, 40.3375]
+point_result = "PIN '530783706997', 112 N 5TH ST, Reading (near the Berks County Services Center), deed 2017/019768; outSR 2272 returned State Plane PA South ft coords (2476390, 371061)"
+apn_test = "PIN = '530783706997' returned 1 polygon"

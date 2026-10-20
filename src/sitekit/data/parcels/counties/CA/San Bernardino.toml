@@ -1,0 +1,21 @@
+state = "CA"
+county = "San Bernardino"
+name = "San Bernardino County Parcels (owner name redacted)"
+publisher = "County of San Bernardino (ArcGIS Online org County_Of_San_Bernardino / SBCo GIS); maintained by Land Use Services, Surveyor and Assessor"
+url = "https://services.arcgis.com/aA3snZwJfFkVyDuP/arcgis/rest/services/Parcels_for_San_Bernardino_County/FeatureServer/0"
+apn_fields = ["ParcelNumber"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of San Bernardino County (about 840,000 parcels)"
+vintage = "County-hosted parcel layer with assessment and zoning attributes (refreshed by the county)"
+max_record_count = 1000
+terms = "San Bernardino County standard disclaimer: no warranty of accuracy, timeliness or completeness; county assumes no liability. Public county open data, no token."
+notes = "Hosted FeatureServer, native SR Web Mercator; reprojects on request (2229 tested). ParcelNumber is the 9-digit book-page-parcel with no dashes, e.g. '013511117' (printed 0135-111-17; the 4-digit trailing sequence of the full 12-digit APN is not included). Dashed input returns 0, so strip dashes and drop any trailing '-0000'. PageMap is the 6-digit assessor book+page ('013511'). No situs address or situs city field (Jurisdiction is the city/unincorporated name, usable as a fallback place label). OwnerName is present but every record reads 'Protected Per CA Gov Code 7928.205', so it is not mapped. No deed, plat or legal fields."
+
+[verified]
+date = "2026-10-20"
+point = [-117.2898, 34.1066]
+point_result = "ParcelNumber '013511117' in downtown San Bernardino beside the County Government Center (385 N Arrowhead Ave), GENERAL OFFICE, 1.17 ac, Jurisdiction City of San Bernardino; outSR=2229 returned projected coordinates"
+apn_test = "ParcelNumber = '013511117' returned 1 polygon; '0135-111-17' returned 0"

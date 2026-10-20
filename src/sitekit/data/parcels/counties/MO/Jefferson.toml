@@ -1,0 +1,27 @@
+state = "MO"
+county = "Jefferson"
+name = "Jefferson County MO Tax Parcels"
+publisher = "Jefferson County, Missouri Department of the County Assessor, GIS Division (ArcGIS Online org jeffcomo)"
+url = "https://services1.arcgis.com/Ur3TPhgM56qvxaar/arcgis/rest/services/Tax_Parcels/FeatureServer/2"
+apn_fields = ["ParcelID", "parcel", "formatted_parcel"]
+situs_field = "Situs"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Jefferson County, Missouri"
+vintage = "Assessor parcels, refreshed regularly (DateOfData 2026-10 at verification)"
+max_record_count = 2000
+terms = "Public, no token. Assessor 'User Agreement' shown in its viewer is a no-warranty/as-is disclaimer only (no use or redistribution limits); cadastral map is informational per 2 CSR 90-65.080"
+owner_field = "owner_name"
+deed_book_field = "deed_book"
+deed_page_field = "deed_page"
+plat_book_field = "plat_book"
+plat_page_field = "plat_page"
+legal_field = "legal_desc"
+notes = "Hosted FeatureServer, layer id 2 (0/1 are lot numbers/lines). ParcelID is 14 digits, sometimes 16 for split parcels ('17200302001029', '1720030200300201'); parcel is identical; formatted_parcel is dashed with decimals and a trailing dot ('17-2.0-03.0-2-001-029.'). Situs ends with the ZIP ('300 1ST ST 63050') and is empty for some parcels. CityDesc is the city taxing district (e.g. 'Hillsboro'), not a postal city, so city_field is empty. deed_document/plat_document hold combined refs ('P001-0038'). An older org (services1.arcgis.com/Sfc8glAOQGBwsYa4, 'JeffersonCountyMO') returns 'Token Required' / subscription disabled; use this one."
+
+[verified]
+date = "2026-10-20"
+point = [-90.56408, 38.23173]
+point_result = "ParcelID '17200302001029' at 300 1ST ST 63050, Hillsboro, legal 'TOWN OF HILLSBORO ALL BLOCK 13 (COURTHOUSE)', owner JEFFERSON COUNTY, plat book 001 page 038; outSR 2815 returned MO East meter coords (244421, 266154)"
+apn_test = "ParcelID = '17200302001029' returned 1 polygon; formatted_parcel = '17-2.0-03.0-2-001-029.' also returned 1"

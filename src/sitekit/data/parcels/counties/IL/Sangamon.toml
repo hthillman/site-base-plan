@@ -1,0 +1,23 @@
+state = "IL"
+county = "Sangamon"
+name = "Sangamon County Parcels (SangCadastral)"
+publisher = "Sangamon County, Illinois GIS (SanGIS, sangis.co.sangamon.il.us)"
+url = "https://sangis.co.sangamon.il.us/server/rest/services/SangCadastral/MapServer/3"
+apn_fields = ["SOA.SANGIS.Parcel_Poly.PIN", "SOA.SANGIS.Reg_ptinfo.PIN1"]
+situs_field = ""
+city_field = "SOA.SANGIS.Reg_ptinfo.PropCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Sangamon County"
+vintage = "Parcel polygons current; joined assessment table reports CurrTxYr 2022 (attributes may lag)"
+max_record_count = 2000
+terms = "Public, no token; Sangamon County GIS with standard accuracy disclaimer"
+owner_field = "SOA.SANGIS.Reg_ptinfo.Owner1"
+legal_field = "SOA.SANGIS.Reg_ptinfo.Legal1"
+notes = "MapServer layer 3 'Parcels' with a joined table, so every field name is fully qualified (use them exactly, e.g. SOA.SANGIS.Parcel_Poly.PIN). PIN is 11 digits with no separators, e.g. '14340132012' (printed 14-34.0-132-012). Situs is split: PropHouseNo + PropDir + PropStreet (no combined field), PropCity is situs city. Owner1/Legal1 come from the joined assessment table, whose max CurrTxYr is 2022, so owner names may be stale. Legal continues in Legal2..Legal4. A geometry-only copy is at .../TyleratENTParcels/MapServer/0 (field PIN)."
+
+[verified]
+date = "2026-10-20"
+point = [-89.6458, 39.7998]
+point_result = "PIN '14340132012' at 701 E MONROE ST, SPRINGFIELD (Springfield municipal/county government block), owner CITY OF SPRINGFIELD; outSR 3436 returned IL West ftUS coords (2442856, 1141424)"
+apn_test = "SOA.SANGIS.Parcel_Poly.PIN = '14340132012' returned 1 polygon"

@@ -1,0 +1,24 @@
+state = "AZ"
+county = "Yavapai"
+name = "Yavapai County Parcels"
+publisher = "Yavapai County ITS GIS and Assessor's Office Cartography Division (ArcGIS Online org yavgis_developers)"
+url = "https://services1.arcgis.com/BajuNXbtZNiBKFkx/arcgis/rest/services/Parcels/FeatureServer/1"
+apn_fields = ["PARNUMASR", "PARLABEL", "PARCEL_ID"]
+situs_field = "SITUS_ADD_DOR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Yavapai County (about 188,000 polygon features)"
+vintage = "Hosted layer refreshed daily (last edit 2026-10-20)"
+max_record_count = 2000
+terms = "Public item, no token. License text: general location mapping only; 'Access is granted to public agencies, educational institutions, non-profit organizations and private individuals for non-commercial purpose. For commercial use of the data see A.R.S. 39-121.03', with a note that A.R.S. 37-178(B) lets agencies waive commercial-use fees. No-warranty disclaimer."
+owner_field = "NAME"
+plat_ref_field = "MAPPLAT"
+subdivision_field = "SUBNAME"
+notes = "Hosted FeatureServer layer id 1, native EPSG:2223 (AZ Central ft); reprojects on outSR. The county's own server gis.yavapaiaz.gov sits behind a Cloudflare browser challenge (HTTP 403 to scripts), so this ArcGIS Online copy is the usable endpoint. PARNUMASR is the Assessor number without dashes, e.g. '11111125B'; PARLABEL is the dashed form '111-11-125B'; PARCEL_ID is a 13-digit internal key ('1311111125022' = county 13 + book/map/parcel/split/check). One parcel can be several polygon features (a where on PARNUMASR returned 3 pieces), so union by PARNUMASR. SITUS_ADD_DOR has a trailing space and no city. NAME/ADDRESS/CITY/STATE/ZIP are the owner and mailing address, so no situs city. MAPPLAT is a combined plat reference like 'M0002/011A' (book/page). RECNUMBER and SUBBOOK/SUBPAGE hold recording references of varying meaning and are not mapped. The lighter 'Parcels_in_Yavapai_County' service has the same geometry with fewer fields."
+
+[verified]
+date = "2026-10-20"
+point = [-112.48373, 34.55313]
+point_result = "PARNUMASR '11111125B' (111-11-125B), 1015 FAIR ST, Prescott (Yavapai County Administration), owner YAVAPAI COUNTY, GARDENLAND TRACT, plat M0002/011A; returned in EPSG:2224 to confirm reprojection"
+apn_test = "PARNUMASR = '11111125B' returned 3 polygon pieces; PARLABEL = '111-11-125B' returned the same 3"

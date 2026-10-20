@@ -1,0 +1,23 @@
+state = "TX"
+county = "Harris"
+name = "HCAD Parcels (Harris County GIS)"
+publisher = "Harris County Appraisal District, served by Harris County GIS (gis.hctx.net)"
+url = "https://www.gis.hctx.net/arcgis/rest/services/HCAD/Parcels/MapServer/0"
+apn_fields = ["HCAD_NUM", "acct_num", "LOWPARCELID"]
+situs_field = ""
+city_field = "site_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Harris County"
+vintage = "HCAD official parcel layer, current tax year (tax_year 2026 at verification)"
+max_record_count = 1000
+terms = "Copyright Harris County Appraisal District GIS Division ('Official Dataset'). Public MapServer, no token."
+owner_field = "owner_name_1"
+legal_field = "legal_dscr_1"
+notes = "MapServer layer. HCAD_NUM is the 13-digit HCAD account as a string with no separators, e.g. '0010320000001' (acct_num and LOWPARCELID hold the same value for normal parcels). No single situs-address field: the site address is split into site_str_num (integer), site_str_pfx, site_str_name, site_str_sfx, site_str_sfx_dir, so situs_field is left blank and address search will not work against this layer; site_city is the situs city. Stacked=1 marks stacked parcels (condos, leases, shared footprints), so a point can return several accounts on one footprint. legal_dscr_1..4 hold the legal description in parts. No deed or plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-95.3608, 29.7616]
+point_result = "HCAD_NUM '0010320000001' at 1001 PRESTON ST, Houston (Harris County Administration Building), owner COUNTY OF HARRIS; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "HCAD_NUM = '0010320000001' returned 1 polygon"

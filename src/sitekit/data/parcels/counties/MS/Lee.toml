@@ -1,0 +1,25 @@
+state = "MS"
+county = "Lee"
+name = "Lee County Parcels (Lee_Service)"
+publisher = "Lee County, Mississippi (ArcGIS Online account leecountyms), Tax Assessor roll"
+url = "https://services3.arcgis.com/j2GTvlDqmJmX3REZ/arcgis/rest/services/Lee_Service/FeatureServer/8"
+apn_fields = ["PARCEL_ID", "PPIN"]
+situs_field = "SITUS_ADDR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Lee County, MS (about 44,000 parcels)"
+vintage = "County web-map parcel layer joined to the assessor roll (service republished August 2026)"
+max_record_count = 1000
+terms = "Public, no token; no license or use constraints stated on the service or item"
+owner_field = "OWNERNAME"
+deed_book_field = "DEED_BOOK"
+deed_page_field = "DEED_PAGE"
+legal_field = "LEGAL1"
+notes = "Layer 8 'Parcels' of the county's Lee_Service hosted FeatureServer (layers 1-21 also hold lot lines, sections, districts). PARCEL_ID is the formatted parcel number, e.g. '089F-30-074-00'; PPIN is the integer parcel PIN (21168). SITUS_ADDR is the situs street address without city (STREET_NUM/STREET hold the parts); ADDRESS1-3/CITY/STATE/ZIP are the owner mailing address. LEGAL1-3 split the legal description. PRC links to a property record card PDF hosted by the county's appraisal vendor. Replaces the MDEQ/MARIS 2024 statewide layer for Lee, which is older."
+
+[verified]
+date = "2026-10-20"
+point = [-88.7047, 34.2594]
+point_result = "outSR 6507 honored (NAD83(2011) State Plane MS East, US ft); PARCEL_ID '089K-31-213-00' (PPIN 19129) at the Lee County Courthouse block, 200 W Jefferson St, Tupelo, owner LEE COUNTY MISSISSIPPI"
+apn_test = "PARCEL_ID = '089F-30-074-00' returned 1 polygon; PPIN = 21168 returned the same"

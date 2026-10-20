@@ -1,0 +1,22 @@
+state = "OR"
+county = "Lane"
+name = "Lane County Taxlots (LaneCountyMaps AddressParcel)"
+publisher = "Lane County GIS (lcmaps.lanecounty.org), taxlots maintained by Lane County Assessment and Taxation"
+url = "https://lcmaps.lanecounty.org/arcgis/rest/services/LaneCountyMaps/AddressParcel/MapServer/2"
+apn_fields = ["MAPTAXLOT", "ACCTNO", "PROPACCT"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Lane County (about 159,000 taxlots)"
+vintage = "Republished weekly from the Assessor into the RLIDgeo geodatabase"
+max_record_count = 2000
+terms = "Public, no token; service copyright 'Lane County GIS'. No license text on the service; county GIS disclaimer applies."
+owner_field = "OWNNAME"
+notes = "MapServer layer 2, native EPSG:2914 (OR South ft intl, HARN); reprojects on outSR. MAPTAXLOT is the 13-character map+taxlot with no spaces, e.g. '1703311110000' (township 17, range 03, section 31, quarter 11, taxlot 10000); MAPNUMBER and TAXLOT are its parts. ACCTNO and PROPACCT are the 7-digit zero-padded account ('0258630'); right-of-way polygons carry '000None'. No situs address on the taxlot layer: layer 0 'Address (Site)' on the same service has concat_address, city_name and maptaxlot for joining. OWNNAME is the owner name; ADDR1..3/OWNERCITY are mailing. ZONING, UGB, GEOCITY and many district fields are included. Layer minScale 20000 only affects drawing."
+
+[verified]
+date = "2026-10-20"
+point = [-123.0901, 44.05155]
+point_result = "MAPTAXLOT '1703311110000', ACCTNO '0258630', owner 'County Owned Lands Dept' (mailing 'Lane County Courthouse'), at the 125 E 8TH AVE address point (Lane County Public Service Building, Eugene); returned in EPSG:2270 (OR South ft intl, NAD83)"
+apn_test = "MAPTAXLOT = '1703311110000' returned 1 polygon; ACCTNO = '0258630' also returned 1"

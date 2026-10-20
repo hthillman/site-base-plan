@@ -1,0 +1,24 @@
+state = "PA"
+county = "York"
+name = "York County Parcels (Open Data)"
+publisher = "York County Planning Commission (YCPC), York County, PA"
+url = "https://arcweb1.ycpc.org/server/rest/services/OPEN_DATA/Parcels/MapServer/0"
+apn_fields = ["PIDN"]
+situs_field = "PROPADR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of York County"
+vintage = "Live parcel map service for the county GIS open data portal"
+max_record_count = 2000
+terms = "Copyright York County Planning Commission (YCPC); public open-data service, no license text. No token."
+owner_field = "OWN_NAME1"
+deed_book_field = "DEED_BK"
+deed_page_field = "DEED_PG"
+notes = "MapServer layer. PIDN is the 13-digit parcel id with no separators, e.g. '0100101002400'; it is the concatenation of DISTRICT ('01'), BLOCK ('001'), MAP ('01') and PARCEL ('002400', = PARCEL_MAJOR '0024' + PARCEL_MINOR '00'). Strip punctuation from user input before matching. PROPADR is the situs ('28 E MARKET ST'); MAIL_ADDR_* is the owner mailing address."
+
+[verified]
+date = "2026-10-20"
+point = [-76.7268, 39.9626]
+point_result = "PIDN '0100101002400', 28 E MARKET ST, York, owner COUNTY OF YORK (York County Admin Center); outSR 2272 returned State Plane PA South ft coords (2255555, 230753)"
+apn_test = "PIDN = '0100101002400' returned 1 polygon"

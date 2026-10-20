@@ -1,0 +1,25 @@
+state = "IA"
+county = "Linn"
+name = "Linn County Real Estate Parcels"
+publisher = "Linn County, Iowa GIS (ArcGIS Online org account 'lc.ago.user')"
+url = "https://services.arcgis.com/i14SLLmXo7Hn9vNc/arcgis/rest/services/RealEstateParcel/FeatureServer/0"
+apn_fields = ["GPN"]
+situs_field = "SitusAddress"
+city_field = "SitusCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Linn County, incl. Cedar Rapids and Marion (about 106,000 parcels)"
+vintage = "Parcel geometry joined to the county tax system, refreshed daily (Updated 2026-10 at verification)"
+max_record_count = 2000
+terms = "Public, no token. Linn County disclaimer: no person shall sell, give, reproduce, or receive for the purpose of selling or offering for sale any portion of the data; no warranty"
+owner_field = "OwnerDeed"
+deed_book_field = "RecorderBook"
+deed_page_field = "RecorderPage"
+legal_field = "LegalDescription"
+notes = "Hosted FeatureServer (native SR 3857). GPN is the 15-digit parcel number with no separators ('142820300100000'); the assessor often prints it as 14282-03001-00000. SitusAddress is the situs street ('101 1ST ST SE'), SitusCity the situs city. OwnerDeed is the deed holder (OwnerContract holds a contract buyer when present). RecorderBook/RecorderPage are the latest recorded deed; RecorderInstrumentNumber is the combined form ('07690-00012'). Terms forbid reselling the data; display in a free tool is not a sale, but do not bundle it into anything sold."
+
+[verified]
+date = "2026-10-20"
+point = [-91.6697, 41.9777]
+point_result = "GPN '142820300100000' at 101 1ST ST SE, CEDAR RAPIDS (Cedar Rapids City Hall on May's Island, beside the Linn County Courthouse), owner CEDAR RAPIDS CITY OF, 1.30 ac; outSR 3417 returned IA North ftUS coords (5419053, 3460127)"
+apn_test = "GPN = '142820300100000' returned 1 polygon"

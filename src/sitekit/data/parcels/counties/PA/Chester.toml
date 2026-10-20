@@ -1,0 +1,26 @@
+state = "PA"
+county = "Chester"
+name = "Chester County Parcels (with owners)"
+publisher = "Chester County, PA (Chesco GIS on ArcGIS Online)"
+url = "https://services.arcgis.com/G4S1dGvn7PIgYd6Y/arcgis/rest/services/Parcels_owners/FeatureServer/0"
+apn_fields = ["UPI", "PIN_COMMON", "PIN_ASMNT", "PIN_MAP"]
+situs_field = "LOC_ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Chester County"
+vintage = "County parcel layer with assessment attributes (tax year 2027 roll)"
+max_record_count = 2000
+terms = "Item license: Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA). Not survey quality. Public, no token."
+owner_field = "OWN1"
+deed_book_field = "BOOK"
+deed_page_field = "PAGE"
+legal_field = "LEGAL1"
+subdivision_field = "SUBDIV_NAME"
+notes = "UPI is the dashed Uniform Parcel Identifier 'MM-M-PPP', e.g. '1-9-123' (same as PIN_COMMON). PIN_ASMNT is the padded assessment form '0109 01230000'. Multi-polygon parcels exist (POLY_PER_PARCEL > 1), so merge results. LOC_ADDRESS is the situs ('17 N HIGH ST'); MUNI is a numeric municipality code, no postal city. ADDR1-3 are owner mailing address. NOTE the NonCommercial license."
+
+[verified]
+date = "2026-10-20"
+point = [-75.6047, 39.9603]
+point_result = "UPI '1-9-123', 17 N HIGH ST, West Chester (across from the county courthouse), deed 8928/1384; outSR 2272 returned State Plane PA South ft coords (2569938, 235778)"
+apn_test = "UPI = '1-9-123' returned 1 polygon"

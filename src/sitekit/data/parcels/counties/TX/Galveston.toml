@@ -1,0 +1,23 @@
+state = "TX"
+county = "Galveston"
+name = "GCAD Parcels (Galveston County)"
+publisher = "Galveston County Engineering (Galveston County ArcGIS Online org), from Galveston Central Appraisal District"
+url = "https://services5.arcgis.com/NAnnb4W7JLztFw9i/arcgis/rest/services/GCAD_Parcels/FeatureServer/0"
+apn_fields = ["GEOID", "PID"]
+situs_field = "SITUS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Galveston County (about 191,000 parcels)"
+vintage = "GCAD parcels with 2026 values (item last modified 2026-05-21)"
+max_record_count = 1000
+terms = "Credit: Galveston County Engineering, GCAD. For geographic reference only; no warranty by Galveston County. Public, no token."
+owner_field = "NAME"
+legal_field = "LEGAL"
+notes = "Hosted FeatureServer in Galveston County's ArcGIS Online org (owner account also publishes the county's commissioner precincts and hurricane evacuation map). GEOID is the GCAD geographic ID like '3505-0320-0000-000'; PID is the GCAD property ID as a string, e.g. '102650'. SITUS includes city and ZIP ('722 MOODY GALVESTON, TX 77550'); CITY/ADDRESS* are the owner mailing address, so no situs city mapping. Value fields are year-named (VAL26LAND etc.), so the schema may change when the layer is refreshed for a new tax year. No deed or plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-94.78975, 29.30315]
+point_result = "GEOID '3505-0320-0000-000' / PID '102650' at 722 MOODY, Galveston (Galveston County Courthouse), owner COUNTY-GALVESTON; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "GEOID = '3505-0320-0000-000' returned 1 polygon"

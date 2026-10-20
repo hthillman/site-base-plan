@@ -1,0 +1,23 @@
+state = "OR"
+county = "Multnomah"
+name = "Oregon Metro RLIS Taxlots (Public), Multnomah County"
+publisher = "Oregon Metro, Regional Land Information System (RLIS), compiled from the Multnomah County Assessor"
+url = "https://services2.arcgis.com/McQ0OlIABe29rJJy/arcgis/rest/services/Taxlots_(Public)/FeatureServer/3"
+apn_fields = ["PRIMACCNUM", "ALTACCNUM", "TLID"]
+situs_field = "SITEADDR"
+city_field = "SITECITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Multnomah County (regional layer also covers the other two Metro counties; about 647,000 taxlots in total)"
+vintage = "RLIS quarterly update, last data update 2026-07-17"
+max_record_count = 2000
+terms = "RLIS Open Database End User License Agreement (Oregon Metro's ODbL-style open license, https://rlisdiscovery.oregonmetro.gov/pages/open-database-license); attribute Oregon Metro RLIS. Public, no token. Excludes ownership information."
+notes = "Oregon Metro RLIS regional layer covering all of Clackamas, Multnomah and Washington counties (rural areas included, not just inside the UGB); hosted FeatureServer layer id 3, native EPSG:2913 (OR North ft intl, HARN); reprojects on outSR. COUNTY holds 'C', 'M' or 'W' for the source county; because the same layer serves three counties, add COUNTY = 'M' to APN where clauses (Multnomah and Washington accounts share the 'R'+digits pattern). TLID is the county map-and-taxlot ID in that county's own format; PRIMACCNUM is the primary Assessor account; ALTACCNUM a secondary account where one exists. SITEADDR / SITECITY / SITEZIP are situs; JURIS_CITY is the jurisdiction. Ownership names are deliberately excluded (OWNERTYPE / PUBLIC_OWN give only the owner class). ORTAXLOT is the statewide ORMAP taxlot key; for Washington County it often holds a placeholder value, so do not rely on it there. Data refreshed quarterly from the county assessors (last data update 2026-07-17; layer edited 2026-08-26). Multnomah TLID is fixed-width with embedded spaces and a dash ('1S1E02BC  -07200'); users usually know the property ID 'R176816' (PRIMACCNUM) or the account 'R366700260' (ALTACCNUM), so try PRIMACCNUM, then ALTACCNUM, then TLID."
+
+filter = "COUNTY = 'M'"  # shared Metro RLIS layer: only this county's tax lots
+
+[verified]
+date = "2026-10-20"
+point = [-122.66025, 45.5126]
+point_result = "TLID '1S1E02BC  -07200' (PRIMACCNUM 'R176816', ALTACCNUM 'R366700260'), 501 SE HAWTHORNE BLVD, PORTLAND (Multnomah Building, county HQ), OWNERTYPE COUNTY; returned in EPSG:2269 (OR North ft intl, NAD83) to confirm reprojection"
+apn_test = "TLID = '1S1E02BC  -07200', PRIMACCNUM = 'R176816' and ALTACCNUM = 'R366700260' each returned 1 polygon"

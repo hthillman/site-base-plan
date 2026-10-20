@@ -1,0 +1,22 @@
+state = "KS"
+county = "Wyandotte"
+name = "Wyandotte County Parcels (UGMAPS_4_V02_Parcels)"
+publisher = "Unified Government of Wyandotte County/Kansas City, Kansas, GeoSpatial Services Division (gisweb.wycokck.org)"
+url = "https://gisweb.wycokck.org/arcgis/rest/services/UGMAPS/UGMAPS_4_V02_Parcels/MapServer/7"
+apn_fields = ["PARCEL", "STATE_ID", "ORIONID"]
+situs_field = ""
+city_field = "CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Wyandotte County (KCK, Bonner Springs, Edwardsville, Lake Quivira part); about 68,000 parcels"
+vintage = "Seamless ownership tax-map parcel layer behind the UG's UGMAPS viewer, current"
+max_record_count = 2000
+terms = "Public, no token; Unified Government GSS Division, no license text on the layer"
+owner_field = "OWNER_NAME"
+notes = "MapServer layer 7 'Parcels' (native SR ESRI 102677, KS North ftUS). PARCEL is the 6-character county parcel number with leading zeros ('087645'; PARCEL_NBR is the same as an integer); STATE_ID is the 19-digit Kansas uniform parcel number ('1050621002013001000'); ORIONID is the appraiser account ('R49143'). Situs is split across NUMB (string), DIR, ST_NAME, SUFX with no combined field, so situs_field is empty; ST_NAME can include the type ('7TH ST' + SUFX 'TRFY'). CITY appears to be the situs city. Point queries with inSR=4326 work; NUMB is a string, so quote it in where clauses. Do not use GISPUB/Parcel_Polygons (fewer attributes, editing enabled) or GISPW/PW_Parcels (token required)."
+
+[verified]
+date = "2026-10-20"
+point = [-94.62799, 39.11309]
+point_result = "PARCEL '087645' (STATE_ID 1050621002013001000) at 710 N 7TH ST TRFY, KANSAS CITY (Wyandotte County Courthouse), owner UNIFIED GOVERNMENT WY CO/KCK, land use 'Government offices', 4.50 ac; outSR 3419 returned KS North ftUS coords (2269194, 301713)"
+apn_test = "PARCEL = '087645' returned 1 polygon; STATE_ID = '1050621002013001000' also returned 1"

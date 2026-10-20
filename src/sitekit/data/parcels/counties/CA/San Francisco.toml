@@ -1,0 +1,21 @@
+state = "CA"
+county = "San Francisco"
+name = "San Francisco Active Parcels (DataSF, pulled daily)"
+publisher = "City and County of San Francisco, SFGIS (ArcGIS Online org sfgov); source dataset DataSF acdm-wktn (Public Works basemap + Assessor roll)"
+url = "https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Active_Parcels_from_DataSF_pulled_daily_/FeatureServer/0"
+apn_fields = ["blklot", "mapblklot"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of San Francisco (about 228,000 active parcel records, including stacked condo lots)"
+vintage = "Pushed to ArcGIS Online daily by SFGIS from DataSF (Public Works recorded-parcel basemap since 1995)"
+max_record_count = 2000
+terms = "Open Data Commons Public Domain Dedication and License (PDDL 1.0). Public, no token."
+notes = "Hosted FeatureServer, native SR Web Mercator; reprojects on request (2227 and 2229 tested). The APN is block+lot: blklot is the unique APN, 4-digit block + 3-character lot, no separator ('0787001' = block 0787 lot 001; lots can carry letters, e.g. '0306T002A'). Users often write '0787-001' or '0787/001', so strip separators and zero-pad the block to 4 digits. Condominium units share one 2D footprint: each unit is a separate stacked record and mapblklot is the lowest APN in the set (about 72,700 records have blklot != mapblklot), so a point query on a condo building returns many features; dedupe by mapblklot to draw the lot once. No single situs string: from_address_num / to_address_num give the address range with street_name + street_type. No owner, deed or legal fields; pw_recorded_map marks parcels on the recorded-map basemap and in_asr_secured_roll marks roll parcels. Includes zoning_code / zoning_district from Planning."
+
+[verified]
+date = "2026-10-20"
+point = [-122.4193, 37.7793]
+point_result = "blklot '0787001' at 1 DR CARLTON B GOODLETT PL (San Francisco City Hall), zoning P (PUBLIC); outSR=2227 returned projected coordinates"
+apn_test = "blklot = '0787001' returned 1 polygon (outSR=2229)"

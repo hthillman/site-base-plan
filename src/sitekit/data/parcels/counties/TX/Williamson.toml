@@ -1,0 +1,23 @@
+state = "TX"
+county = "Williamson"
+name = "WCAD Parcels (Williamson County GIS)"
+publisher = "Williamson County GIS (gis.wilco.org), from Williamson Central Appraisal District"
+url = "https://gis.wilco.org/arcgis/rest/services/public/county_wcad_parcels/MapServer/0"
+apn_fields = ["QuickRefID", "PropertyNumber", "PARCELID"]
+situs_field = "SITEADDRESS"
+city_field = "Scity"
+county_field = ""
+county_values = "none"
+coverage = "All of Williamson County"
+vintage = "WCAD parcels, updated daily per service description (DataDate 2026-07-30, Tax_Year 2027 at verification)"
+max_record_count = 2000
+terms = "Copyright Williamson County Appraisal District. Public MapServer, no token."
+owner_field = "OWNERNME1"
+legal_field = "LegalDesc"
+notes = "MapServer layer. QuickRefID is the WCAD Quick Ref ID, e.g. 'R320073' (PARCELID holds the same value); PropertyNumber is the long form like 'R-20-2000-0000-0191'. SITEADDRESS includes city and ZIP ('700 S MAIN ST, GEORGETOWN, TX  78626'); Scity is the situs city (Mcity is mailing). Deeds are referenced by InstrumentNumber; no deed book/page fields."
+
+[verified]
+date = "2026-10-20"
+point = [-97.67755, 30.63705]
+point_result = "QuickRefID 'R320073' at 700 S MAIN ST, Georgetown (Williamson County Courthouse block), owner WILLIAMSON COUNTY; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "PropertyNumber = 'R-20-2000-0000-0191' returned 1 polygon"

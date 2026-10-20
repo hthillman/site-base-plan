@@ -1,0 +1,23 @@
+state = "MO"
+county = "Clay"
+name = "Clay County MO Parcels (ClayCountyParcelService)"
+publisher = "Clay County, Missouri GIS (ArcGIS Online account 'clayco_gisadmin')"
+url = "https://services7.arcgis.com/3c8lLdmDNevrTlaV/arcgis/rest/services/ClayCountyParcelService/FeatureServer/0"
+apn_fields = ["parcel_id", "prop_id"]
+situs_field = "situs_display"
+city_field = "situs_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Clay County, Missouri (incl. the Clay County part of Kansas City)"
+vintage = "Hosted county parcel service (item modified 2026-08-14)"
+max_record_count = 2000
+terms = "Public, no token; Clay County MO GIS hosted layer, no license text on the item"
+owner_field = "current_owner"
+legal_field = "legal_desc"
+notes = "Hosted FeatureServer (native SR ESRI 102698, MO West ftUS). parcel_id is a 14-digit string with no separators ('15114000303300'); prop_id is the numeric assessor property id (265809, integer, no quotes). situs_display embeds a CRLF and state ('101 E KANSAS ST \\r\\nMO '), so take the text before the line break, or build it from situs_num + situs_street_prefx + situs_st_name + situs_street_sufix. situs_city is often empty. The county's own server gis.claycountymo.gov returned Cloudflare error 525 at verification."
+
+[verified]
+date = "2026-10-20"
+point = [-94.4191, 39.2460]
+point_result = "parcel_id '15114000303300' (prop_id 265809) at 101 E KANSAS ST, Liberty (Liberty City Hall, by the Clay County courthouse square), owner LIBERTY CITY OF, 0.64 ac; outSR 2817 returned MO West meter coords (857029, 341741)"
+apn_test = "parcel_id = '15114000303300' returned 1 polygon; prop_id = 265809 also returned 1"

@@ -1,0 +1,23 @@
+state = "KY"
+county = "Kenton"
+name = "Kenton County PVA Parcels (LINK-GIS)"
+publisher = "LINK-GIS (Kenton County Fiscal Court / Planning and Development Services of Kenton County)"
+url = "https://maps.linkgis.org/server/rest/services/Parcel_QueryOnly/MapServer/1"
+apn_fields = ["PIDN"]
+situs_field = "ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Kenton County"
+vintage = "Live LINK-GIS parcel layer joined to PVA data"
+max_record_count = 2000
+terms = "LINK-GIS public map service; no license text on the service. No token."
+owner_field = "OWNER_NAME"
+subdivision_field = "SUB_TEXT"
+notes = "MapServer layer 1 (Parcels_KC_PVA); layers 0 and 2 in the same service are Campbell and Pendleton counties, which could be added later. PIDN is dashed 'MMM-MM-MM-PPP.PP', e.g. '054-21-20-009.00'. ADDRESS is the situs ('109 W PIKE ST'); CITY_TEXT is the city jurisdiction, not necessarily the postal city. SUB_LOT holds lot numbers. No deed/plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-84.5115, 39.0822]
+point_result = "PIDN '054-21-20-009.00', 109 W PIKE ST, Covington, owner COVINGTON CITY OF (by Covington City Hall); outSR 3089 returned KY Single Zone ft coords (5272787, 4284470)"
+apn_test = "PIDN = '054-21-20-009.00' returned 1 polygon"

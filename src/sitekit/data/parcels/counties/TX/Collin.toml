@@ -1,0 +1,24 @@
+state = "TX"
+county = "Collin"
+name = "CCAD Parcel Feature Set"
+publisher = "Collin Central Appraisal District (ArcGIS Online org 'Collin Central Appraisal District')"
+url = "https://services2.arcgis.com/uXyoacYrZTPTKD3R/arcgis/rest/services/CCAD_Parcel_Feature_Set/FeatureServer/4"
+apn_fields = ["geoID", "PROP_ID", "propID"]
+situs_field = "situsConcatShort"
+city_field = "situsCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Collin County"
+vintage = "Appraisal data refreshed nightly and joined to the CCAD parcel layer (propYear 2027 at verification)"
+max_record_count = 2000
+terms = "Collin Central Appraisal District: 'For public use.' Informational only, not suitable for legal, engineering or surveying purposes."
+owner_field = "ownerName"
+legal_field = "legalDescription"
+subdivision_field = "legalAbsSubName"
+notes = "Hosted FeatureServer layer 4 ('Parcels'); other layers are county line, school districts, abstracts, special districts, subdivisions, city limits. geoID is the CCAD geographic ID like 'R-2667-001-01R1-1'; PROP_ID / propID is the integer CCAD property ID, e.g. 2871703. situsConcatShort is the street address with a trailing space ('2100 BLOOMDALE RD '); situsConcat adds city, state, ZIP. Deeds are referenced by instrument number (deedNum, e.g. '2022010000485'); deedBook holds the year for those, so no deed book/page mapping."
+
+[verified]
+date = "2026-10-20"
+point = [-96.63133, 33.24589]
+point_result = "geoID 'R-2667-001-01R1-1' / PROP_ID 2871703 at 2100 BLOOMDALE RD, McKinney (Collin County Justice Center / courthouse), owner COLLIN COUNTY; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "geoID = 'R-2667-001-01R1-1' returned 1 polygon"

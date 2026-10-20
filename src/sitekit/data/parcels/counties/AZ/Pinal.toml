@@ -1,0 +1,24 @@
+state = "AZ"
+county = "Pinal"
+name = "Pinal County Tax Parcels"
+publisher = "Pinal County GIS (gis.pinal.gov)"
+url = "https://gis.pinal.gov/mapping/rest/services/TaxParcels/FeatureServer/3"
+apn_fields = ["PARCELID"]
+situs_field = "SITEADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Pinal County (about 289,000 features)"
+vintage = "Live county parcel layer joined to CAMA and tax data"
+max_record_count = 2000
+terms = "Public, no token. No copyright or license text on the service; county GIS disclaimer applies."
+owner_field = "OWNERNME1"
+legal_field = "PRPRTYDSCRP"
+subdivision_field = "CNVYNAME"
+notes = "FeatureServer layer id 3. Native SR is AZ Central intl ft given only as WKT (no wkid), so always pass outSR. PARCELID is 9 characters with no dashes, 8 digits plus a check digit or letter, e.g. '200490510' or '20046005V' (shown as 200-49-0510); strip dashes from user input. SITEADDRESS includes city, state and ZIP ('75 N BAILEY ST FLORENCE, AZ 85132'), so no separate situs city field (PSTLCITY is mailing). Condo units repeat the parcel geometry, so a point can return several features. RECEPTIONNO (deed) is empty for every record."
+
+[verified]
+date = "2026-10-20"
+point = [-111.38666, 33.03222]
+point_result = "PARCELID '200490510', 75 N BAILEY ST FLORENCE (county government block, Florence townsite), owner PINAL COUNTY; returned in EPSG:2222 (AZ East ft)"
+apn_test = "PARCELID = '200490510' returned 1 polygon"

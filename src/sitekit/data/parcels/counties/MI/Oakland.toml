@@ -1,0 +1,21 @@
+state = "MI"
+county = "Oakland"
+name = "Oakland County Tax Parcels (Public)"
+publisher = "Oakland County, MI (gisservices.oakgov.com)"
+url = "https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/1"
+apn_fields = ["PIN", "KEYPIN"]
+situs_field = "SITEADDRESS"
+city_field = "SITECITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Oakland County (about 490,000 parcels)"
+vintage = "Live county open parcel data service"
+max_record_count = 2000
+terms = "Oakland County public open parcel service (published on the county's ArcGIS Online as 'OC Tax Parcels (Public)'); no license text on the service. No token."
+notes = "MapServer layer 1 ('Tax Parcel Plus'). PIN is the 10-digit Oakland parcel number with no separators, e.g. '1925356011' (displayed 19-25-356-011); strip dashes from user input. SITEADDRESS/SITECITY are situs (blank on some exempt parcels; POSTALADDRESS then often holds the address). Owner names (NAME1/NAME2) are suppressed (null) in this public service, so no owner field. CVTTAXDESCRIPTION is the city/village/township."
+
+[verified]
+date = "2026-10-20"
+point = [-83.2193, 42.5468]
+point_result = "PIN '1925356011', 484 W MAPLE RD, BIRMINGHAM 48009; also county campus point (-83.3110, 42.6595) returned PIN 1419228024, City of Pontiac; outSR 2253 returned State Plane MI South intl-ft coords (13432563, 383654)"
+apn_test = "PIN = '1925356011' returned 1 polygon"

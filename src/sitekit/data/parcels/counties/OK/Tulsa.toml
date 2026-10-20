@@ -1,0 +1,24 @@
+state = "OK"
+county = "Tulsa"
+name = "Tulsa County Parcels (INCOG)"
+publisher = "INCOG (Indian Nations Council of Governments, regional COG) publishing Tulsa County Assessor data"
+url = "https://map11.incog.org/arcgis11wa/rest/services/Parcels_TulsaCo/FeatureServer/0"
+apn_fields = ["ParcelNo", "ACCT_NUM", "AccountNo"]
+situs_field = "PropertyAddress"
+city_field = "PropertyCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Tulsa County (about 285,000 parcels)"
+vintage = "Assessor extract; LoadDate 2026-10-03 (service description still says 'Last updated February 3, 2025')"
+max_record_count = 2000
+terms = "Public, no token; copyright text 'Tulsa County Assessor'. No license text on the service."
+owner_field = "Owner"
+deed_ref_field = "ReceptionNo"
+legal_field = "Legal"
+notes = "FeatureServer on INCOG's server, native EPSG:2267 (OK North ftUS, reported as wkid 102724); reprojects on outSR. ParcelNo is a 14-digit string with no dashes, e.g. '00500920140670' (Assessor shows it as 00500-92-01-40670, 5-2-2-5); ACCT_NUM is identical and AccountNo adds an 'R' prefix ('R00500920140670'). Strip dashes from user input and match ParcelNo. PropertyAddress uses Tulsa's trailing quadrant style ('218 W 6 ST S', '500 S DENVER AV W'). PropertyCity is the situs city; City/State/ZIPCode are mailing. ReceptionNo is the County Clerk reception number of the last deed (often null). Legal is space-padded to 250 chars, so trim. INCOG also publishes Creek, Osage, Rogers and Wagoner county parcels on the same server."
+
+[verified]
+date = "2026-10-20"
+point = [-95.9922, 36.14905]
+point_result = "ParcelNo '00500920140670', 218 W 6 ST S, TULSA (Tulsa County Administration Building, BusinessName 'TULSA COUNTY HQ'), owner BOARD OF COUNTY COMMISSIONERS OF TULSA; returned in EPSG:32124 (OK North m) to confirm reprojection"
+apn_test = "ParcelNo = '00500920140670' returned 1 polygon; AccountNo = 'R00500920140670' also returned 1"

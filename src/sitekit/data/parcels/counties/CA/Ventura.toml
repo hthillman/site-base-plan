@@ -1,0 +1,21 @@
+state = "CA"
+county = "Ventura"
+name = "Ventura County Parcels (County GIS open data, monthly)"
+publisher = "County of Ventura Information Technology Services GIS (ArcGIS Online org GISVentura), item 'Parcels Monthly'"
+url = "https://services2.arcgis.com/XJ5Tb7dTYtAMoyYT/arcgis/rest/services/Parcels_Quarterly/FeatureServer/0"
+apn_fields = ["APN", "APN10"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Ventura County (about 268,000 parcels)"
+vintage = "Parcel polygons refreshed monthly by Ventura County GIS"
+max_record_count = 2000
+terms = "County of Ventura GIS: reference use only, features approximate and not to survey/engineering standards, no warranty, County assumes no legal responsibility. Public, no token. (Assessor roll attributes are only released via a public-records request and info agreement, which is why this layer carries geometry and APN only.)"
+notes = "Hosted FeatureServer, native SR Web Mercator; reprojects on request (2229 tested). APN is 9 digits with no dashes ('083006132'); APN10 is the 10-digit form with the trailing suffix digit ('0830061325', the attributed county copy calls it APN_SUFFIX). Printed APNs are dashed (e.g. 083-0-061-325), so strip dashes and try the first 9 digits against APN, all 10 against APN10. Fields are only APN, APN10, LAT, LON: no situs, owner, deed or legal attributes. The county's own server also exposes an attributed copy (maps.ventura.org/arcgis/rest/services/SDs/Parcels/FeatureServer/0, with SITUS, DOC_NR, TRACT) but it is not published as open data and the Assessor restricts roll attributes, so it is not used here."
+
+[verified]
+date = "2026-10-20"
+point = [-119.2104, 34.2683]
+point_result = "APN '083006132' / APN10 '0830061325' at the Ventura County Government Center (800 S Victoria Ave, Ventura), 80.9 ac; outSR=2229 returned projected coordinates"
+apn_test = "APN = '083006132' returned 1 polygon; APN10 = '0830061325' returned 1 polygon"

@@ -1,0 +1,24 @@
+state = "LA"
+county = "East Baton Rouge"
+name = "East Baton Rouge Tax Parcels 2026"
+publisher = "City of Baton Rouge / Parish of East Baton Rouge GIS (EBRGIS ArcGIS Online org), Assessor data"
+url = "https://services.arcgis.com/KYvXadMcgf0K1EzK/arcgis/rest/services/Tax_Parcels_2026/FeatureServer/0"
+apn_fields = ["ASSESSMENT_NUM", "PRONO"]
+situs_field = "PHYSICAL_ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of East Baton Rouge Parish (about 205,800 parcels)"
+vintage = "2026 Assessor tax parcels (updated annually)"
+max_record_count = 2000
+terms = "Public, no token; item licence text 'For public use'; EBRGIS / EBR Assessor's Office"
+owner_field = "OWNER"
+legal_field = "LEGAL_DESCRIPTION"
+subdivision_field = "SUBDIVISION"
+notes = "Hosted FeatureServer in the consolidated City-Parish's 'East Baton Rouge GIS Map Portal' ArcGIS Online org. Use this instead of maps.brla.gov Cadastral/Tax_Parcel/MapServer/0: that service returns zero features for any outFields=* query (its SALE_YEAR field breaks the response). ASSESSMENT_NUM is the dashed assessment number, e.g. '012-9624-8'; PRONO is the same digits as an integer (1296248). PHYSICAL_ADDRESS has no city. LEGAL_DESCRIPTION contains CR/LF line breaks. LOT, BLOCK and WARD_SECTION are present; no deed or plat book fields. The service name carries the tax year, so expect a Tax_Parcels_2027 next year."
+
+[verified]
+date = "2026-10-20"
+point = [-91.18700, 30.44540]
+point_result = "outSR 6479 honored (NAD83(2011) State Plane LA South, US ft); ASSESSMENT_NUM '012-9624-8' at 233 ST LOUIS ST, Baton Rouge (East Baton Rouge Parish Courthouse, Beauregard Town Sq 27), owner CITY OF BATON ROUGE & PARISH OF EAST BATON ROUGE"
+apn_test = "ASSESSMENT_NUM = '012-9624-8' returned 1 polygon"

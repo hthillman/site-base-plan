@@ -1,0 +1,24 @@
+state = "TX"
+county = "Dallas"
+name = "DCAD ParcelPublishing (tax parcels)"
+publisher = "Dallas Central Appraisal District (maps.dcad.org)"
+url = "https://maps.dcad.org/prdwa/rest/services/Property/ParcelQuery/MapServer/4"
+apn_fields = ["PARCELID", "LOWPARCELID"]
+situs_field = "SITEADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Dallas County"
+vintage = "DCAD parcel publishing layer, refreshed continuously (LASTUPDATE max 2026-10-19 at verification)"
+max_record_count = 4000
+terms = "Public DCAD MapServer, no token. Service copyright line reads 'DCAD, MAPSCO, Esri., Inc.' (MAPSCO refers to the MAPGRID page reference; parcel geometry and attributes are DCAD's)."
+owner_field = "OWNERNME1"
+legal_field = "PRPRTYDSCRP"
+subdivision_field = "CNVYNAME"
+notes = "MapServer layer 4 (ParcelPublishing) of the ParcelQuery service; layers 0-3 are blocks, simultaneous conveyances, map grid and survey abstracts. PARCELID is the 17-character DCAD account number as a string with no separators, e.g. '00000101154000000' (LOWPARCELID is the same for ordinary parcels). SITEADDRESS is like '1400 YOUNG ST' with no city; PSTLCITY is the owner mailing city, not situs, so city_field is blank. PRPRTYDSCRP is the short legal (e.g. 'BLK D/81 82 83 E/87 88 1/89'); CNVYNAME is the addition/conveyance name. Several attribute values are space-padded. No deed or plat book fields."
+
+[verified]
+date = "2026-10-20"
+point = [-96.7969, 32.7765]
+point_result = "PARCELID '00000101154000000' at 1400 YOUNG ST, Dallas (City of Dallas parcel at City Hall), owner DALLAS CITY OF; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "PARCELID = '00000101154000000' returned 1 polygon"

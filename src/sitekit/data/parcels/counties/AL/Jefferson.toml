@@ -1,0 +1,26 @@
+state = "AL"
+county = "Jefferson"
+name = "Jefferson County Parcels"
+publisher = "Jefferson County Commission, ITS GIS Division (jccgis.jccal.org)"
+url = "https://jccgis.jccal.org/server/rest/services/Basemap/Parcels/MapServer/0"
+apn_fields = ["PID", "PARCELID", "APP_PID"]
+situs_field = "ADDR_APR"
+city_field = "Property_City"
+county_field = ""
+county_values = "none"
+coverage = "All of Jefferson County (Birmingham and Bessemer divisions)"
+vintage = "Static layer regenerated nightly from county assessor data"
+max_record_count = 2000
+terms = "Public, no token; Jefferson County disclaimer (use at own risk, AS IS, hold harmless)"
+owner_field = "OWNERNAME"
+plat_book_field = "Plat_Book"
+plat_page_field = "Plat_Page"
+legal_field = "Legal_Desc"
+subdivision_field = "SUBDIV_NAME"
+notes = "MapServer layer (no FeatureServer). PID is a 16-digit string with no separators, e.g. '2200362022001000'; ParcelNo holds the formatted form '22 00 36 2 022 001.000' (strip spaces and dots to get PID). APP_PID differs from PID on condo/joint sub-accounts. Many text fields are space-padded (OWNERNAME, ADDR_APR, Plat_Book), so trim. Property_City is the situs city; CITY is a tax-district label like 'BIRMINGHAM-30'. Stacked duplicate polygons exist for joint accounts. No deed book/page fields."
+
+[verified]
+date = "2026-10-20"
+point = [-86.8082, 33.5214]
+point_result = "outSR 9749 honored (NAD83(2011) State Plane AL West, US ft; 26930 also honored); PID '2200253022009000' at 723 / 715 RICHARD ARRINGTON JR BLVD N, Birmingham (beside the Jefferson County Courthouse), owner JEFFERSON COUNTY RIGHT-OF-WAY"
+apn_test = "PID = '2200362022001000' returned 1 polygon (2001 PARK PL, Birmingham)"

@@ -1,0 +1,21 @@
+state = "KS"
+county = "Sedgwick"
+name = "Sedgwick County Parcels (Op_Parcel_Dynamic_SP)"
+publisher = "Sedgwick County Geographic Information Services (gismaps.sedgwickcounty.org)"
+url = "https://gismaps.sedgwickcounty.org/arcgis/rest/services/Map/Op_Parcel_Dynamic_SP/MapServer/0"
+apn_fields = ["PIN", "AIN", "GEOCODE"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Sedgwick County, incl. Wichita (about 240,000 parcels)"
+vintage = "Live cadastral parcel layer used by the county's public map viewers"
+max_record_count = 1000
+terms = "Public, no token; SCGIS / City of Wichita 'as is, with all faults' disclaimer with hold-harmless clause"
+notes = "MapServer layer (native SR ESRI 102678, KS South ftUS). Geometry and ids only: no owner, situs, legal or deed fields. PIN is an 8-digit string with leading zeros ('00116113'); AIN is the 18-19 character Kansas uniform parcel number, sometimes with a letter suffix ('087124200110400102', '087124200110200500C'); GEOCODE is a space-padded appraiser code ('   A 159060002'). A hosted copy with the same ids is services7.arcgis.com/McLat6HlPl45bNBv/arcgis/rest/services/Sedgwick_County_Land_Records/FeatureServer/4 (AIN has a trailing space there). Owner/address attributes exist only for county-owned parcels (Map/Op_CountyOwnedProperty_Dynamic_SP)."
+
+[verified]
+date = "2026-10-20"
+point = [-97.34025, 37.69111]
+point_result = "PIN '00116113' / AIN '087124200110400102' = 271 W 3RD ST N, Wichita (Sedgwick County Ronald Reagan administration building, owner SEDGWICK COUNTY per the county-owned property layer), 1.54 ac; outSR 3420 returned KS South ftUS coords (1648120, 1687344)"
+apn_test = "PIN = '00116113' returned 1 polygon; AIN LIKE '087124200110400102%' also returned 1"

@@ -1,0 +1,23 @@
+state = "OR"
+county = "Deschutes"
+name = "Deschutes County Taxlots (DIAL)"
+publisher = "Deschutes County GIS / Assessor's Office (maps.deschutes.org)"
+url = "https://maps.deschutes.org/arcgis/rest/services/Dial2_Taxlots/MapServer/0"
+apn_fields = ["Taxlot_Assessor_Account.TAXLOT", "dbo_GIS_MAILING.ACCOUNT_ID"]
+situs_field = "Taxlot_Assessor_Account.Address"
+city_field = "Taxlot_Assessor_Account.City"
+county_field = ""
+county_values = "none"
+coverage = "All of Deschutes County (about 109,500 taxlots; 112,000 rows with account joins)"
+vintage = "Live county taxlot layer behind the DIAL property viewer"
+max_record_count = 1000
+terms = "Public, no token; Deschutes County GIS (OpenData copy credits 'Deschutes County - Assessor's Office'). No license text; county GIS disclaimer applies."
+owner_field = "dbo_GIS_MAILING.OWNER"
+subdivision_field = "Taxlot_Assessor_Account.Subdivision"
+notes = "MapServer layer (native Web Mercator), reprojects on outSR. This layer is a join, so every field name is table-qualified ('Taxlot_Assessor_Account.TAXLOT', 'dbo_GIS_MAILING.OWNER'); use the qualified names in where clauses and when reading attributes. TAXLOT is the 13-character map+taxlot with no spaces, e.g. '171232AA06300' (T17 R12 sec 32 AA, taxlot 06300); ACCOUNT_ID is the Assessor account ('103228'). A taxlot with several accounts appears once per account (112k rows over 109.5k taxlots). Address is the situs street ('1300 NW WALL ST'), City/Zip the situs city and ZIP; M_* fields are mailing. Block and Lot are separate. Fallback with unqualified names but geometry and taxlot ID only: https://maps.deschutes.org/arcgis/rest/services/OpenData/LandFD/MapServer/2 (TAXLOT field)."
+
+[verified]
+date = "2026-10-20"
+point = [-121.30814, 44.06248]
+point_result = "TAXLOT '171232AA06300', ACCOUNT_ID '103228', 1300 NW WALL ST, BEND (Deschutes Services Building), owner DESCHUTES COUNTY; returned in EPSG:2270 (OR South ft intl)"
+apn_test = "Taxlot_Assessor_Account.TAXLOT = '171232AA06300' returned 1 polygon; dbo_GIS_MAILING.ACCOUNT_ID = '103228' also returned 1"

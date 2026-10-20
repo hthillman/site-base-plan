@@ -40,4 +40,5 @@ Rules:
 - Verify by actually calling `<url>/query` with `geometry=<lon>,<lat>&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=true&f=json`, in a real city in that state, and again with a `where` on an apn field. Record what came back.
 - Prefer the state GIS office / official state portal. A county-by-county compilation is fine if it is one service.
 - Skip a state rather than guess. Do not include services that need tokens, are owned by private individuals, or look like one-off student/consultant copies.
+- Layers shared by several counties: set `filter = "COUNTY = 'M'"` (SQL) so parcel-number and address searches stay in the right county.
 - Validate each file: `python3 -c "import tomllib,sys;tomllib.load(open(sys.argv[1],'rb'))" <file>`.

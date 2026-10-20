@@ -1,0 +1,22 @@
+state = "MO"
+county = "Jackson"
+name = "Jackson County MO Parcels (ParcelViewer/ParcelsAscendRelate)"
+publisher = "Jackson County, Missouri GIS Department (jcgis.jacksongov.org)"
+url = "https://jcgis.jacksongov.org/arcgis/rest/services/ParcelViewer/ParcelsAscendRelate/MapServer/1"
+apn_fields = ["Name", "parcel_id"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Jackson County, incl. most of Kansas City, Independence, Lee's Summit"
+vintage = "Live parcel fabric behind the county Parcel Viewer (edited continuously)"
+max_record_count = 2000
+terms = "Public, no token; Jackson County MO GIS Department, no license text on the service"
+subdivision_field = "RecordName"
+notes = "MapServer layer id 1 (not 0), from the county parcel fabric (native SR ESRI 102698, MO West ftUS). Name is the DASHED parcel number, e.g. '29-240-06-01-00-0-00-000'; parcel_id is the same 17 digits with no dashes ('29240060100000000'). No situs address, owner, legal or deed fields on this layer (the viewer joins them from the Ascend assessment system). RecordName/CartogNote hold the subdivision/addition name ('MC GEE'S ADD'). Situs addresses are in ParcelViewer/ParcelsPointsAscendBackup/MapServer/0 (address points keyed by ADDPTKEY = Name). Status is 'Active' or 'Pending'."
+
+[verified]
+date = "2026-10-20"
+point = [-94.5778, 39.0995]
+point_result = "Name '29-240-06-01-00-0-00-000' (Jackson County Courthouse, 415 E 12TH ST, Kansas City per the county address-point layer), MC GEE'S ADD; outSR 2817 returned MO West meter coords (843291, 325392)"
+apn_test = "Name = '29-240-06-01-00-0-00-000' returned 1 polygon; parcel_id = '29240060100000000' also returned 1"

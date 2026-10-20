@@ -1,0 +1,24 @@
+state = "KY"
+county = "Warren"
+name = "City-County Planning Commission of Warren County Parcels"
+publisher = "City-County Planning Commission of Warren County (CCPC), on the City of Bowling Green GIS server"
+url = "https://webgis.bgky.org/server/rest/services/CCPC/CCPC_Parcels/FeatureServer/0"
+apn_fields = ["PVA_PARCEL"]
+situs_field = "ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Warren County (about 61,000 parcels, incl. Bowling Green and Smiths Grove)"
+vintage = "Live CCPC parcel/zoning layer (last_edited_date per record)"
+max_record_count = 2000
+terms = "Public city-county planning commission service; no license text on the service. No token."
+deed_ref_field = "DEED_USED"
+plat_ref_field = "PLAT_USED"
+subdivision_field = "SUBNAME"
+notes = "PVA_PARCEL is the Warren PVA map number 'MMMM-MM-PPP', e.g. '039A-03-159'. ADDRESS is the situs and can list several addresses ('419, 416 PARK ROW, EAST 10TH AVENUE'). PLAT_USED / DEED_USED are free-text references ('MA 39-370; MA 1-2', '734-434'). Includes ZONING and LAND_USE. No owner field."
+
+[verified]
+date = "2026-10-20"
+point = [-86.4385, 36.9932]
+point_result = "PVA_PARCEL '039A-03-159', 522 EAST 8TH AVENUE, Bowling Green (downtown near the Warren County Justice Center); also Smiths Grove point returned 156 SOUTH MAIN STREET; outSR 3089 returned KY Single Zone ft coords (4720231, 3521871)"
+apn_test = "PVA_PARCEL = '039A-03-159' returned 1 polygon"

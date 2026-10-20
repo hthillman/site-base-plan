@@ -1,0 +1,26 @@
+state = "SC"
+county = "Charleston"
+name = "Charleston County Parcels with CAMA Attributes"
+publisher = "Charleston County GIS (gisccapps.charlestoncounty.org), Assessor-maintained parcels"
+url = "https://gisccapps.charlestoncounty.org/arcgis/rest/services/CDC/CDC_ParcelMap/MapServer/0"
+apn_fields = ["PID", "PARCEL_ID"]
+situs_field = ""
+city_field = "PROP_CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Charleston County (about 198,000 parcels)"
+vintage = "Assessor parcels joined to current CAMA (recordings through late September 2026 at verification)"
+max_record_count = 1000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "OWNER1"
+deed_ref_field = "DEED_BOOK_PAGE"
+plat_ref_field = "PLAT_BOOK_PAGE"
+legal_field = "LEGAL_DESCR"
+subdivision_field = "SUBDIVISION"
+notes = "MapServer layer ('Parcels with cama attributes', published for the county's CDC). PID is the 10-digit TMS number with no separators, e.g. '4120000008' (printed as 412-00-00-008); PARCEL_ID is the same value space-padded to 32 characters. Situs address is split across PROP_ST_NO, PROP_ST_NAME and PROP_TYPE (all space-padded) with PROP_CITY as the situs city, so there is no single situs field; concatenate and trim. DEED_BOOK_PAGE looks like 'E107-183', PLAT_BOOK_PAGE like ' AE-129 '. The county's public viewer layer (GIS_VIEWER/External_GIS_Website/MapServer/7) has the same parcels and owner/deed data but no situs address."
+
+[verified]
+date = "2026-10-20"
+point = [-80.0135, 32.8420]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); PID '4120000008' at 3999 BRIDGE VIEW DR, NORTH CHARLESTON (Charleston County School District office, beside the county Lonnie Hamilton III Public Services Building), owner CHARLESTON COUNTY SCHOOL DIST, deed E107-183"
+apn_test = "PID = '4120000008' returned 1 polygon"

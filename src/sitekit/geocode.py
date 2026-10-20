@@ -35,6 +35,14 @@ class GeocodeHit:
     score: float | None = None
 
 
+def census_county(c: dict | None) -> str | None:
+    """County name from a Census Counties record. NAME, not BASENAME, so independent cities stay distinct
+    ('St. Louis city' vs St. Louis County, both BASENAME 'St. Louis'); the County/Parish suffix is dropped."""
+    if not c:
+        return None
+    return re.sub(r"\s+(County|Parish|Borough|Census Area|Municipality)$", "", c.get("NAME") or c.get("BASENAME") or "") or None
+
+
 class GeocodeError(RuntimeError):
     def __init__(self, msg: str, suggestions: list[str] | None = None, hint: str = ""):
         super().__init__(msg)
@@ -68,7 +76,7 @@ def _coords(lon: float, lat: float) -> GeocodeHit | None:
     st = (g.get("States") or [{}])[0].get("STUSAB")
     if st not in STATES:
         return None
-    county = (g.get("Counties") or [{}])[0].get("BASENAME")
+    county = census_county((g.get("Counties") or [None])[0])
     return GeocodeHit(lon, lat, f"{lat:.6f}, {lon:.6f}", county, "Coordinates entered (state and county from US Census)", st)
 
 
@@ -88,7 +96,7 @@ def _census(addr: str, want: str | None) -> GeocodeHit | None:
             continue
         counties = m.get("geographies", {}).get("Counties", [])
         c = m["coordinates"]
-        return GeocodeHit(c["x"], c["y"], m["matchedAddress"], counties[0]["BASENAME"] if counties else None,
+        return GeocodeHit(c["x"], c["y"], m["matchedAddress"], census_county(counties[0]) if counties else None,
                           "US Census Geocoder (TIGER address ranges)", st)
     return None
 

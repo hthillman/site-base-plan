@@ -1,0 +1,24 @@
+state = "AZ"
+county = "Pima"
+name = "Pima County Parcels - Regional"
+publisher = "Pima County Information Technology Department, GIS (GISOpenData)"
+url = "https://gisdata.pima.gov/arcgis1/rest/services/GISOpenData/LandRecords/MapServer/12"
+apn_fields = ["PARCEL"]
+situs_field = "ADDRESS_OL"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Pima County (regional parcel layer, all jurisdictions)"
+vintage = "Rebuilt nightly from the Assessor parcel fabric ('Paregion Assembly')"
+max_record_count = 2000
+terms = "Public open data, no token; Pima County map disclaimer applies. Copyright text credits Pima County IT GIS."
+owner_field = "MAIL1"
+plat_ref_field = "MP"
+legal_field = "LEGAL1"
+notes = "MapServer layer, native EPSG:2868; reprojects on outSR. PARCEL is a 9-character string, 8 digits plus a trailing check letter or digit, no dashes, e.g. '11720012A' (shown as 117-20-012A); strip dashes from user input. ADDRESS_OL is populated only when the parcel has exactly one situs address (ADR_STATUS = 'ONE'); blank for NONE/MULTIPLE. JURIS_OL is jurisdiction (TUCSON, UNINCORPORATED, etc.), not a postal city, so city_field is left blank. MAIL1 is the first owner/mailing line (owner name), populated after Assessor audit. MP is the Maps & Plats book+page as 5 digits ('48094' = Bk 48 Pg 94), blank for unplatted land. LEGAL1..LEGAL5 hold the legal description. DOCKET/PAGE are nearly always null, so no deed fields."
+
+[verified]
+date = "2026-10-20"
+point = [-110.9737, 32.2219]
+point_result = "PARCEL '11720012A', PUEBLO CENTER BLOCK 504 at the point for Pima County Administration, 130 W Congress St, Tucson (ADR_STATUS MULTIPLE so no situs), owner PIMA COUNTY, 3.64 ac; returned in EPSG:2222 (AZ East ft)"
+apn_test = "PARCEL = '11720012A' returned 1 polygon"

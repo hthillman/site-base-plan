@@ -1,0 +1,25 @@
+state = "SC"
+county = "Berkeley"
+name = "Berkeley County Parcel Lines (internet map)"
+publisher = "Berkeley County GIS (gis.berkeleycountysc.gov)"
+url = "https://gis.berkeleycountysc.gov/arcgis/rest/services/desktop/internet_map/MapServer/4"
+apn_fields = ["O_TMS", "ParcelID"]
+situs_field = "GIS_Address"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Berkeley County (about 123,000 parcels)"
+vintage = "County internet-map parcel layer with assessor attributes (current roll)"
+max_record_count = 1000
+terms = "Public, no token; (c) Berkeley County GIS, no license or use constraints stated"
+owner_field = "OwnerName"
+deed_book_field = "DeedBook"
+deed_page_field = "DeedPage"
+plat_ref_field = "Plat"
+notes = "Layer 4 'Parcel Lines' (inside the 'Parcels' group layer 3) of desktop/internet_map MapServer; the same layer is in API/internet_map_with_api. O_TMS is the 10-digit TMS with no dashes, e.g. '1421203036'; ParcelID is the dashed form '142-12-03-036'; O_TMS_NODASH exists but is empty. GIS_Address is the situs (no city); StreetAddress1/City/StateProvince/Zip are the owner mailing address. Plat is a cabinet reference like 'CAB Q - 209C'."
+
+[verified]
+date = "2026-10-20"
+point = [-80.00048, 33.18813]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); O_TMS '1421203036' at 1003 HWY 52, Moncks Corner (Berkeley County Administration Building), owner BERKELEY COUNTY, deed 10658/59"
+apn_test = "O_TMS = '1421203036' returned 1 polygon; ParcelID = '142-12-03-036' returned the same"

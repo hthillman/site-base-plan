@@ -1,0 +1,24 @@
+state = "CA"
+county = "Monterey"
+name = "Monterey County Parcels (Land Records)"
+publisher = "County of Monterey Information Technology GIS (maps.co.monterey.ca.us)"
+url = "https://maps.co.monterey.ca.us/server/rest/services/Land_Records/Parcels/FeatureServer/0"
+apn_fields = ["APN_FORMAT", "APN"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Monterey County (about 124,000 parcels)"
+vintage = "County GIS parcel layer with Assessor attributes and land-use overlays (Last_Modified per record)"
+max_record_count = 2000
+terms = "County of Monterey GIS disclaimer: provided AS IS, no warranties; GIS data will be inconsistent with the official assessment roll; use at user's own risk. Public, no token."
+legal_field = "Legal_Description"
+subdivision_field = "Subdivision"
+deed_ref_field = "Current_Document_Number"
+notes = "FeatureServer, native SR EPSG 2228 (CA zone 4 ftUS); reprojects on request (2229 tested). APN is 12 digits with no dashes ('002244099000'); APN_FORMAT is the dashed 3-3-3-3 form ('002-244-099-000'). Printed APNs often omit the trailing '-000', so append it when only 9 digits are given. No situs address field and no owner field. City is the incorporated city name or blank/unincorporated (a jurisdiction, not a postal situs city), so city_field is left empty; Jurisdiction and Community are also available. Legal_Description holds the assessor legal ('RIKERS ADD TO SALINAS POR LOTS E F G & H BLK 6'); Subdivision is often the literal string 'None'. Current_Document_Number is the latest recorded document (trailing spaces). Many overlay attributes (zoning, flood, fire hazard, coastal zone) are included."
+
+[verified]
+date = "2026-10-20"
+point = [-121.6566, 36.6745]
+point_result = "APN '002244099000' (002-244-099-000) in downtown Salinas at the County Government Center coordinates (168 W Alisal St), RIKERS ADD TO SALINAS BLK 6, 0.89 ac; outSR=2229 returned projected coordinates"
+apn_test = "APN = '002244099000' returned 1 polygon (outSR=2229); APN_FORMAT = '002-244-099-000' returned 1 polygon (outSR=2228)"

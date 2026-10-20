@@ -1,0 +1,24 @@
+state = "LA"
+county = "Lafayette"
+name = "Lafayette Parish Parcels with CAMA Data"
+publisher = "Lafayette Consolidated Government GIS (maps.lafayettela.gov), assessor CAMA join"
+url = "https://maps.lafayettela.gov/arcgis/rest/services/MGO/MGOParcelsService/FeatureServer/0"
+apn_fields = ["ASMNTNUM", "ASSMT_NUM"]
+situs_field = "PROPERTY_LOCATION"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Lafayette Parish (about 117,000 parcels)"
+vintage = "LCG parcel fabric joined to Assessor CAMA, rebuilt periodically (last build 2026 at verification)"
+max_record_count = 1000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "OWNERS"
+legal_field = "PROPERTY_DESCRIPTION"
+subdivision_field = "SUBDIVISION"
+notes = "FeatureServer layer used by LCG's MGO permitting app; answers point queries in well under a second. ASMNTNUM is the bare assessment number, e.g. '6000180'; ASSMT_NUM is the same with a 'PAR-' prefix ('PAR-6000180'). PROPERTY_LOCATION is free text, sometimes a block range ('800 BLK SAINT JOHN ST,') with a trailing comma, and has no city. OWNERS lists all owners joined by ',,'; MAIL_LINE1 holds the first owner name. PROPERTY_TRANSACTIONS lists instrument numbers with dates, not book/page. The sibling BaseLayers/LCG_Parcels_with_CAMA_Data_View service has the same data plus Plat_num but takes ~40 s per outFields=* query, so it was not used."
+
+[verified]
+date = "2026-10-20"
+point = [-92.0243, 30.2215]
+point_result = "outSR 6479 honored (NAD83(2011) State Plane LA South, US ft; 3452 also honored); ASMNTNUM '6000180' at 800 BLK SAINT JOHN ST, Lafayette (Cathedral of St. John the Evangelist campus), owner CONGREGATION OF STJOHNS ROMAN CATHOLIC CHURCH"
+apn_test = "ASMNTNUM = '6000180' returned 1 polygon; ASSMT_NUM = 'PAR-6000180' returned the same parcel"

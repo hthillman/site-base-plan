@@ -1,0 +1,21 @@
+state = "CA"
+county = "Fresno"
+name = "Fresno County Parcels (County GIS hosted layer)"
+publisher = "County of Fresno GIS (gisprod10.co.fresno.ca.us, item 'Parcels' on the county portal gisportal.co.fresno.ca.us)"
+url = "https://gisprod10.co.fresno.ca.us/server/rest/services/Hosted/Parcels/FeatureServer/0"
+apn_fields = ["apn", "apn12"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Fresno County (about 303,000 parcel polygons)"
+vintage = "County GIS hosted parcel layer (roll_year field is mostly blank or placeholder)"
+max_record_count = 2000
+terms = "Public item on the County of Fresno GIS portal with no license or use-limitation text attached; the county states it does not publish ownership information online. No token."
+notes = "Hosted FeatureServer on the county's own ArcGIS Enterprise, native SR Web Mercator; reprojects on request (2228 and 2229 tested). apn is the assessor number without dashes, usually 8 characters but with letter suffixes on some parcels ('46609401T', '01503017ST'; printed 466-094-01T). apn12 is the 12-digit padded form ('466094001000'). Try apn with dashes stripped first, then apn12. agency_cod is a jurisdiction code (e.g. CY county, FR, CL), not a situs city. Fields are only fid, apn, apn12, agency_cod, active_dat, roll_year: no situs, owner, deed or legal attributes. The same server has an attributed FC_PARCEL_SELECT MapServer (owner names, site address) that backs the county permit system; it is not used here because the county says ownership is not provided online and that layer carries no public-use statement."
+
+[verified]
+date = "2026-10-20"
+point = [-119.7860, 36.7377]
+point_result = "apn '46609401T' / apn12 '466094001000' in the downtown Fresno county government block (2420 Mariposa St per the county's attributed layer, owner Fresno County); outSR=2228 returned projected coordinates"
+apn_test = "apn = '46609401T' returned 1 polygon (outSR=2229); apn12 = '466094001000' returned 1 polygon"

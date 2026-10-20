@@ -1,0 +1,22 @@
+state = "CA"
+county = "Santa Barbara"
+name = "Santa Barbara County Assessor Parcels Public"
+publisher = "County of Santa Barbara (ArcGIS Online org COSB-ent), Clerk-Recorder-Assessor"
+url = "https://services.arcgis.com/KkJhFbLnXVqahKz2/arcgis/rest/services/Assessor_Parcels_Public1/FeatureServer/0"
+apn_fields = ["APN"]
+situs_field = "Situs1"
+city_field = "SCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Santa Barbara County (about 134,000 parcel records, including condo floor and mobile-home records)"
+vintage = "Assessor parcel map layer with current roll attributes (RollYear field)"
+max_record_count = 2000
+terms = "County of Santa Barbara disclaimer: no liability for errors or omissions, no representations of accuracy; representational only, not for coordinate values, distances or bearings. Public, no token."
+deed_ref_field = "DocNum"
+notes = "Hosted FeatureServer, native SR EPSG 2229 (CA zone 5 ftUS); reprojection tested to 2228. APN is dashed 3-3-3 ('029-121-022'); undashed input returns 0, so insert dashes. Situs1 is the situs street line, Situs2 is 'CITY, CA ZIP', SCity the situs city. LAYER classifies each record ('Ground', 'Condo First Floor' ... 'Condo Ninth Floor', 'Mobile Home', 'Cabin', 'Basement', 'Island', 'Right of Way (Private)'); condo floors are stacked over the ground parcel, so for a base plan prefer LAYER = 'Ground'. DocNum is the latest recorded document number. No owner, legal or plat fields; BkPgLnk links the assessor map page. The layer was digitized from assessor map pages in the late 1990s and rubber-sheeted, so positional accuracy varies."
+
+[verified]
+date = "2026-10-20"
+point = [-119.7031, 34.42536]
+point_result = "APN '029-121-022' at 105 E ANAPAMU ST, SANTA BARBARA (County Administration Building / Courthouse block), LAYER Ground, 2.4 ac; outSR=2229 returned projected coordinates"
+apn_test = "APN = '029-121-022' returned 1 polygon (outSR=2228); '029121022' returned 0"

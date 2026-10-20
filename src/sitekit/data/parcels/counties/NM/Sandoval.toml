@@ -1,0 +1,24 @@
+state = "NM"
+county = "Sandoval"
+name = "Sandoval County Parcels"
+publisher = "Sandoval County Assessor's Office GIS Mapping Department (ArcGIS Online org SCMapping)"
+url = "https://services3.arcgis.com/CkhxOCyQmitz4nLa/arcgis/rest/services/Sandoval_County_Parcels/FeatureServer/0"
+apn_fields = ["Parcel_ID", "Account_No"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Sandoval County, taxable and exempt (about 152,000 parcels)"
+vintage = "Assessor parcel layer, last refreshed 2026-03-05"
+max_record_count = 1000
+terms = "Public item, no token. License text: 'For reference use only. Not for legal use.' Copyright credits Sandoval County Assessor GIS Mapping and contributing agencies."
+owner_field = "Owner_List"
+plat_ref_field = "Bk_Pg"
+subdivision_field = "Sub"
+notes = "Hosted FeatureServer, native EPSG:2258 (NM Central ftUS, reported as wkid 102713); reprojects on outSR. Parcel_ID is the NM UPC as a digit string with no dashes, usually 13 digits ('1017073410235') but some are 12 ('101707318061'), so match exactly after stripping dashes and spaces; Account_No is the Assessor account ('R188633'). No situs address field. Bk_Pg is the recorded plat reference as cabinet-page ('3-4996'); Reception_ holds the plat reception number ('2022P01992') when present; both are often blank. Lot, Block, Unit, Tract and Phase are separate fields; Lat/Long are DMS text strings, not numbers. Acrage is text like '9.478 ac'. The City of Rio Rancho publishes its own parcel copy; this county layer is the authoritative one."
+
+[verified]
+date = "2026-10-20"
+point = [-106.58828, 35.31147]
+point_result = "Parcel_ID '1017073410235', owner SANDOVAL COUNTY, LA PLAZUELA tract 2B, 9.478 ac, county-owned land by the Idalia Rd county complex in Bernalillo (no situs field to confirm the building); returned in EPSG:2903 (NM Central ftUS HARN) to confirm reprojection"
+apn_test = "Parcel_ID = '1017073410235' returned 1 polygon; Account_No = 'R188633' also returned 1"

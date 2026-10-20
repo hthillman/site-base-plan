@@ -1,0 +1,26 @@
+state = "TX"
+county = "Tarrant"
+name = "Tarrant County Parcels (TCProperty)"
+publisher = "Tarrant County (mapit.tarrantcounty.com), derived from Tarrant Appraisal District parcels"
+url = "https://mapit.tarrantcounty.com/arcgis/rest/services/Tax/TCProperty/MapServer/0"
+apn_fields = ["ACCOUNT", "TAXPIN"]
+situs_field = "SITUS_ADDR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Tarrant County"
+vintage = "Derived from TAD parcel feature class (latest DEED_DATE 2025-11-12 at verification)"
+max_record_count = 1000
+terms = "Copyright Tarrant County Tax Assessor-Collector, Tarrant Appraisal District. Public MapServer, no token."
+owner_field = "OWNER_NAME"
+deed_book_field = "DEED_BOOK"
+deed_page_field = "DEED_PAGE"
+legal_field = "LEGAL_1"
+subdivision_field = "SubdivisionName"
+notes = "MapServer layer. ACCOUNT is the 8-digit TAD account number as a string with leading zeros, e.g. '06138578'; TAXPIN is the GIS lot key, e.g. '14437-A' (GISLINK is TAXPIN space-padded). SITUS_ADDR is space-padded ('100 W WEATHERFORD ST          '), so trim; STREET_NO/PREDIR/STREET_NAM/STREET_TYP hold the parts. CITY is almost always blank (only ~120 rows populated), so city_field is left empty; OWNER_CITY is the mailing city. DEED_BOOK/DEED_PAGE are zero-filled ('0000000') when the deed is recorded by instrument number instead (INSTRUMENT_NO). LEGAL_1..LEGAL_4 hold the legal in parts."
+
+[verified]
+date = "2026-10-20"
+point = [-97.3328, 32.7576]
+point_result = "ACCOUNT '06138578' / TAXPIN '14437-A' at 100 W WEATHERFORD ST, Fort Worth (Tarrant County Courthouse), owner TARRANT COUNTY OF; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "ACCOUNT = '06138578' returned 1 polygon; TAXPIN = '14437-A' returned 1 polygon"

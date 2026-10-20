@@ -1,0 +1,22 @@
+state = "AL"
+county = "Shelby"
+name = "Shelby County Parcel Boundary (Cadastral_Current)"
+publisher = "Shelby County, Alabama GIS / Property Tax (maps.shelbyal.com)"
+url = "https://maps.shelbyal.com/gisserver/rest/services/LegacyServices/Cadastral_Current/MapServer/91"
+apn_fields = ["Assess_Num"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Shelby County (about 108,500 parcels)"
+vintage = "Current cadastral layer for the county GIS website, updated yearly after October 1 per AL DOR rules"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+subdivision_field = "Subd_Name"
+notes = "MapServer layer 91 'Parcel Boundary'. Assess_Num is the formatted assessor parcel number with spaces and a dot, e.g. '21 7 26 1 001 043.000'; it is stored only in that form, so a run-together '217261001043000' will not match (try reinserting spaces as 2-1-2-1-3-3.3 digits). Geometry only: no owner or situs address on this layer (Elem_Addr is empty). The joined C_PARCEL layer in CaptureServices/PropertyTaxOfficeBase has owner/situs but its tax roll join is stale (RecordYear 2023), so it was not used. No deed fields; MapBook1/MapPage1 are filled on only ~2% of parcels."
+
+[verified]
+date = "2026-10-20"
+point = [-86.6101, 33.1795]
+point_result = "outSR 9749 honored (NAD83(2011) State Plane AL West, US ft; 26929 AL East also honored); Assess_Num '21 7 26 1 001 043.000' at the Shelby County Courthouse / Administration Building, 200 W College St, Columbiana (owner on tax roll: SHELBY COUNTY ALABAMA)"
+apn_test = "Assess_Num = '21 7 26 1 001 043.000' returned 1 polygon"

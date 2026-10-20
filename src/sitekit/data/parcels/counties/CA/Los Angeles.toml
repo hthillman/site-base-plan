@@ -1,0 +1,22 @@
+state = "CA"
+county = "Los Angeles"
+name = "Los Angeles County Parcels (Assessor)"
+publisher = "Los Angeles County Enterprise GIS (public.gis.lacounty.gov), data from the Office of the Assessor"
+url = "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer/0"
+apn_fields = ["AIN", "APN"]
+situs_field = "SitusAddress"
+city_field = "SitusCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Los Angeles County (about 2.4 million parcels)"
+vintage = "Assessor parcel layer, current roll (refreshed periodically by LA County eGIS)"
+max_record_count = 1000
+terms = "Copyright: Los Angeles County Office of the Assessor. Publicly served by LA County eGIS, no token."
+legal_field = "LegalDescription"
+notes = "MapServer layer, native SR Web Mercator; reprojects to State Plane on request. AIN is the 10-digit assessor ID with no separators, e.g. '5161004909'; APN is the same number dashed 4-3-3, e.g. '5161-004-909'. Users usually type the dashed form, so try APN with dashes and AIN with digits only. SitusAddress is the street line ('500 W TEMPLE ST'); SitusFullAddress adds city/state/ZIP. SitusCity carries a trailing ' CA' ('LOS ANGELES CA'), so strip it for display. No owner name field (LA County does not publish owners in this layer). No deed or plat book fields; Assr_Map holds the assessor map reference."
+
+[verified]
+date = "2026-10-20"
+point = [-118.2453, 34.0566]
+point_result = "AIN '5161004909' / APN '5161-004-909' at 500 W TEMPLE ST, LOS ANGELES (Kenneth Hahn Hall of Administration), Government Parcel; outSR=2229 returned wkid 2229 coordinates"
+apn_test = "AIN = '5161004909' returned 1 polygon; APN = '5161-004-909' returned 1 polygon"

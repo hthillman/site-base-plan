@@ -1,0 +1,24 @@
+state = "TX"
+county = "Denton"
+name = "Denton County Parcels (Parcels_FC)"
+publisher = "Denton County GIS (gis.dentoncounty.gov), from Denton Central Appraisal District"
+url = "https://gis.dentoncounty.gov/arcgis/rest/services/Parcels_FC/MapServer/0"
+apn_fields = ["pid", "geoID"]
+situs_field = "situs_street_address"
+city_field = "situsCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Denton County (about 384,000 parcels)"
+vintage = "Current appraisal roll joined to parcels (pYear 2027 at verification)"
+max_record_count = 2000
+terms = "Public Denton County MapServer, no token; no license text on the service."
+owner_field = "name"
+legal_field = "legalDescription"
+subdivision_field = "abstractSubdivisionDescription"
+notes = "MapServer layer. pid is the integer DCAD (Denton) property ID, e.g. 167557; geoID is the geographic ID like 'SD0511A-000000-0000-0000-0000'. situs_street_address is like '110 W HICKORY ST'; situsCity is the situs city (addrCity is mailing). volume/page fields exist but hold inconsistent values, so they are not mapped; instrumentNum holds the deed instrument. The older Parcels/MapServer/0 layer on the same server has fewer fields and its CITY is the mailing city."
+
+[verified]
+date = "2026-10-20"
+point = [-97.13301, 33.21502]
+point_result = "pid 167557 / geoID 'SD0511A-000000-0000-0000-0000' at 110 W HICKORY ST, Denton (Courthouse on the Square), owner DENTON, COUNTY OF; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "geoID = 'SD0511A-000007-0000-0004-0000' returned 1 polygon; pid = 167557 returned 1 polygon"

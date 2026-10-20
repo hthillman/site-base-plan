@@ -1,0 +1,24 @@
+state = "AZ"
+county = "Mohave"
+name = "Mohave County Assessor Tax Parcels (ParcelQueryLayer)"
+publisher = "Mohave County Information Technology GIS (mcgis.mohave.gov) for the Mohave County Assessor"
+url = "https://mcgis.mohave.gov/arcgis/rest/services/PARCELS/MapServer/14"
+apn_fields = ["PARCEL", "TPARCEL", "TAXPIN"]
+situs_field = "SITE_ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Mohave County (about 267,000 parcels)"
+vintage = "Live Assessor tax parcel layer (tax year 2027 values present in Oct 2026)"
+max_record_count = 2000
+terms = "Public, no token. Service description 'Mohave County Assessor's Office Tax PARCELS', copyright text 'MCIT'. County disclaimer applies."
+owner_field = "OWNER"
+deed_ref_field = "RECPTNO"
+legal_field = "LEGAL_DESCRIPTION"
+notes = "MapServer layer 14 (ParcelQueryLayer, native Web Mercator), reprojects on outSR. Layer 3 on the same service has the same schema but is scale-dependent; use 14. PARCEL and TAXPIN are dashed book-map-parcel strings, e.g. '304-18-064'; TPARCEL is the same without dashes ('30418064'). CITY/STATE/ZIP belong to the mailing address, not the situs, so no city field. RECPTNO is the recorder reception number of the last deed (about 2/3 populated); older deeds use REC_BOOK/REC_PAGE (0 when unused)."
+
+[verified]
+date = "2026-10-20"
+point = [-114.06472, 35.18803]
+point_result = "PARCEL '304-18-064', 700 W BEALE ST, Kingman (Mohave County Administration Building), owner MOHAVE COUNTY; returned in EPSG:2224 (AZ West ft)"
+apn_test = "PARCEL = '304-18-064' returned 1 polygon; TPARCEL = '30418064' returned 1"

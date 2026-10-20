@@ -53,6 +53,7 @@ class ParcelSource:
     city_field: str = ""
     county_field: str = ""
     county_values: str = "none"
+    filter: str = ""  # extra SQL for layers shared by several counties, e.g. "COUNTY = 'M'"
     coverage: str = ""
     vintage: str = ""
     terms: str = ""
@@ -133,7 +134,7 @@ def county_sources() -> dict[str, dict[str, ParcelSource]]:
 
 # Consolidated city-county governments that geocoders name differently from the county.
 COUNTY_ALIASES = {"athens-clarke": "clarke", "augusta-richmond": "richmond", "macon-bibb": "bibb",
-                  "columbus": "muscogee", "columbus-muscogee": "muscogee"}
+                  "columbus": "muscogee", "columbus-muscogee": "muscogee", "dona ana": "doña ana"}
 
 
 def _county_key(name: str | None) -> str:
@@ -224,7 +225,9 @@ def county_at(lon: float, lat: float) -> str | None:
         d = get_json("https://geocoding.geo.census.gov/geocoder/geographies/coordinates",
                      {"x": lon, "y": lat, "benchmark": "Public_AR_Current", "vintage": "Current_Current", "layers": "Counties", "format": "json"}, timeout=30)
         c = d.get("result", {}).get("geographies", {}).get("Counties", [])
-        return c[0]["BASENAME"] if c else None
+        from .geocode import census_county
+
+        return census_county(c[0]) if c else None
     except Exception:  # noqa: BLE001
         return None
 
@@ -307,6 +310,8 @@ def parcel_by_apn(apn: str, out_sr: int, state: str, county: str | None = None) 
             return [], "", [f"{state} parcel lines come from county layers; pick the county for a parcel-number lookup."]
         return [], "", [f"Parcel-number lookup needs a parcel layer; none for {county + ' County, ' if county else ''}{state} yet. Use the street address."]
     where = _apn_where(src, apn)
+    if src.filter:
+        where = f"({where}) AND ({src.filter})"
     try:
         feats = [_normalise(f, src) for f in query_features(src.url, where=where, out_sr=out_sr)]
         if county and feats:
@@ -346,7 +351,7 @@ def parcel_by_situs(addr: str, out_sr: int, state: str | None, county: str | Non
     if not words:
         return []
     first = words[0].replace("'", "''")
-    where = f"UPPER({src.situs_field}) LIKE '{number} %{first}%'"
+    where = f"UPPER({src.situs_field}) LIKE '{number} %{first}%'" + (f" AND ({src.filter})" if src.filter else "")
     try:
         return [_normalise(f, src) for f in query_features(src.url, where=where, out_sr=out_sr)][:5]
     except Exception:  # noqa: BLE001

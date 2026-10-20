@@ -1,0 +1,21 @@
+state = "PA"
+county = "Delaware"
+name = "Delaware County Parcels Public Access"
+publisher = "Delaware County, PA GIS (gis.delcopa.gov)"
+url = "https://gis.delcopa.gov/arcgis/rest/services/Parcels/Parcels_Public_Access/FeatureServer/0"
+apn_fields = ["PIN", "MAPID", "PARID"]
+situs_field = "ADRCAT"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Delaware County"
+vintage = "Tax year 2026 parcel layer"
+max_record_count = 2000
+terms = "County-hosted public access layer; no license or use text published on the service. No token."
+notes = "PIN (= MAPID) is the map-based id 'MM-BB-PPP:SSS', e.g. '26-04-593:000'. PARID is the 11-digit folio number stored as a double (26000011400), so query it without quotes; folios users quote from the assessment site are this number. A PIN can return several polygons (multi-part parcels), so merge results. ADRCAT is the situs ('0 E BALTIMORE PK'); MUNICIPALI is a numeric municipality code. LEGAL2/LEGAL3 hold the building description and lot dimensions. No owner/deed fields."
+
+[verified]
+date = "2026-10-20"
+point = [-75.3906, 39.9177]
+point_result = "PIN '26-04-593:000', PARID 26000011400, 0 E BALTIMORE PK, Media (by the Delaware County courthouse); outSR 2272 returned State Plane PA South ft coords (2630268, 221841)"
+apn_test = "PIN = '26-04-593:000' returned 3 polygons (multi-part parcel)"

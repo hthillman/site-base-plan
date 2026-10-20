@@ -1,0 +1,23 @@
+state = "IA"
+county = "Scott"
+name = "Scott County IA Cadastral Parcels"
+publisher = "Scott County, Iowa GIS (ArcGIS Online org account 'Scott_County_IA_GIS')"
+url = "https://services.arcgis.com/ovln19YRWV44nBqV/arcgis/rest/services/Cadastral/FeatureServer/3"
+apn_fields = ["PIN", "AlternateID"]
+situs_field = "PropertyAddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Scott County, incl. Davenport and Bettendorf"
+vintage = "County cadastral service joined to assessor/auditor data (item modified 2026-10 at verification)"
+max_record_count = 2000
+terms = "Public, no token; (c) Scott County, Iowa GIS, no license text on the item"
+owner_field = "DeedHold"
+legal_field = "LegalDesc1"
+notes = "Hosted FeatureServer layer 3 'Parcel' (native SR 3857). PIN is alphanumeric with a dash and optional suffix letter, e.g. 'G0061-16A' or 'L0005-19' (a letter prefix for the area, not purely digits); AlternateID is the assessor key ('G25002'). PropertyAddress is situs street only ('600 W 4TH ST'); TaxJuris is the taxing jurisdiction ('CITY OF DAVENPORT'), not a postal city, so city_field is empty. DeedHold is the deed holder (ContrHold = contract buyer). LegalDesc1 contains CRLF line breaks; LegalDesc2/3 continue it. DeedDoc / Instr_Number are recorder document numbers, not book/page."
+
+[verified]
+date = "2026-10-20"
+point = [-90.58219, 41.52391]
+point_result = "PIN 'G0061-16A' (AlternateID G25002) at 600 W 4TH ST, Davenport (Scott County Administrative Center), deed holder SCOTT COUNTY IOWA, 2.28 ac; outSR 3418 returned IA South ftUS coords (2439236, 568596)"
+apn_test = "PIN = 'G0061-16A' returned 1 polygon; AlternateID = 'G25002' also returned 1"

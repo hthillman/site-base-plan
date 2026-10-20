@@ -1,0 +1,23 @@
+state = "LA"
+county = "Calcasieu"
+name = "Calcasieu Parish Parcels (Hub layer)"
+publisher = "Calcasieu Parish Police Jury GIS (lak-dc-arcgis2.cppj.net)"
+url = "https://lak-dc-arcgis2.cppj.net/arcgis/rest/services/HubLayers/Parcels/FeatureServer/0"
+apn_fields = ["ASSESSMENT", "PIN"]
+situs_field = "PHYSICALAD"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Calcasieu Parish (about 168,000 parcels)"
+vintage = "Police Jury parcel layer for its open data hub, joined to assessor and zoning attributes (item updated mid-2026)"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service or item"
+owner_field = "NAME"
+legal_field = "DESCRIPTIO"
+notes = "FeatureServer on the Police Jury's own ArcGIS Server, published for its open data hub. ASSESSMENT is the 8-digit zero-padded assessment number, e.g. '00567973'; PIN is the assessor parcel number with dashes and internal blank padding, e.g. '061008-0677-   -0006', so match it exactly or with LIKE. PHYSICALAD is the situs without city; ADDRESS1/ADDRESS2 are the owner mailing address. DESCRIPTIO is a fixed-width assessor legal block that embeds deed book/page references (REF1.. B 1955 P 557). ZONE/Zn_Descr carry parish zoning from a spatial join. Several OBJECTID_n columns are join leftovers."
+
+[verified]
+date = "2026-10-20"
+point = [-93.21935, 30.22491]
+point_result = "outSR 6479 honored (NAD83(2011) State Plane LA South, US ft); ASSESSMENT '00567973' / PIN '061008-0677-   -0006' at 1110 PITHON ST, Lake Charles (across from the Police Jury Government Building, 1015 Pithon St), owner CALCASIEU PARISH POLICE JURY"
+apn_test = "ASSESSMENT = '00567973' returned 1 polygon; PIN = '061008-0677-   -0006' returned the same"

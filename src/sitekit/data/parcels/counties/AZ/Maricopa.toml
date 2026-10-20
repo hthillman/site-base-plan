@@ -1,0 +1,26 @@
+state = "AZ"
+county = "Maricopa"
+name = "Maricopa County Assessor Parcels"
+publisher = "Maricopa County Assessor's Office GIS"
+url = "https://gis.mcassessor.maricopa.gov/arcgis/rest/services/Parcels/MapServer/0"
+apn_fields = ["APN", "APN_DASH"]
+situs_field = "PHYSICAL_ADDRESS"
+city_field = "PHYSICAL_CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Maricopa County"
+vintage = "Live Assessor parcel layer (tax year 2027 values present in Oct 2026)"
+max_record_count = 1000
+terms = "Public, no token; copyright text 'Maricopa County Assessor's Office'. Standard Assessor disclaimer."
+owner_field = "OWNER_NAME"
+deed_ref_field = "DEED_NUMBER"
+plat_book_field = "MCR_BOOK"
+plat_page_field = "MCR_PAGE"
+subdivision_field = "SUBNAME"
+notes = "MapServer layer (native Web Mercator), reprojects on outSR. APN is 8 digits plus optional letter with no separators, e.g. '11219113'; APN_DASH is the book-map-item form '112-19-113'. Strip dashes from user input and match APN. PHYSICAL_ADDRESS includes city and ZIP with padded spaces ('305 W WASHINGTON ST   PHOENIX  85003'); street parts are also in PHYSICAL_STREET_NUM/DIR/NAME/TYPE. DEED_NUMBER is the 11-digit recorder document number, not book/page. MCR_BOOK/MCR_PAGE are the Maricopa County Recorder plat book/page. Layer minScale 15000 only affects drawing, not query. Stacked condo parcels carry a FLOOR value."
+
+[verified]
+date = "2026-10-20"
+point = [-112.0779, 33.4475]
+point_result = "APN '11219113' (112-19-113), 305 W WASHINGTON ST, PHOENIX (Phoenix City Hall), owner PHOENIX CITY OF; returned in EPSG:2223 (AZ Central ft)"
+apn_test = "APN = '11219113' returned 1 polygon; APN_DASH = '112-19-113' also returned 1"

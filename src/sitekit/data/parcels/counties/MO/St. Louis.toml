@@ -1,0 +1,25 @@
+state = "MO"
+county = "St. Louis"
+name = "St. Louis County Parcels (AGS_Parcels)"
+publisher = "St. Louis County, Missouri GIS Service Center (maps.stlouisco.com)"
+url = "https://maps.stlouisco.com/hosting/rest/services/Maps/AGS_Parcels/MapServer/0"
+apn_fields = ["LOCATOR", "PARENT_LOC"]
+situs_field = "PROP_ADD"
+city_field = "MUNICIPALITY"
+county_field = ""
+county_values = "none"
+coverage = "All of St. Louis County (excludes the independent City of St. Louis)"
+vintage = "Current Assessor roll (TAXYR 2026 at verification)"
+max_record_count = 6000
+terms = "Public, no token; St. Louis County GIS with standard no-warranty disclaimer"
+owner_field = "OWNER_NAME"
+deed_ref_field = "DEEDBKPG"
+legal_field = "LEGAL"
+subdivision_field = "SUBDIVISION"
+notes = "MapServer layer (native SR ESRI 102696, MO East ftUS). LOCATOR is the 9-character parcel locator with letters, e.g. '18K311064' (also written 18K-31-1064); PARENT_LOC is the parent locator (same as LOCATOR except for condo units). PROP_ADD is situs street ('41 S CENTRAL AVE'). MUNICIPALITY is the municipality/unincorporated name, not a postal city ('CLAYTON', or 'UNINCORPORATED'). DEEDBKPG is a combined deed 'book-page' string ('18416-0234'); ASRBKPG is an assessor map book/page, not a deed. This is St. Louis County (FIPS 29189), not St. Louis City (29510); geocoders using BASENAME call both 'St. Louis'."
+
+[verified]
+date = "2026-10-20"
+point = [-90.33906, 38.64993]
+point_result = "LOCATOR '18K311064' at 41 S CENTRAL AVE, CLAYTON (St. Louis County Administration Building / courthouse), owner ST LOUIS COUNTY, 2.68 ac, TAXYR 2026; outSR 2815 returned MO East meter coords (263971, 312617)"
+apn_test = "LOCATOR = '18K311064' returned 1 polygon"

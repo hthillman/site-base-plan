@@ -1,0 +1,23 @@
+state = "TX"
+county = "Travis"
+name = "TCAD Parcels (Travis County TNR)"
+publisher = "Travis County Transportation & Natural Resources (gis.traviscountytx.gov), from Travis Central Appraisal District"
+url = "https://gis.traviscountytx.gov/server1/rest/services/Boundaries_and_Jurisdictions/TCAD_public/MapServer/0"
+apn_fields = ["PROP_ID", "geo_id"]
+situs_field = "situs_address"
+city_field = "situs_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Travis County (about 387,000 parcels)"
+vintage = "TCAD parcels assembled and updated monthly by Travis County TNR"
+max_record_count = 2000
+terms = "Copyright Travis Central Appraisal District; published by Travis County TNR. Public MapServer, no token."
+legal_field = "legal_desc"
+subdivision_field = "sub_dec"
+notes = "MapServer layer. PROP_ID is the TCAD property ID (integer, e.g. 194308), which is what TCAD's property search shows; geo_id is the 10-digit TCAD geographic ID string, e.g. '0206011507'. situs_address is like '700 LAVACA ST 78701' (street plus ZIP, sometimes city). situs_city is populated for only about 44% of parcels. No owner field in this public layer, and no deed or plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-97.74521, 30.27028]
+point_result = "PROP_ID 194308 / geo_id '0206011507' at 700 LAVACA ST, Austin (Travis County Administration Building), legal 'LOT 1-12 BLOCK 081 ORIGINAL CITY'; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "geo_id = '0206011507' returned 1 polygon; PROP_ID = 194308 returned 1 polygon"

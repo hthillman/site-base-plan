@@ -486,6 +486,7 @@ def llms_txt():
     guides = "\n".join(f"- [{g.h1}]({base}/guides/{g.slug}): {g.description}" for g in GUIDES)
     states = ", ".join(sorted(all_sources()))
     counties = sum(len(v) for v in county_sources().values())
+    cstates = ", ".join(sorted(county_sources()))
     text = f"""# Basesheet
 
 > Basesheet is a free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files. No account. Open source (MIT).
@@ -516,7 +517,7 @@ Built for landscape architects, site designers and civil engineers doing early s
 - Flood: FEMA National Flood Hazard Layer
 - Wetlands: USFWS National Wetlands Inventory
 - Roads: US Census TIGER; aerial: Esri World Imagery
-- Parcels: free statewide layers in {states}, plus {counties} Georgia counties. Elsewhere the plan is drawn around the address without a parcel line.
+- Parcels: free statewide layers in {states}, plus {counties} county layers in {cstates}. Elsewhere the plan is drawn around the address without a parcel line. Full list: {base}/parcels
 
 ## Limits
 - Planning-level only. Parcel lines are assessor tax lines, often 5-50 ft off the legal boundary. Wetland and flood layers are screening maps. Confirm with a licensed surveyor and specialists.

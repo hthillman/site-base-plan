@@ -1,0 +1,24 @@
+state = "NV"
+county = "Washoe"
+name = "Washoe County Parcels (Open Data)"
+publisher = "Washoe County Technology Services GIS (wcgisweb.washoecounty.us), Assessor data"
+url = "https://wcgisweb.washoecounty.us/arcgis/rest/services/OpenData/OpenData/FeatureServer/0"
+apn_fields = ["PIN", "STRAP", "APN"]
+situs_field = "FullAddress"
+city_field = "CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Washoe County (about 194,000 parcels)"
+vintage = "Live county open-data parcel layer with Assessor attributes (tax year 2026)"
+max_record_count = 1000
+terms = "Public open data, no token. No license or copyright text on the service; Washoe County GIS disclaimer applies."
+owner_field = "LASTNAME"
+plat_ref_field = "RECMAP"
+subdivision_field = "SUBNAME"
+notes = "FeatureServer layer, native EPSG:3423 (NV West ftUS, reported as wkid 102709); reprojects on outSR. Washoe APNs are 8 digits shown as 'BBB-PPP-PP'. PIN is the dashed string '008-030-10'; STRAP is the same 8 digits with no dashes ('00803010'); APN is an INTEGER with leading zeros dropped (803010), so query it unquoted. Prefer PIN (normalize user input to 3-3-2 with dashes) or STRAP (digits only). FullAddress is the situs street ('1001 E 9TH ST'); CITY is the situs city and SITUSZIP the situs ZIP. Owner name is in LASTNAME (full entity or 'LAST FIRST'), with FIRSTNAME sometimes split out. RECMAP is the recorded map reference such as 'P5791' (parcel map) or '0' when none. MAPLINK points to the Assessor map PDF folder. Stacked condo floors carry FLOOR/FLR."
+
+[verified]
+date = "2026-10-20"
+point = [-119.80098, 39.53931]
+point_result = "PIN '008-030-10', 1001 E 9TH ST, RENO (Washoe County government complex), owner STATE OF NEVADA, RECMAP P5791; returned in EPSG:32109 (NV West m) to confirm reprojection"
+apn_test = "PIN = '008-030-10', STRAP = '00803010' and APN = 803010 each returned 1 polygon"

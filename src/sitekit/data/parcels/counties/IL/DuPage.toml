@@ -1,0 +1,23 @@
+state = "IL"
+county = "DuPage"
+name = "DuPage County Parcels with Real Estate (ParcelsWithRealEstateCC)"
+publisher = "DuPage County Information Technology Department, GIS Division (gis.dupageco.org)"
+url = "https://gis.dupageco.org/arcgis/rest/services/DuPage_County_IL/ParcelsWithRealEstateCC/FeatureServer/0"
+apn_fields = ["PIN"]
+situs_field = "PROPADDRL1"
+city_field = "PROPCITY"
+county_field = ""
+county_values = "none"
+coverage = "All of DuPage County"
+vintage = "Assessment parcels, current; County Clerk real estate file joined weekly"
+max_record_count = 1000
+terms = "Public, no token; DuPage County IT GIS Division with County Clerk; standard disclaimer"
+owner_field = "BILLNAME"
+legal_field = "LEGALDES1"
+notes = "FeatureServer (Query,Extract). PIN is a 10-digit string with no dashes, e.g. '0518211001' (printed as 05-18-211-001). PROPADDRL1 is the situs street ('117 N COUNTY FARM RD'); PROPCITY is situs city but space-padded ('WHEATON           '), so trim. BILLNAME is the tax-bill name (owner of record), space-padded. Legal description is split across LEGALDES1..LEGALDES9 (23-char lines); legal_field holds only the first line, concatenate all nine for the full text. No deed or plat book fields."
+
+[verified]
+date = "2026-10-20"
+point = [-88.1407, 41.8665]
+point_result = "PIN '0518211001' at 117 N COUNTY FARM RD, WHEATON (DuPage County complex), BILLNAME COUNTY OF DU PAGE, 46.59 ac; outSR 3435 returned IL East ftUS coords (1037859, 1894379)"
+apn_test = "PIN = '0518211001' returned 1 polygon"

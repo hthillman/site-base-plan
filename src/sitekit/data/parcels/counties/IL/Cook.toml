@@ -1,0 +1,21 @@
+state = "IL"
+county = "Cook"
+name = "Cook County Parcels (CookViewer3Parcels)"
+publisher = "Cook County Bureau of Technology, GIS Department (gis.cookcountyil.gov)"
+url = "https://gis.cookcountyil.gov/traditional/rest/services/CookViewer3Parcels/MapServer/0"
+apn_fields = ["PIN14", "PIN14_dash", "PARID", "PIN10"]
+situs_field = "street_address"
+city_field = "CITYNAME"
+county_field = ""
+county_values = "none"
+coverage = "All of Cook County, incl. City of Chicago"
+vintage = "Current tax year (TAXYR 2025 at verification); layer edited continuously by Cook County GIS"
+max_record_count = 2000
+terms = "Public, no token; Cook County GIS Dept. data with standard county disclaimer"
+notes = "MapServer layer backing the Cook County Viewer. PIN14 is the 14-digit PIN with no separators ('17094470040000'); PIN14_dash has dashes ('17-09-447-004-0000'); PARID equals PIN14; PIN10 is the first 10 digits (shared by condo units). street_address is situs street ('121 N LA SALLE ST'); CITYNAME is the situs city. No owner, deed, plat or legal fields on this layer. Condo buildings stack multiple PIN14 records on one footprint."
+
+[verified]
+date = "2026-10-20"
+point = [-87.6316, 41.8839]
+point_result = "PIN14 '17094470040000' at 121 N LA SALLE ST, CHICAGO (City Hall / County Building), exempt; outSR 3435 returned IL East ftUS coords (1175487, 1900854)"
+apn_test = "PIN14 = '17094470040000' returned 1 polygon; PIN14_dash and PIN10 also matched"

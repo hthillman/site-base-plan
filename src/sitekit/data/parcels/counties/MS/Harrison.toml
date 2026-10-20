@@ -1,0 +1,22 @@
+state = "MS"
+county = "Harrison"
+name = "Harrison County Approved Parcels"
+publisher = "Harrison County Geographic Information Services and Tax Assessor (geo.co.harrison.ms.us)"
+url = "https://geo.co.harrison.ms.us/server/rest/services/AGO/HarrisonCounty_ApprovedParcels/MapServer/0"
+apn_fields = ["PARCELID", "PARCEL_ID", "PPIN"]
+situs_field = "PHYSADDR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Harrison County (about 109,000 parcels)"
+vintage = "Parcels and land roll approved by the Board of Supervisors at fiscal year end (item snippet says 2023; refreshed each fiscal year)"
+max_record_count = 110000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "NAME"
+notes = "MapServer layer. PARCELID (same as PARCEL_ID) is the formatted parcel number with dashes and a dot, e.g. '0811F-04-001.000'; the first block is 5 characters and is space-padded when the map has no letter ('0102 -07-018.002'), so match the exact formatted string or use LIKE. PPIN is the integer parcel PIN (90792). PHYSADDR has double spaces between number and street ('1801  23RD AVE') and no city; ADDRESS_1..4/CITY/ZIP are the owner mailing address. The AS400/liveParcels layer (110,124 parcels) is more current geometry but only carries a mailing address, so it was not used. No deed/plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-89.0906, 30.3726]
+point_result = "outSR 6507 honored (NAD83(2011) State Plane MS East, US ft; 2254 also honored); PARCELID '0811F-04-001.000' / PPIN 90792 at 1801 23RD AVE, Gulfport (Harrison County First Judicial District Courthouse), owner HARRISON CO"
+apn_test = "PARCELID = '0811F-04-001.000' returned 1 polygon; PPIN = 90792 returned the same"

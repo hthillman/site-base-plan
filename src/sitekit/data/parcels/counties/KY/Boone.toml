@@ -1,0 +1,26 @@
+state = "KY"
+county = "Boone"
+name = "Boone County Tax Parcels"
+publisher = "Boone County Planning Commission, GIS Services Division (BCPC ArcGIS Online)"
+url = "https://services1.arcgis.com/kleO5B3qko1eLO4Z/arcgis/rest/services/Tax_Parcels/FeatureServer/0"
+apn_fields = ["PIDN"]
+situs_field = "SITEADD1"
+city_field = "SITEPOST"
+county_field = ""
+county_values = "none"
+coverage = "All of Boone County"
+vintage = "Live county planning commission parcel layer (GMDEDITED per record)"
+max_record_count = 2000
+terms = "Copyright Boone County Planning Commission, GIS Services Division; public layer, no license text. No token."
+owner_field = "PRCLOWNR1"
+deed_ref_field = "DEEDBKPG1"
+plat_ref_field = "PLATID"
+legal_field = "LEGALDESCR"
+subdivision_field = "SUBNAME"
+notes = "PIDN is the PVA map number 'MMM.MM-MM-PPP.PP', e.g. '038.07-00-005.00'. SITEADD1 is the situs street (blank on some exempt parcels); SITEPOST is the situs postal city; CITYNAME is the taxing jurisdiction. DEEDBKPG1 is the latest deed as 'book/page' ('340/276'); PLATID is the plat cabinet-slide ('1-112')."
+
+[verified]
+date = "2026-10-20"
+point = [-84.7245, 39.0273]
+point_result = "PIDN '038.07-00-005.00', BURLINGTON 41005 (by the Boone County Administration Building), owner BURLINGTON BAPTIST CHURCH, deed 340/276; outSR 3089 returned KY Single Zone ft coords (5212549, 4263278)"
+apn_test = "PIDN = '038.07-00-005.00' returned 1 polygon"

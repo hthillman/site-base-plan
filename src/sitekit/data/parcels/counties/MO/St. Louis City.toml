@@ -1,0 +1,25 @@
+state = "MO"
+county = "St. Louis City"
+name = "City of St. Louis Parcels (St_Louis_Parcels)"
+publisher = "City of St. Louis (independent city; county-equivalent) GIS, maps6.stlouis-mo.gov"
+url = "https://maps6.stlouis-mo.gov/arcgis/rest/services/St_Louis_Parcels/MapServer/0"
+apn_fields = ["HANDLE", "ParcelId", "LowerAsrParcelId"]
+situs_field = "SITEADDR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of the City of St. Louis (about 134,000 parcels)"
+vintage = "Current City parcel layer with Assessor attributes"
+max_record_count = 2000
+terms = "Public, no token; City of St. Louis GIS, no license text on the service"
+owner_field = "OWNERNAME"
+deed_book_field = "RecBookNum"
+deed_page_field = "RecPageNum"
+legal_field = "LegalDesc1"
+notes = "Independent city, a county-equivalent (Census FIPS 29510, NAME 'St. Louis city', BASENAME 'St. Louis'). Geocoders that return BASENAME will say 'St. Louis', the same as St. Louis County (29189), so match on the FIPS or full NAME. HANDLE is the 11-digit city parcel handle ('10207000011'); ParcelId is the Assessor 11-digit id ('02079011000' = city block 0207, parcel 9011, suffix 000); LowerAsrParcelId is its 8-digit form ('02079011'); CityBlock/Parcel are numeric parts. SITEADDR is situs street with runs of spaces ('1200   MARKET ST '), so normalize whitespace before matching. No situs city field (all are St. Louis). RecBookNum/RecPageNum are often null (newer deeds use RecDailyDate/RecDailyNum). Legal continues in LegalDesc2..5. A lighter layer with tax-year attributes is Livedatabase/AssessedValue3/MapServer/0 but it was slow (timed out) at verification."
+
+[verified]
+date = "2026-10-20"
+point = [-90.19971, 38.62671]
+point_result = "HANDLE '10207000011' / ParcelId '02079011000' at 1200 MARKET ST (St. Louis City Hall), owner CITY OF ST LOUIS; outSR 2815 returned MO East meter coords (276247, 310111)"
+apn_test = "HANDLE = '10207000011' returned 1 polygon; ParcelId = '02079011000' also returned 1"

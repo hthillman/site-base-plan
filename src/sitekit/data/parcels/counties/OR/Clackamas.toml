@@ -1,0 +1,23 @@
+state = "OR"
+county = "Clackamas"
+name = "Oregon Metro RLIS Taxlots (Public), Clackamas County"
+publisher = "Oregon Metro, Regional Land Information System (RLIS), compiled from the Clackamas County Assessor"
+url = "https://services2.arcgis.com/McQ0OlIABe29rJJy/arcgis/rest/services/Taxlots_(Public)/FeatureServer/3"
+apn_fields = ["PRIMACCNUM", "TLID", "ALTACCNUM"]
+situs_field = "SITEADDR"
+city_field = "SITECITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Clackamas County (regional layer also covers the other two Metro counties; about 647,000 taxlots in total)"
+vintage = "RLIS quarterly update, last data update 2026-07-17"
+max_record_count = 2000
+terms = "RLIS Open Database End User License Agreement (Oregon Metro's ODbL-style open license, https://rlisdiscovery.oregonmetro.gov/pages/open-database-license); attribute Oregon Metro RLIS. Public, no token. Excludes ownership information."
+notes = "Oregon Metro RLIS regional layer covering all of Clackamas, Multnomah and Washington counties (rural areas included, not just inside the UGB); hosted FeatureServer layer id 3, native EPSG:2913 (OR North ft intl, HARN); reprojects on outSR. COUNTY holds 'C', 'M' or 'W' for the source county; because the same layer serves three counties, add COUNTY = 'C' to APN where clauses (Multnomah and Washington accounts share the 'R'+digits pattern). TLID is the county map-and-taxlot ID in that county's own format; PRIMACCNUM is the primary Assessor account; ALTACCNUM a secondary account where one exists. SITEADDR / SITECITY / SITEZIP are situs; JURIS_CITY is the jurisdiction. Ownership names are deliberately excluded (OWNERTYPE / PUBLIC_OWN give only the owner class). ORTAXLOT is the statewide ORMAP taxlot key; for Washington County it often holds a placeholder value, so do not rely on it there. Data refreshed quarterly from the county assessors (last data update 2026-07-17; layer edited 2026-08-26). Clackamas TLID is map number, a space, then a 5-digit taxlot ('32E05C 00812'); PRIMACCNUM is the 8-digit zero-padded account ('01507952') with no 'R'."
+
+filter = "COUNTY = 'C'"  # shared Metro RLIS layer: only this county's tax lots
+
+[verified]
+date = "2026-10-20"
+point = [-122.5973, 45.33496]
+point_result = "TLID '32E05C 00812' (PRIMACCNUM '01507952'), 2125 KAEN RD, OREGON CITY (Clackamas County Red Soils government campus), OWNERTYPE COUNTY; returned in EPSG:2269 (OR North ft intl, NAD83) to confirm reprojection"
+apn_test = "TLID = '32E05C 00812' and PRIMACCNUM = '01507952' each returned 1 polygon"

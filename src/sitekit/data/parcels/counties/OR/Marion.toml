@@ -1,0 +1,24 @@
+state = "OR"
+county = "Marion"
+name = "Marion County Parcels (Public)"
+publisher = "Marion County Assessor and IT GIS (gis.co.marion.or.us)"
+url = "https://gis.co.marion.or.us/arcgis/rest/services/Public/Parcels/MapServer/0"
+apn_fields = ["TAXLOT", "TAXACCT", "TAXLOTNS"]
+situs_field = "SITUS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Marion County (about 116,000 features)"
+vintage = "Live Assessor parcel layer (records edited through 2025-2026)"
+max_record_count = 1000
+terms = "Public, no token; copyright text 'MC-ASR, MC-IT GIS'. No license text on the service; county GIS disclaimer applies."
+owner_field = "OWNERNAME"
+deed_ref_field = "INSTNUM"
+subdivision_field = "PLATNAME"
+notes = "MapServer layer (native Web Mercator), reprojects on outSR. TAXLOT is the 13-character map+taxlot with no spaces, e.g. '073W27AB00800' (T7S R3W sec 27 AB, taxlot 00800); TAXLOTNS is the same; TAXACCT is the numeric account as text without the 'R' ('589038'). SITUS is the street ('100 HIGH ST NE'); SITUSCSZ holds situs 'CITY, OR, ZIP' in one string, so no city_field (CITY is the city jurisdiction). INSTNUM is the last recorded instrument number (reel+page style, e.g. '46940110') with INSTTYPE and INSTDATE. BLOCK and LOT are separate. Condominium units are stacked polygons over the common-element lot, so a point can return a unit (TAXLOT ending 9xxxx) rather than the base lot. REFLINK and MAPLINK point to the Assessor summary and map PDF."
+
+[verified]
+date = "2026-10-20"
+point = [-123.03614, 44.93992]
+point_result = "TAXLOT '073W27AB00800', TAXACCT '589038', 100 HIGH ST NE, SALEM (Marion County Courthouse), owner MARION COUNTY; returned in EPSG:2269 (OR North ft intl)"
+apn_test = "TAXLOT = '073W27AB00800' returned 1 polygon; TAXACCT = '589038' also returned 1"

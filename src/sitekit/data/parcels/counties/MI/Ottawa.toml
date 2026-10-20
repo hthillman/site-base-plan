@@ -1,0 +1,24 @@
+state = "MI"
+county = "Ottawa"
+name = "Ottawa County Parcels (Public)"
+publisher = "County of Ottawa, Michigan GIS (gis.miottawa.org)"
+url = "https://gis.miottawa.org/arcgis/rest/services/HostedServices/ParcelsPublic/FeatureServer/0"
+apn_fields = ["FinalPIN", "FinalPackedPIN", "ParentPIN"]
+situs_field = "PropertyAddress"
+city_field = "PropertyCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Ottawa County"
+vintage = "Live county parcel and assessment service"
+max_record_count = 2000
+terms = "Copyright County of Ottawa, Michigan; item license 'For use in public applications'. No token."
+owner_field = "OwnerName"
+legal_field = "LegalDesc"
+subdivision_field = "CondoName"
+notes = "FinalPIN is dashed 'CC-TT-SS-BBB-PPP', e.g. '70-07-25-300-006' (70 = Ottawa); FinalPackedPIN is the same without dashes ('700725300006'). Condo units have their own FinalPIN and share ParentPIN. PropertyAddress is blank for some vacant land (StreetName may still be set); PropertyCity is the situs postal city. Mailing* fields are owner mailing address."
+
+[verified]
+date = "2026-10-20"
+point = [-86.1575, 42.9620]
+point_result = "FinalPIN '70-07-25-300-006', WINANS ST, WEST OLIVE (near the Ottawa County Fillmore complex), owner KARSTEN KVK TRUST; outSR 2253 returned State Plane MI South intl-ft coords (12645122, 538925)"
+apn_test = "FinalPIN = '70-07-25-300-006' returned 1 polygon"

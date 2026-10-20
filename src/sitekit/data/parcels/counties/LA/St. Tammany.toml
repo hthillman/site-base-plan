@@ -1,0 +1,23 @@
+state = "LA"
+county = "St. Tammany"
+name = "St. Tammany Parish 2025 Parcels"
+publisher = "St. Tammany Parish Government GIS Division, from St. Tammany Parish Assessor's Office data"
+url = "https://maps.stpgov.org/server/rest/services/Referenced_Layers/2025_Parcels/MapServer/0"
+apn_fields = ["REID", "Assessment_Num", "LegacyID"]
+situs_field = "Physical_Address1"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of St. Tammany Parish"
+vintage = "2025 Assessor roll, delivered annually (service last updated 10/21/2025)"
+max_record_count = 2000
+terms = "Public records, no token; (c)2025 St. Tammany Parish Assessor's Office and Parish Government; standard no-warranty disclaimer, for general mapping and planning"
+owner_field = "Owner_Name"
+legal_field = "Property_Description"
+notes = "MapServer layer. The parish publishes one service per tax year (Referenced_Layers/2024_Parcels, 2025_Parcels); when a 2026_Parcels service appears, update the url. REID is the assessment number as a string, e.g. '55236'; Assessment_Num is the same value as an integer; LegacyID is the older 10-digit parcel id ('1128133223'). Physical_Address1 has no city or zip. Owner_Name can contain double spaces. Lot_No, Block_No and Subd_Phase are present; no deed or plat book fields."
+
+[verified]
+date = "2026-10-20"
+point = [-90.0405, 30.4185]
+point_result = "outSR 6479 honored (NAD83(2011) State Plane LA South, US ft; 3452 also honored); REID '55236' at 68182 HWY 59, near the parish government complex on Koop Dr, Mandeville, LITTLE CREEK LT2"
+apn_test = "REID = '55236' returned 1 polygon; Assessment_Num = 55236 returned the same"

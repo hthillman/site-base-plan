@@ -200,7 +200,8 @@ def index(parcel_states: list[str], needs_code: bool) -> str:
     _cfg = load_config()
     layer_lines = "\n".join(f"{st.name} = {st.name}" for k, st in _cfg.layers.items() if not k.startswith("tf_"))
     n = len(parcel_states)
-    county_txt = "".join(f" + {len(v)} {k} counties" for k, v in sorted(county_sources().items()))
+    _cs = county_sources()
+    county_txt = f" + {sum(len(v) for v in _cs.values())} counties in {len(_cs)} more" if _cs else ""
     actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
     if FIRMS_PAGE:
         actions.append('<a href="/firms">Using this at a firm?</a>')
@@ -401,6 +402,7 @@ def faq_items() -> list[tuple[str, str]]:
 
     n = len(all_sources())
     counties = sum(len(v) for v in county_sources().values())
+    cstates = len(county_sources())
     return [
         ("How do I get a base plan for a property?",
          "Type the street address (or a parcel number and state) on the home page and select Build base plan. In about 15 to 30 "
@@ -418,8 +420,9 @@ def faq_items() -> list[tuple[str, str]]:
          "boundary, and wetlands and flood zones are screening maps. Use a licensed land surveyor and the appropriate specialists "
          "before design decisions that depend on exact boundaries or conditions."),
         ("Which states have parcel lines?",
-         f"{n} states publish a free statewide parcel layer it can use, plus {counties} Georgia counties so far. Elsewhere the "
-         "plan is drawn around the address without a parcel line; everything else still works. The coverage table above lists each state."),
+         f"{n} states publish a free statewide parcel layer it can use. In {cstates} more states it uses county layers: "
+         f"{counties} counties so far, mostly the larger metro areas. Elsewhere the plan is drawn around the address without a "
+         "parcel line; everything else still works. The coverage table above lists each state and county."),
         ("How accurate are the contours?",
          "They come from the best USGS 3DEP elevation data at the site: usually 1 m LiDAR, sometimes older 3 m LiDAR or a 10 m "
          "model where there's no LiDAR. The tool raises the contour interval to what the data supports (5 ft at 10 m) and says so."),
@@ -451,8 +454,8 @@ def about(parcel_states: list[str]) -> str:
 
     csrc = county_sources()
     rows += "".join(
-        f"<tr><td>{escape(STATES.get(k, k))} (by county)</td><td>{escape(', '.join(sorted(s.county for s in v.values())))}</td><td>{escape(next(iter(v.values())).vintage or '')}</td></tr>"
-        for k, v in sorted(csrc.items()))
+        f"<tr><td>{escape(STATES.get(k, k))} (by county)</td><td>{escape(', '.join(sorted(s.county for s in v.values())))}</td><td>Varies by county</td></tr>"
+        for k, v in sorted(csrc.items(), key=lambda kv: STATES.get(kv[0], kv[0])))
     missing = [STATES[k] for k in sorted(STATES, key=lambda k: STATES[k]) if k not in src and k not in csrc]
     body = f"""
 <h1>About & coverage</h1>
@@ -514,6 +517,10 @@ def sources() -> str:
         ("State Plane zones", "NOAA NGS State Plane Coordinate System of 1983 (zone boundaries via Esri)", "Public domain (NOAA)"),
     ]
     nrows = "".join(f"<tr><td>{escape(a)}</td><td>{escape(b)}</td><td>{escape(c)}</td></tr>" for a, b, c in national)
+    from .parcel import county_sources
+
+    crows = "".join(f'<tr><td><a href="/parcels/{state_slug(k)}">{escape(STATES.get(k, k))}</a></td><td>{len(v)}: {escape(", ".join(sorted(c.county for c in v.values())))}</td></tr>'
+                    for k, v in sorted(county_sources().items(), key=lambda kv: STATES.get(kv[0], kv[0])))
     src = all_sources()
     prows = "".join(
         f'<tr><td><a href="/parcels/{state_slug(k)}">{escape(STATES.get(k, k))}</a></td><td>{escape(s.publisher or s.name)}</td>' f"<td>{escape(s.coverage)}</td>"
@@ -527,6 +534,9 @@ services answered, when, and with what resolution and date.</p>
 <div class="tablewrap"><table><tr><th>Layer</th><th>Source</th><th>Terms / credit</th></tr>{nrows}</table></div>
 <h2>Statewide parcel layers</h2>
 <div class="tablewrap"><table><tr><th>State</th><th>Publisher</th><th>Coverage</th><th>Terms</th><th>Last verified</th></tr>{prows}</table></div>
+<h2>County parcel layers</h2>
+<p>In states without a free statewide layer, Basesheet uses county layers. Each state page lists every county source, its terms and when it was last verified.</p>
+<div class="tablewrap"><table><tr><th>State</th><th>Counties</th></tr>{crows}</table></div>
 <p class="note">Parcel layers are assessor tax-parcel compilations, not legal boundaries. Where a publisher limits commercial use, the outputs say so.</p>
 """
     return layout("Data sources and credits · Basesheet", "/sources", body,

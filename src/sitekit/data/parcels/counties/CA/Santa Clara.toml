@@ -1,0 +1,22 @@
+state = "CA"
+county = "Santa Clara"
+name = "Santa Clara County Parcels Public View"
+publisher = "County of Santa Clara, Department of Planning and Development (ArcGIS Online org SCC.Planning.Office)"
+url = "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Parcels_Public_View/FeatureServer/0"
+apn_fields = ["APNdashed", "APN"]
+situs_field = "Situs_Address_Full"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Santa Clara County (about 505,000 parcels)"
+vintage = "County land information parcel layer as of April 2026"
+max_record_count = 2000
+terms = "Copyright County of Santa Clara. 'There are no Use Constraints'; informational only, no guarantees, County not liable. Public, no token."
+deed_ref_field = "Document_Number"
+notes = "Hosted FeatureServer, native SR EPSG 2227 (CA zone 3 ftUS); reprojects on request (2229 and 2226 tested). APN is 8 digits with no dashes ('25904010'); APNdashed is the printed 3-2-3 form ('259-04-010'). Situs_Address_Full is the full situs line including city, state and ZIP ('70 W HEDDING ST SAN JOSE CA 95110'); there is no separate situs city field (AGOL_Situs_Search is a search helper without the direction). Document_Number is the last recorded document number (space-padded). No owner, legal or plat fields. The County's own mapservices.sccgov.org SCCProperty service was unreachable (TLS certificate for another host, then 404) on the test date, so this Planning-hosted copy is used."
+
+[verified]
+date = "2026-10-20"
+point = [-121.9037, 37.3519]
+point_result = "APN '25904010' (259-04-010) at 70 W HEDDING ST SAN JOSE CA 95110 (County Government Center); outSR=2227 returned projected coordinates"
+apn_test = "APN = '25904010' returned 1 polygon (outSR=2229); APNdashed = '259-04-010' returned 1 polygon (outSR=2226)"

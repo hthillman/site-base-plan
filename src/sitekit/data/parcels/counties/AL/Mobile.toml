@@ -1,0 +1,23 @@
+state = "AL"
+county = "Mobile"
+name = "Mobile County Revenue Tax Parcels"
+publisher = "Mobile County Commission GIS (gis.mobilecountyal.gov)"
+url = "https://gis.mobilecountyal.gov/server/rest/services/CountyServices/Municipal_Addressing/MapServer/3"
+apn_fields = ["Parcel_Number", "PID", "Account_Number", "KeyNum"]
+situs_field = "PropAddr1"
+city_field = "PropCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Mobile County"
+vintage = "Revenue Commission parcels, current tax year (RecordYear 2027 at verification)"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "Name1"
+subdivision_field = "Subdivision_Name"
+notes = "Layer 3 of the county's Municipal_Addressing MapServer (the 'Revenue Tax Parcels' layer in the Development service does not allow spatial queries). Parcel_Number is the 13-digit parcel plus a 3-digit suffix after a dot, e.g. '2906400011117.000'; PID is the same without the dot ('2906400011117XXX' style, X suffixes on some); ParcelNo is the formatted, space-padded '29 06 40 0 011 117.XXX'. Account_Number is an 8-digit zero-padded revenue account ('00762464'), KeyNum the unpadded form. Text fields are heavily space-padded, so trim. Book1/Page1 are lot/map references, often blank, not deed book/page. Mobile is in State Plane AL West (EPSG 26930); requesting AL East returns negative eastings."
+
+[verified]
+date = "2026-10-20"
+point = [-88.0425, 30.6892]
+point_result = "outSR 9749 honored (NAD83(2011) State Plane AL West, US ft; 26930 also honored); Parcel_Number '2906400011117.000' at 201 GOVERNMENT ST, Mobile (Mobile Government Plaza), owner MOBILE COUNTY OF THE"
+apn_test = "Parcel_Number = '2906400011117.000' returned 1 polygon; KeyNum = '762464' returned the same parcel"

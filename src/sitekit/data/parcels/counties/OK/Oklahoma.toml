@@ -1,0 +1,24 @@
+state = "OK"
+county = "Oklahoma"
+name = "Oklahoma County Tax Parcels (Public)"
+publisher = "Oklahoma County Assessor's Office (ArcGIS Online org 'Oklahoma County', Ok-Co)"
+url = "https://services8.arcgis.com/euhkr1dAJeQBIjV0/arcgis/rest/services/TaxParcelsPublics_view/FeatureServer/0"
+apn_fields = ["pin", "PARCELNB_1", "accountno"]
+situs_field = "location"
+city_field = "locationcity"
+county_field = ""
+county_values = "none"
+coverage = "All of Oklahoma County (about 338,000 polygon features)"
+vintage = "Assessor public view, edited continuously (last edit 2026-10-15)"
+max_record_count = 2000
+terms = "Public item in the Oklahoma County ArcGIS Online org, no token. No license or copyright text published."
+owner_field = "name1"
+legal_field = "legal"
+subdivision_field = "subname"
+notes = "Hosted FeatureServer view, native EPSG:2267 (OK North ftUS, reported as wkid 102724); reprojects on outSR. pin is the dashed parcel number '2730-01-001-6900' (4-2-3-4); PARCELNB_1 is the same 13 digits with no dashes ('2730010016900'); accountno is the Assessor account 'R' + 9 digits ('R010016900'). Normalize user input to digits and match PARCELNB_1, or match pin with dashes. One account can be several polygon pieces (the courthouse returned 2), so union by accountno. location includes the city ('320 ROBERT S KERR AVE OKLAHOMA CITY'); locationcity is the situs city; city/state/zipcode are mailing. Layer minScale 10607 only affects drawing. A sibling InternalParcelData_view service exists in the same org but was not used."
+
+[verified]
+date = "2026-10-20"
+point = [-97.51873, 35.46917]
+point_result = "pin '2730-01-001-6900', 320 ROBERT S KERR AVE OKLAHOMA CITY (Oklahoma County Courthouse), owner OKLAHOMA COUNTY, OKLA CITY ORIGINAL BLK 49; returned in EPSG:32124 (OK North m) to confirm reprojection"
+apn_test = "pin = '2730-01-001-6900', PARCELNB_1 = '2730010016900' and accountno = 'R010016900' each returned the parcel's 2 polygon pieces"

@@ -1,0 +1,24 @@
+state = "CA"
+county = "Sacramento"
+name = "Sacramento County Parcel Boundaries (Assessor/GIS)"
+publisher = "Sacramento County Department of Technology GIS (mapservices.gis.saccounty.gov)"
+url = "https://mapservices.gis.saccounty.gov/ArcGIS/rest/services/PARCELS/MapServer/3"
+apn_fields = ["APN_DASH", "APN10", "PARCEL_NUMBER"]
+situs_field = "SITUS_ADD1"
+city_field = "CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Sacramento County (about 509,000 active parcels)"
+vintage = "Current GIS parcel base joined to the Assessor roll (LAST_ROLL_YEAR 2026 on test date)"
+max_record_count = 2000
+terms = "County GIS service with no terms text on the layer; Sacramento County publishes its parcel open data (data.saccounty.gov) under a Creative Commons Public Domain Dedication. Public, no token."
+legal_field = "LONG_LEGAL"
+subdivision_field = "SUB_NAME"
+deed_ref_field = "RECORDED_DOCUMENT_LABEL"
+notes = "MapServer layer 3 ('Parcel Boundaries, Level 16-20') in the PARCELS service; native SR EPSG 2226 (CA zone 2 ftUS), reprojects on request (2229 tested). Three APN forms are stored: APN_DASH '002-0143-017-0000' (3-4-3-4, zero padded), APN10 '0020143017' (book-page-parcel, no sub-parcel) and PARCEL_NUMBER '00201430170000' (14 digits). Users often type the short printed form 002-0143-017, so pad and try APN10 first if no 4-digit suffix is given. SITUS_ADD1 is the situs street line, SITUS_ADD2 is 'CITY, CA ZIP', CITY is the situs city; MAIL1/MAIL2/MAIL_CITY are the owner mailing address. NAME/OWNER/CARE_OF_NAME all read 'OWNER OF RECORD' (owners withheld), so no owner field is mapped. RECORDED_DOCUMENT_LABEL is the latest recorded document as 'YYYYMMDD.O.R.page' (e.g. '20181214.O.R.1377'). SUBDIVISION holds the subdivision code ('S281008'), SUB_NAME its name, LOT the lot. Layer 8 (Active GIS Parcel Base) has the same schema. The county open data portal also hosts a slimmer copy at services1.arcgis.com/5NARefyPVtAeuJPU/arcgis/rest/services/Parcels/FeatureServer/0 (field APN = 14-digit form, explicit CC public domain license)."
+
+[verified]
+date = "2026-10-20"
+point = [-121.4955, 38.5835]
+point_result = "APN_DASH '002-0143-017-0000' at 725 7TH ST, SACRAMENTO (full block of 7th/8th/G/H beside the County Administration Center, 700 H St), 2.5 ac; outSR=2226 returned projected coordinates"
+apn_test = "APN10 = '0020143017', APN_DASH = '002-0143-017-0000' and PARCEL_NUMBER = '00201430170000' each returned 1 polygon (outSR=2229)"

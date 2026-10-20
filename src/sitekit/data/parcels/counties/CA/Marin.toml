@@ -1,0 +1,22 @@
+state = "CA"
+county = "Marin"
+name = "Marin County Parcels (MarinMap BaseMap)"
+publisher = "County of Marin GIS / MarinMap (gis.marinpublic.com), geometry from the Marin County Assessor"
+url = "https://gis.marinpublic.com/arcgis/rest/services/BaseMap/Basemap/FeatureServer/13"
+apn_fields = ["Prop_ID"]
+situs_field = "SitusFormatted"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Marin County (about 96,000 parcels)"
+vintage = "County parcel geometry updated monthly (4th Monday) with unsecured-roll attributes"
+max_record_count = 5000
+terms = "Marin County GIS disclaimer: as-is, no warranty, not survey precise, county assumes no liability; users asked to report errors to GISProjects@marincounty.gov. Public, no token."
+owner_field = "PublicOwnerNameStandard"
+notes = "FeatureServer layer 13 ('Parcel') of the county BaseMap service; native SR EPSG 2872 (CA zone 3 ftUS HARN); reprojects on request (2226 and 2229 tested). Prop_ID is the APN in dashed 3-3-2 form ('179-270-11'); undashed input returns 0, so insert dashes. SitusFormatted is the situs street line (trailing space); SitusFormattedCity is 'street, CITY'; Jurisdiction is the city or unincorporated area the parcel lies in (not a postal city), so city_field is left empty. PublicOwnerNameStandard is filled only for publicly owned parcels (about 4,200, e.g. 'COUNTY OF MARIN') and empty for private owners. No deed, plat or legal fields. The county also publishes a geometry-only copy on ArcGIS Online (services6.arcgis.com/T8eS7sop5hLmgRRH/arcgis/rest/services/PARCEL1/FeatureServer/0, APN field 'Parcel', same disclaimer). The server returns HTTP 403 to the default Python-urllib User-Agent (python-requests, curl and browser UAs get 200), so send an explicit User-Agent."
+
+[verified]
+date = "2026-10-20"
+point = [-122.5317, 37.9991]
+point_result = "Prop_ID '179-270-11' at 3501 CIVIC CENTER DR, SAN RAFAEL (Marin County Civic Center), owner COUNTY OF MARIN, Tax Exempt; outSR=2226 returned projected coordinates"
+apn_test = "Prop_ID = '179-270-11' returned 1 polygon (outSR=2229); '17927011' returned 0"

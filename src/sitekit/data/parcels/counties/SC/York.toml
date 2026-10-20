@@ -1,0 +1,28 @@
+state = "SC"
+county = "York"
+name = "York County Parcels"
+publisher = "York County Government, South Carolina GIS (ArcGIS Online org yorkcountysc_gisonline), Tax Assessor data"
+url = "https://services1.arcgis.com/2AGLxyiJoNiVHKwq/arcgis/rest/services/Parcels/FeatureServer/0"
+apn_fields = ["TAXMAPID", "ParcelID"]
+situs_field = "PropertyAddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of York County, SC (about 134,500 parcels)"
+vintage = "Tax Assessor parcel layer on the county's open data site (current roll)"
+max_record_count = 2000
+terms = "Public open data, no token; county disclaimer: no warranty of accuracy, not a legal survey"
+owner_field = "Owner1"
+deed_book_field = "TransferBook"
+deed_page_field = "TransferPage"
+plat_book_field = "PlatBook"
+plat_page_field = "PlatPage"
+legal_field = "LegalDescription"
+subdivision_field = "subdivision"
+notes = "Hosted FeatureServer in York County SC's ArcGIS Online org (not maps.yorkcounty.gov, which is York County, Virginia). TAXMAPID (same as ParcelID) is the 10-digit tax map number with no separators, e.g. '0700301001'; AprAccNum is the integer appraisal account (80852). PropertyAddress is the situs in assessor order ('1 CONGRESS ST N') with no city; MuniTaxDist gives the municipal tax district code (e.g. 'YR' for York). Mail* fields are the owner mailing address. TransferBook/TransferPage are the last deed book/page."
+
+[verified]
+date = "2026-10-20"
+point = [-81.2420, 34.9943]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); TAXMAPID '0700301001' at 1 CONGRESS ST N, York (downtown block across from the York County Courthouse, 6 S Congress St), owner NATIONAL MILLS LLC, deed 21088/259, plat 172/10"
+apn_test = "TAXMAPID = '0700301001' returned 1 polygon; AprAccNum = 80852 returned the same"

@@ -1,0 +1,21 @@
+state = "AZ"
+county = "Coconino"
+name = "Coconino County Parcels Open Data"
+publisher = "Coconino County GIS (ArcGIS Online org CoconinoCountyGIS)"
+url = "https://services1.arcgis.com/Rlvx5g8pKeK13apH/arcgis/rest/services/Coconino_County_Parcels_Open_Data/FeatureServer/0"
+apn_fields = ["APN"]
+situs_field = "SITUS"
+city_field = "SITUS_CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Coconino County (about 78,600 parcels)"
+vintage = "County open data item, updated regularly (last modified 2026-10-09)"
+max_record_count = 2000
+terms = "Public open data, no token. County no-warranty disclaimer citing A.R.S. 37-178; not for legal boundary determination."
+notes = "Hosted FeatureServer, native EPSG:2223 (AZ Central ft); reprojects on outSR. APN is 8 or 9 characters with no dashes, e.g. '10117011' (shown as 101-17-011); strip dashes from user input. The open-data layer deliberately carries only APN, TYLERACCOUNTNUM, SITUS, SITUS_CITY, SITUS_ZIP; no owner, deed, plat or legal fields (owner info is by request to the Assessor). A sibling 'Coconino_County_Parcels_Public_View' service carries the same limited fields."
+
+[verified]
+date = "2026-10-20"
+point = [-111.64526, 35.19921]
+point_result = "APN '10117011', 219 E CHERRY AVE, FLAGSTAFF 86001 (Coconino County Administration); returned in EPSG:2223 and, to confirm reprojection, EPSG:2224"
+apn_test = "APN = '10117011' returned 1 polygon"

@@ -1,0 +1,21 @@
+state = "CA"
+county = "San Joaquin"
+name = "San Joaquin County Parcels (Assessor tax parcels)"
+publisher = "San Joaquin County Department of Public Works GIS (ArcGIS Online org SanJoaquinCountyPW); data from the County Assessor's Office"
+url = "https://services2.arcgis.com/GQhSReJEO6f7tsvy/arcgis/rest/services/Parcels/FeatureServer/0"
+apn_fields = ["APN", "LINK"]
+situs_field = "FULL_ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of San Joaquin County (about 253,000 parcel polygons)"
+vintage = "Assessor tax parcel layer, updated 09/2026 per item description"
+max_record_count = 2000
+terms = "Copyright San Joaquin County Assessor's Office; public item from San Joaquin County Public Works with no license text attached. County assessor disclaimer (as quoted on copies of this layer): for tax assessment purposes, no warranty, not to be relied on for legal ownership or private real-property transactions. No token."
+notes = "Hosted FeatureServer, native SR EPSG 2227 (CA zone 3 ftUS); reprojects on request (2229 tested). APN is 8 digits with no dashes ('14916014', printed 149-160-14); dashed input returns 0, so strip dashes. LINK is a 9-digit variant with an extra digit ('149160014'). APN is not unique: some APNs have several polygons (multi-part parcels), so union all features for an APN. FULL_ADDRESS is the full situs line including city, state and ZIP ('44 N SAN JOAQUIN ST STOCKTON CA 95202'); SITUSCITY is a 2-4 letter code ('ST' = Stockton, 'UN..' = unincorporated areas), not a city name. MAILING_ADDRESS / MAIL* fields are the owner mailing address; CAREOF is a care-of line (often the agency for public parcels), not the owner name, so no owner field is mapped. No deed, plat or legal fields."
+
+[verified]
+date = "2026-10-20"
+point = [-121.28665, 37.95376]
+point_result = "APN '14916014' at 44 N SAN JOAQUIN ST STOCKTON CA 95202 (County Administration Building), care of COUNTY ADMINISTRATOR'S OFFICE, 1.29 ac; outSR=2229 returned projected coordinates"
+apn_test = "APN = '14916014' returned 1 polygon (outSR=2227); '149-160-14' returned 0"

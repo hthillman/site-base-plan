@@ -1,0 +1,23 @@
+state = "CA"
+county = "Riverside"
+name = "Riverside County Parcels CREST (Assessor parcels with roll attributes)"
+publisher = "Riverside County Information Technology (RCIT) GIS, data from the County Assessor"
+url = "https://gis.countyofriverside.us/arcgis_mapping/rest/services/OpenData/Assessor/MapServer/50"
+apn_fields = ["APN"]
+situs_field = "SITUS_STREET"
+city_field = "CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Riverside County (about 847,000 parcels; right-of-way and river polygons removed)"
+vintage = "Replicated from the Assessor CountyGIS geodatabase, updated daily Monday through Friday"
+max_record_count = 2000
+terms = "Riverside County Open Data item 'Parcels CREST' (GISOpenData@rivco.org), license: Public Use. Copyright Riverside County Assessor / RCIT. No token."
+plat_ref_field = "MAP_BOOK_PAGE"
+subdivision_field = "SUBDIVISION_NAME"
+notes = "MapServer layer 50 (PARCELS_CREST) in the OpenData/Assessor service; native SR EPSG 2230, reprojects on request (2229 tested). APN is a 9-digit string with no dashes, e.g. '215372014' (printed 215-372-014); dashed input returns 0, so strip dashes. SITUS_STREET is the site street line; CITY is the situs city name (SITUS_CITY is city+state+ZIP, e.g. 'RIVERSIDE  CA 92501'); MAIL_STREET / MAIL_CITY are the owner mailing address. No owner name field is published here despite the layer description listing PRIMARY_OWNER. MAP_BOOK_PAGE is the recorded map reference (RECORDER_MAP_TYPE + BOOK/PAGE, e.g. 'MB 7/34'; types AM assessor map, CM condo map, MB map book, PM parcel map, RS record of survey). FLAG marks special parcels (PI possessory interest, condos, mobile homes). Layer 40 (PARCELS) is the same geometry with only APN/FLAG and includes ROW polygons. The server returns HTTP 403 to the default Python-urllib User-Agent (python-requests, curl and browser UAs get 200), so send an explicit User-Agent."
+
+[verified]
+date = "2026-10-20"
+point = [-117.3755, 33.9806]
+point_result = "APN '215372014' at 3900 MAIN ST, RIVERSIDE (Riverside City Hall, downtown civic center), MB 7/34, 0.68 ac; outSR=2229 returned projected coordinates"
+apn_test = "APN = '215372014' returned 1 polygon; APN = '215-372-014' returned 0"

@@ -1,0 +1,25 @@
+state = "KS"
+county = "Shawnee"
+name = "Shawnee County Parcels (Property Search)"
+publisher = "Shawnee County, Kansas GIS (SNCOGIS, gis.sncoapps.us)"
+url = "https://gis.sncoapps.us/arcgis2/rest/services/Parcels/MapServer/0"
+apn_fields = ["PIN", "PID", "QUICKREFID"]
+situs_field = "PADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Shawnee County, incl. Topeka"
+vintage = "Live parcel layer behind the county Property Search app (deed refs into 2026 at verification)"
+max_record_count = 5000
+terms = "Public, no token; (c) SNCOGIS, no license text on the service"
+owner_field = "ONAME"
+deed_ref_field = "DBOOKPAGE"
+legal_field = "PROPDESCRIPTION"
+subdivision_field = "SUBS"
+notes = "MapServer layer (native SR ESRI 102677, KS North ftUS), the source for the county Property Search app. PIN is the 16-digit Kansas parcel number without county prefix or separators ('1093104001003000'); PID is identical; QUICKREFID is the appraiser account ('R26360'); PARCELNUM is only the trailing parcel part, not unique. PADDRESS is situs street ('200 SE 7TH ST'); PADDRESS2 holds ' City, KS  ZIP' with leading space, so city_field is empty (parse from PADDRESS2 if needed). DBOOKPAGE is the latest deed reference, either book/page or an instrument number like '2026R14754'; '-' means none. The old host gis.snco.us timed out, and the hosted copy on services2.arcgis.com/2XE514jeVQMWNKHX is a 2023 snapshot; do not use either."
+
+[verified]
+date = "2026-10-20"
+point = [-95.67139, 39.05057]
+point_result = "PIN '1093104001003000' (R26360) at 200 SE 7TH ST, Topeka (Shawnee County Courthouse), owner BOARD OF COUNTY COMMISSIONERS OF THE COUNTY OF SHAWNEE KS, 2.79 ac; outSR 3419 returned KS North ftUS coords (1973627, 269881)"
+apn_test = "PIN = '1093104001003000' returned 1 polygon; QUICKREFID = 'R26360' also returned 1"

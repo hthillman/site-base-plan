@@ -1,0 +1,24 @@
+state = "IL"
+county = "St. Clair"
+name = "St. Clair County IL Parcels (SCC_parcel_map_data)"
+publisher = "St. Clair County, Illinois GIS Department (arcgispublicmap.co.st-clair.il.us)"
+url = "https://arcgispublicmap.co.st-clair.il.us/server/rest/services/SCC_parcel_map_data/MapServer/29"
+apn_fields = ["parcel_number", "parcelid"]
+situs_field = "siteadr1"
+city_field = "sitecity"
+county_field = ""
+county_values = "none"
+coverage = "All of St. Clair County, Illinois"
+vintage = "Current parcel map viewer data (paryear field gives the assessment year)"
+max_record_count = 2000
+terms = "Public map service, no token, no license text on the service. Note: the county sells bulk parcel extracts ($1/parcel); this entry only uses per-parcel live queries."
+owner_field = "owner"
+legal_field = "legal1"
+subdivision_field = "subdiv"
+notes = "MapServer layer 29 'Parcels' behind the county Parcel Map Viewer. parcel_number is 11 digits with no separators ('08210444020'); parcelid is the printed form with dashes and a decimal ('08-21.0-444-020'). siteadr1 is situs street ('10 PUBLIC SQ'), sitecity situs city. Legal is split across legal1..legal4 (legal1 often cites book-page refs like '2273-244'). document_number1 is the latest recorded document; no separate deed or plat book/page fields. Do not confuse with St. Clair County, Michigan (maps.stclaircounty.org), which is a different county."
+
+[verified]
+date = "2026-10-20"
+point = [-89.98481, 38.51317]
+point_result = "parcel_number '08210444020' (08-21.0-444-020) at 10 PUBLIC SQ, BELLEVILLE (St. Clair County Courthouse), owner PUBLIC BUILDING COMMISSION, 2.08 ac; outSR 3436 returned IL West ftUS coords (2348645, 672516)"
+apn_test = "parcel_number = '08210444020' returned 1 polygon; parcelid = '08-21.0-444-020' also returned 1"

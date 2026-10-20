@@ -1,0 +1,23 @@
+state = "TX"
+county = "Montgomery"
+name = "MCAD Tax Parcel View"
+publisher = "Montgomery County, Texas IT-GIS (ArcGIS Online org MOCO), from Montgomery Central Appraisal District"
+url = "https://services1.arcgis.com/PRoAPGnMSUqvTrzq/arcgis/rest/services/Tax_Parcel_view/FeatureServer/0"
+apn_fields = ["PIN", "pid"]
+situs_field = "situs"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Montgomery County (about 344,000 parcels)"
+vintage = "MCAD tax parcels, updated monthly (pYear 2027 at verification)"
+max_record_count = 2000
+terms = "Montgomery County IT-GIS: intended for public use, for GIS and mapping purposes; users must comply with Montgomery County data access policies and verify details with MCAD."
+owner_field = "ownerName"
+legal_field = "legalDescription"
+notes = "Hosted FeatureServer view. PIN and pid are the same integer MCAD property ID, e.g. 66093; MCAD's site sometimes shows it with an 'R' prefix (R66093), which must be stripped before querying since both fields are integers. situs includes city and ZIP without a comma before the state ('501 N THOMPSON, CONROE TX 77301'). No separate situs city field and no deed or plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-95.45872, 30.31334]
+point_result = "PIN 66093 at 501 N THOMPSON, Conroe (Montgomery County government building), owner MONTGOMERY COUNTY; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "PIN = 66093 returned 1 polygon"

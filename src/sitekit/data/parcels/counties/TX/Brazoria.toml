@@ -1,0 +1,24 @@
+state = "TX"
+county = "Brazoria"
+name = "Brazoria County Parcel Information (BCAD parcels)"
+publisher = "Brazoria County GIS (maps.brazoriacountytx.gov), from Brazoria County Appraisal District"
+url = "https://maps.brazoriacountytx.gov/arcgis/rest/services/general/Parcels/MapServer/1"
+apn_fields = ["geo_id", "prop_id", "PID"]
+situs_field = "SITUS"
+city_field = "situs_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Brazoria County (about 280,000 lot polygons)"
+vintage = "BCAD parcel data maintained by Brazoria County (deed documents through 2026 present)"
+max_record_count = 1000000
+terms = "Public Brazoria County MapServer ('generic BCAD parcel data'), no token; no license text on the service."
+owner_field = "py_owner_name"
+legal_field = "legal_desc"
+subdivision_field = "abs_subdv_desc"
+notes = "MapServer layer 1 ('Parcel Information'); layer 0 is 'Flagged Parcels' (illegal divisions, platting issues) and should not be used. Polygons are lot-level, so one property (prop_id) can have several polygons; an APN query may return more than one. geo_id is the BCAD geographic ID like '1310-0095-200', stored space-padded to 50 characters (equality matches still work, but trim for display); prop_id / PID are the integer BCAD property ID, e.g. 181572. Owner and legal text fields are also space-padded. SITUS is like '111 / 237 E LOCUST ST' (no city); situs_city is the situs city. DOCUMENT holds the deed instrument number."
+
+[verified]
+date = "2026-10-20"
+point = [-95.43091, 29.16841]
+point_result = "geo_id '1310-0095-200' / prop_id 181572 at 111 / 237 E LOCUST ST, Angleton (Brazoria County Complex), owner BRAZORIA COUNTY; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "geo_id = '1310-0095-200' returned 1 polygon; PID = 181572 returned 1 polygon"

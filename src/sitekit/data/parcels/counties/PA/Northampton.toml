@@ -1,0 +1,23 @@
+state = "PA"
+county = "Northampton"
+name = "Northampton County Parcels (Land Records)"
+publisher = "Northampton County GIS Division (gis.northamptoncounty.org)"
+url = "https://gis.northamptoncounty.org/arcgisweb/rest/services/Assessment_Services/Land_Records_LGM/MapServer/0"
+apn_fields = ["PARCEL_ID", "CAMA_ID"]
+situs_field = "LOCATION"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Northampton County"
+vintage = "Live assessment and land records service"
+max_record_count = 1000
+terms = "Copyright Northampton County GIS Division; public service, no license text. No token."
+owner_field = "OWNERS_NAME_1"
+deed_ref_field = "DEED"
+notes = "MapServer layer 0 (layer 1 is parcel lines). PARCEL_ID is map-block-lot separated by single spaces, e.g. 'L9NE3D 15 3'; CAMA_ID pads it with the municipality/school code ('L9NE3D 15 3       0310'). LOCATION is the situs with a trailing space ('82 N 4TH ST '). DEED is a combined instrument/book reference ('2015-1 184095'). MUNI is a numeric code; MAIL_ADDRESS_* is owner mailing. OWNERS_HIDENAME flags suppressed owner names."
+
+[verified]
+date = "2026-10-20"
+point = [-75.2115, 40.6930]
+point_result = "PARCEL_ID 'L9NE3D 15 3', 82 N 4TH ST, Easton (by the Northampton County Courthouse); outSR 2272 returned State Plane PA South ft coords (2672263, 505440)"
+apn_test = "PARCEL_ID = 'L9NE3D 15 3' returned 1 polygon"

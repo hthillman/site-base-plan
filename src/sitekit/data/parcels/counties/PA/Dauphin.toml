@@ -1,0 +1,22 @@
+state = "PA"
+county = "Dauphin"
+name = "Dauphin County Parcel Boundaries"
+publisher = "Dauphin County, PA (Information Technology / Tax Assessment, Dauphin County ArcGIS Online org)"
+url = "https://services2.arcgis.com/EEtiX55QzkHKYQKY/arcgis/rest/services/DC_Parcels/FeatureServer/0"
+apn_fields = ["PID", "CAMA_PID", "UPI"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Dauphin County"
+vintage = "County parcel layer joined to assessment (EDITED_ON per record)"
+max_record_count = 2000
+terms = "Dauphin County: for reference use only, no warranties; represents deed descriptions, not a survey. Public, no token."
+owner_field = "last_name"
+notes = "PID is dashed 'MM-BBB-LLL', e.g. '03-001-061' (municipality 03 = Harrisburg); CAMA_PID is the 15-digit padded form ('030010610000000'). No single situs field: house_numb + prefix_dir + street_nam + street_suf, with '0' used as a null placeholder in the direction/suffix fields. last_name holds the owner or organization name; address1/city/zip are owner mailing, not situs. MUNICIPALI is the municipality name. The county's own server gis.dauphincounty.org was unreachable (TLS error) on the test date."
+
+[verified]
+date = "2026-10-20"
+point = [-76.8826, 40.2611]
+point_result = "PID '03-001-061', 223 WALNUT ST, City of Harrisburg, owner HARRISBURG PARKING AUTHORITY (downtown, near the courthouse); outSR 2272 returned State Plane PA South ft coords (2210789, 339121)"
+apn_test = "PID = '03-001-061' returned 1 polygon"

@@ -1,0 +1,26 @@
+state = "IA"
+county = "Johnson"
+name = "Johnson County IA Parcels (Land_Records)"
+publisher = "Johnson County, Iowa GIS (gis.johnsoncountyiowa.gov)"
+url = "https://gis.johnsoncountyiowa.gov/arcgis/rest/services/LandRecords/Land_Records/MapServer/9"
+apn_fields = ["PPN"]
+situs_field = "SiteAddress"
+city_field = "City"
+county_field = ""
+county_values = "none"
+coverage = "All of Johnson County, Iowa, incl. Iowa City and Coralville"
+vintage = "County land records layer joined to assessor values (Year 2025 at verification)"
+max_record_count = 2000
+terms = "Public, no token; Johnson County IA GIS, no license text on the service"
+owner_field = "DeedHolder1"
+deed_book_field = "DeedBook"
+deed_page_field = "DeedPage"
+legal_field = "LegalDescription"
+subdivision_field = "SubDivision"
+notes = "MapServer layer 9 'Parcels' (native SR 6465, IA South ftUS 2011). PPN is the 10-digit parcel number with no separators ('1015287001'). SiteAddress is the situs street ('913 S DUBUQUE ST'); PropertyAddress is the same with trailing spaces; City is the property city. DeedBook/DeedPage are left-padded with spaces ('  760' / '  301'), so trim; ContractBook/ContractPage hold contract sales. AlternateID is a section/plat key shared by many parcels, not an APN. Do not confuse with Johnson County, Kansas or other Johnson counties."
+
+[verified]
+date = "2026-10-20"
+point = [-91.53398, 41.65074]
+point_result = "PPN '1015287001' at 913 S DUBUQUE ST, IOWA CITY (Johnson County Administration Building), deed holder JOHNSON COUNTY IOWA, deed book 760 page 301; outSR 3418 returned IA South ftUS coords (2177843, 607416)"
+apn_test = "PPN = '1015287001' returned 1 polygon"

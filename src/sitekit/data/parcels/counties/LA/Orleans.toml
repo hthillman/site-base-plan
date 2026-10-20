@@ -1,0 +1,21 @@
+state = "LA"
+county = "Orleans"
+name = "Orleans Parish Assessor Parcels (Parcels_To_Join)"
+publisher = "City of New Orleans GIS (consolidated city-parish, maps.nola.gov), Orleans Parish Assessor parcel geometry"
+url = "https://maps.nola.gov/server/rest/services/Assessor/Parcels_To_Join/MapServer/0"
+apn_fields = ["PARID", "GEOPIN"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Orleans Parish (about 163,600 parcels)"
+vintage = "Assessor parcel geometry published for tabular joins (current)"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+notes = "MapServer layer whose only attributes are GEOPIN and PARID ('Parcel geometry that contains GEOPIN and PARID to allow for tabular joins'). PARID is the Assessor's address-style parcel key, house number plus squeezed street name, e.g. '6124-MILNEBL', '1725B-STANDREWST' ('29208-SQUARE' for whole-square government parcels), so it doubles as a rough situs; GEOPIN is the 8-digit GIS parcel number as an integer (41200970). No owner, situs or legal fields. The richer layer at gis.nola.gov/arcgis/rest/services/LGIM/TaxParcelQuery/MapServer/0 (owner, situs, 9-digit TAXBILLID) answers fine in a browser or curl but gis.nola.gov does not send its intermediate TLS certificate, so Python requests fails with CERTIFICATE_VERIFY_FAILED; it was therefore not used. Assessor/Landbase_Layers/MapServer/0 on this host has GEOPIN plus situs parts (SITUS_NUMBER, SITUS_STREET, SITUS_TYPE) if an address is needed."
+
+[verified]
+date = "2026-10-20"
+point = [-90.0766, 29.9527]
+point_result = "outSR 6479 honored (NAD83(2011) State Plane LA South, US ft); PARID '29208-SQUARE' / GEOPIN 41200970 (331 LOYOLA AVE, Duncan Plaza beside New Orleans City Hall, 1300 Perdido St; owner CITY OF NEW ORLEANS per the assessor layer)"
+apn_test = "PARID = '29208-SQUARE' returned 1 polygon; GEOPIN = 41200970 returned the same"

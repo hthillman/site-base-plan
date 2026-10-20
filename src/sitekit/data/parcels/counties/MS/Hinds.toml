@@ -1,0 +1,28 @@
+state = "MS"
+county = "Hinds"
+name = "Mississippi Statewide Parcels, West half (MDEQ / MARIS, August 2024) - Hinds County"
+publisher = "Mississippi Department of Environmental Quality parcel project, served by MARIS (gis.mississippi.edu)"
+url = "https://gis.mississippi.edu/server/rest/services/Cadastral/MS_MDEQPARCELS_West_2024/MapServer/0"
+apn_fields = ["PARNO", "ALTPARNO"]
+situs_field = "SITEADD"
+city_field = "SCITY"
+county_field = "CNTYNAME"
+county_values = "name"
+coverage = "All of Hinds County as compiled in the statewide MDEQ/MARIS West layer (tax year 2024)"
+vintage = "August 2024 release of the MDEQ county parcel collection (tax year 2024); no newer release published"
+max_record_count = 2000
+terms = "Public state service, no token; license 'none'; credits county tax assessors and their mapping contractors (Tri-State Consulting, TabMap, Spatial Net, Sanders and Associates) via MDEQ/MARIS"
+owner_field = "OWNNAME"
+deed_ref_field = "DEEDREF"
+plat_ref_field = "PLATREF"
+legal_field = "LEGLDESC"
+subdivision_field = "SUBNAME"
+notes = "Hinds County has no public county-run parcel REST service, so this points at the state's MDEQ/MARIS compilation, which is split into a West and an East layer; Hinds is in the West layer. The layer holds many counties, so county_field is CNTYNAME (upper-case name, e.g. 'HINDS') to narrow parcel-number hits; PPIN is a county-local integer that collides across counties, so it is not an apn field. Hinds PARNO is an 18-digit zero-padded string ('000330000034000000'); ALTPARNO is a second 18-digit id. Street right-of-way is one enormous polygon (PARNO '000000000000000010', about 211,000 vertices, ~8 MB as JSON), so a point in a street returns that blob; treat PARNO '000000000000000010' as no parcel. SITEADD is often '0' or blank when the county did not supply a situs; SCITY is the situs city. DEEDREF is 'book - page' (e.g. '3381 - 130'), sometimes '  -' when empty. Data is a 2024 snapshot and lags the county roll."
+
+filter = "CNTYNAME = 'HINDS'"  # shared MDEQ West layer: only this county's parcels
+
+[verified]
+date = "2026-10-20"
+point = [-90.1800, 32.2995]
+point_result = "outSR 6510 honored (NAD83(2011) State Plane MS West, US ft); PARNO '000330000034000000' at 100 S STATE ST, JACKSON, owner STATE OF MISS (downtown state government block); the geocoded point for the Hinds County Chancery Court (316 S President St) falls in a giant right-of-way polygon instead"
+apn_test = "PARNO = '000330000034000000' returned 1 polygon (CNTYNAME HINDS)"

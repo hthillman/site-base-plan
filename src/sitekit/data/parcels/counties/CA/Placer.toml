@@ -1,0 +1,21 @@
+state = "CA"
+county = "Placer"
+name = "Placer County Parcels Lite"
+publisher = "Placer County GIS Services (ArcGIS Online org PlacerGISServices), from the Assessor parcel SDE"
+url = "https://services9.arcgis.com/NENkjkswKTzMfG3A/arcgis/rest/services/County_Parcels_Lite/FeatureServer/0"
+apn_fields = ["Apn"]
+situs_field = "FormattedSitus1"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Placer County (about 198,000 parcels)"
+vintage = "Refreshed daily from the Assessor parcel database (ASR_Parcels SDE)"
+max_record_count = 2000
+terms = "Placer County GIS layer terms of use: PUBLIC. No license text beyond that; no token."
+notes = "Hosted FeatureServer, native SR Web Mercator; reprojects on request (2226 and 2229 tested). Apn is dashed 3-3-3-3 ('001-032-034-000'); undashed input returns 0 and printed APNs often omit the trailing '-000', so format as BBB-PPP-PPP-000 (or match LIKE 'BBB-PPP-PPP%'). FormattedSitus1 is the situs street line, FormattedSitus2 is 'CITY CA ZIP' (no separate city field). No owner, deed or legal fields. Do NOT switch to the richer 'County Parcels - Public View' service in the same org: its layer metadata says 'Terms of Use: INTERNAL - PLACER COUNTY EMPLOYEES ONLY' even though the item is shared publicly."
+
+[verified]
+date = "2026-10-20"
+point = [-121.08128, 38.90589]
+point_result = "Apn '001-032-034-000' at 175 FULWEILER AV, AUBURN CA 95603 (Placer County Administrative Center); outSR=2226 returned projected coordinates"
+apn_test = "Apn = '001-032-034-000' returned 1 polygon (outSR=2229); '001032034000' returned 0"

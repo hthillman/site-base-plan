@@ -1,0 +1,21 @@
+state = "PA"
+county = "Allegheny"
+name = "Allegheny County Parcel Boundaries"
+publisher = "Allegheny County Department of Administrative Services, GIS (gisdata.alleghenycounty.us)"
+url = "https://gisdata.alleghenycounty.us/arcgis/rest/services/OPENDATA/Parcels/MapServer/0"
+apn_fields = ["PIN", "MAPBLOCKLOT"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Allegheny County"
+vintage = "County open data parcel layer (live GIS edits)"
+max_record_count = 1000
+terms = "Allegheny County open data (access info: Allegheny County DCS-GIS); no license text on the service. No token."
+notes = "MapServer layer, geometry plus ids only: no situs address, owner, deed or plat fields. PIN is the 16-character lot-and-block id with no separators, e.g. '0002E00251000000' (block 2-E, lot 251); MAPBLOCKLOT is the short display form '2-E-251'. Users often type '2-E-251' or '0002-E-00251-0000-00': strip dashes and pad to match PIN. MUNICODE is the municipality code (102 = Pittsburgh Ward 2)."
+
+[verified]
+date = "2026-10-20"
+point = [-79.9965, 40.4387]
+point_result = "PIN '0002E00251000000' (2-E-251), Allegheny County Courthouse block, Pittsburgh, 1.66 ac; outSR 2272 returned State Plane PA South ft coords (1343198, 410831)"
+apn_test = "PIN = '0002E00251000000' returned 1 polygon"

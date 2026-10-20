@@ -1,0 +1,26 @@
+state = "SD"
+county = "Pennington"
+name = "Pennington County Tax Parcels (RCPC Open Data)"
+publisher = "Rapid City / Pennington County GIS (gis.rcgov.org), county Equalization parcel fabric"
+url = "https://gis.rcgov.org/server/rest/services/OpenData/TaxParcels/FeatureServer/0"
+apn_fields = ["PIN", "TaxID"]
+situs_field = "PropAddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Pennington County (about 54,800 parcels)"
+vintage = "Parcel fabric with Equalization attributes, rebuilt 2026"
+max_record_count = 2000
+terms = "Public open data, no token; no license or use constraints stated on the service or item"
+owner_field = "GranteeLastName"
+deed_book_field = "GranteeInstBook"
+deed_page_field = "GranteeInstPage"
+legal_field = "LegalDescription"
+subdivision_field = "Subdivision"
+notes = "FeatureServer from the joint Rapid City-Pennington County GIS office's open data folder. PIN is the 10-digit parcel number as text, e.g. '3701252018'; TaxID is the integer tax account (64570). PropAddress is the situs without city; Civil holds the municipality/township name. Owner is split into GranteeLastName (whole name for entities), Grantee1stName, Grantee2ndName; GranteeFullAddr/GranteeCity/GranteeZip are the owner mailing address. GranteeInstBook/GranteeInstPage are the vesting deed book/page (GranteeInstDate is MMDDYY text). Subdivision and LotNumber are space-padded."
+
+[verified]
+date = "2026-10-20"
+point = [-103.2189, 44.0780]
+point_result = "outSR 6574 honored (NAD83(2011) State Plane SD South, US ft); PIN '3701252018' at 130 KANSAS CITY ST, Rapid City (Pennington County Administration Building), owner PENNINGTON COUNTY, deed 2012/07446"
+apn_test = "PIN = '3701252018' returned 1 polygon; TaxID = 64570 returned the same"

@@ -1,0 +1,26 @@
+state = "SC"
+county = "Spartanburg"
+name = "Spartanburg County CAMA Parcels"
+publisher = "Spartanburg County GIS (maps.spartanburgcounty.org), Assessor CAMA join"
+url = "https://maps.spartanburgcounty.org/server/rest/services/GIS/CAMA_Parcels/MapServer/0"
+apn_fields = ["MAPNUMBER", "GISParcelNumber"]
+situs_field = "PropertyLocation"
+city_field = "StreetCommunity"
+county_field = ""
+county_values = "none"
+coverage = "All of Spartanburg County (about 183,000 parcels)"
+vintage = "Parcels joined to the assessor CAMA table, updated nightly"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "OwnerName"
+deed_book_field = "DeedBook"
+deed_page_field = "DeedPage"
+legal_field = "LegalDescription"
+subdivision_field = "SUBDIVISION"
+notes = "MapServer layer. MAPNUMBER is the tax map number as printed, with dashes and a dot, e.g. '7-12-06-002.00'; GISParcelNumber is a separate PIN-style id ('7113-97-7775.09'); PARCELNUMBER is only the trailing parcel part ('2') and AccountNumber the CAMA account integer. PropertyLocation is the situs with the community appended ('385 N CHURCH ST SPARTANBURG'); StreetNumber/StreetName hold the parts and StreetCommunity the situs community. StreetAddress/City/State/Zip are the owner mailing address. DeedBook can carry a trailing space ('14P ')."
+
+[verified]
+date = "2026-10-20"
+point = [-81.9358, 34.9558]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); MAPNUMBER '7-12-06-002.00' at 385 N CHURCH ST, Spartanburg (Memorial Auditorium, across from the County Administration Building at 366 N Church St), owner SPARTANBURG MEMORIAL AUDITORIUM COMMISSION, deed 14P/375"
+apn_test = "MAPNUMBER = '7-12-06-002.00' returned 1 polygon"

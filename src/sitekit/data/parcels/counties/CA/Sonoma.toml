@@ -1,0 +1,22 @@
+state = "CA"
+county = "Sonoma"
+name = "Sonoma County Parcels Public"
+publisher = "County of Sonoma Clerk-Recorder-Assessor (owner) and ISD-GIS Central (steward), socogis.sonomacounty.ca.gov"
+url = "https://socogis.sonomacounty.ca.gov/map/rest/services/CRAPublic/ParcelsPublic/FeatureServer/0"
+apn_fields = ["APN"]
+situs_field = "SitusFormatted1"
+city_field = "POCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Sonoma County (about 189,000 parcels)"
+vintage = "Seamless parcel base digitized from Assessor Parcel Maps, published monthly"
+max_record_count = 2000
+terms = "CC BY-SA 3.0 US (per layer metadata): attribution 'County of Sonoma' required when distributing; share-alike for derived data; no warranty; not survey quality. Public, no token."
+deed_ref_field = "CurrentDocNum"
+notes = "FeatureServer, native SR EPSG 2226; reprojects on request (2229 tested). APN keeps dashes in 3-3-3 form ('180-030-012'); undashed input returns 0, so insert dashes. SitusFormatted1 is the situs street line, SitusFormatted2 is 'CITY ST'; POCity is the situs postal city name, while SitusCity is a short code ('SR' = Santa Rosa). Type distinguishes regular parcels ('PCL') from other records. CurrentDocNum is the current recorded document ('1964R2083514'). No owner, legal or plat fields. Geometry is georeferenced from AP map pages of varying accuracy (RANK/DESCRIPTION fit notes are documented but not exposed here); not for boundary interpretation. Share-alike applies if the drawn parcel lines are redistributed as data; attribute 'County of Sonoma' on sheets."
+
+[verified]
+date = "2026-10-20"
+point = [-122.72361, 38.46550]
+point_result = "APN '180-030-012' at 575 ADMINISTRATION DR, Santa Rosa (County Administration Center), COUNTY BUILDING, 47.65 ac; outSR=2229 returned projected coordinates"
+apn_test = "APN = '180-030-012' returned 1 polygon; '180030012' returned 0"

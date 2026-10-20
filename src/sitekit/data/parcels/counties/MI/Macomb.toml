@@ -1,0 +1,23 @@
+state = "MI"
+county = "Macomb"
+name = "Macomb County Tax Parcels"
+publisher = "Macomb County, Michigan (county ArcGIS Online organization)"
+url = "https://services6.arcgis.com/K0qS4r8AEJxrE8em/arcgis/rest/services/Macomb_County_Parcel_Data/FeatureServer/10"
+apn_fields = ["TAX_ID", "BSA_ID"]
+situs_field = "ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Macomb County"
+vintage = "County parcel layer joined to assessing data (BS&A)"
+max_record_count = 2000
+terms = "Public item in the Macomb County, Michigan ArcGIS Online org; no license text. No token."
+owner_field = "ownername1"
+legal_field = "LEGAL"
+notes = "Layer id is 10. TAX_ID is dashed 'TT-SS-BBB-PPP', e.g. '11-14-209-019'; BSA_ID adds the 2-digit unit prefix used by BS&A Online ('05-11-14-209-019'). ADDRESS is the situs ('7 N MAIN ST'); propertyCityStateZip is a combined 'MOUNT CLEMENS, MI 48043' string and CVT_NAME is the city/village/township, so no separate city field. LEGAL sometimes cites plat book/page inline ('A/P NO. 25 (L15, P15)'), but there are no separate deed/plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-82.8783, 42.5973]
+point_result = "TAX_ID '11-14-209-019', 7 N MAIN ST, Mount Clemens (by the old county building), owner 7 MAIN, LLC; outSR 2253 returned State Plane MI South intl-ft coords (13524088, 403378)"
+apn_test = "TAX_ID = '11-14-209-019' returned 1 polygon"

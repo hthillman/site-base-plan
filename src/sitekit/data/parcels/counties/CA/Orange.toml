@@ -1,0 +1,25 @@
+state = "CA"
+county = "Orange"
+name = "Orange County Parcels With Attributes (OC Public Works open data)"
+publisher = "OC Public Works / OC Survey Geospatial Services (ocgis.com), listed on the OCPW open data hub as 'Parcels With Attributes'"
+url = "https://ocgis.com/arcpub/rest/services/LegalLotsAttributeOpenData/FeatureServer/0"
+apn_fields = ["AssessmentNo"]
+situs_field = "SiteAddress"
+city_field = "SiteCityState"
+county_field = ""
+county_values = "none"
+coverage = "All of Orange County (about 988,000 legal-lot records carrying assessor attributes)"
+vintage = "Updated nightly from the OC Survey landbase and Assessor roll"
+max_record_count = 2000
+terms = "OCPW open data item 'Parcels With Attributes', described as public parcel attribute data; no license text or agreement attached. Publicly served, no token."
+legal_field = "LegalDescr"
+plat_ref_field = "DocNum"
+subdivision_field = "MapNum"
+deed_ref_field = "DocRefNo"
+notes = "FeatureServer, native SR EPSG 2230; reprojects on request (2229 tested). Geometry is LEGAL LOTS joined to assessor attributes, not one outline per APN: a parcel spanning several recorded lots returns one polygon per lot (APN '008-067-47', Santa Ana City Hall, returns 10), so union all features for an APN to draw the parcel. Condos are stacked identical polygons covering the whole lot. AssessmentNo keeps dashes: regular parcels are 3-3-2 ('008-067-47'), condo/unit APNs 3-2-3 ('930-45-060'); undashed input ('00806747') returns nothing, so insert dashes. SiteAddress is the situs street line (often null on public property); SiteCityState is the situs city (no state despite the name); MailAddress is the owner mailing address. 'Name' is the lot/block label ('1 / C'), not an owner; there is no owner field. DocNum is the recorded map book/page (e.g. 'MM 203/5-20', or '<MAP>' when unknown); MapNum is the tract ('TR 5438'); DocRefNo is the latest recorded document number (12 digits, year first). Same server also publishes an assessor-outline layer at Map_Layers/Parcels/FeatureServer/0 (ASSESSMENT_NO, SITE_ADDRESS only) as a fallback."
+
+[verified]
+date = "2026-10-20"
+point = [-117.87363, 33.74926]
+point_result = "AssessmentNo '008-067-47' at 20 CIVIC CENTER PLZ, SANTA ANA (Santa Ana City Hall), lot '1 / C' of ROSS ADD, LA BOOK 1/46-47; outSR=2229 returned projected coordinates"
+apn_test = "AssessmentNo = '008-067-47' returned 10 legal-lot polygons (the parcel's lots); '00806747' returned 0"

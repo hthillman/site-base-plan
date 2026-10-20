@@ -1,0 +1,23 @@
+state = "IL"
+county = "McHenry"
+name = "McHenry County TaxParcels"
+publisher = "McHenry County, Illinois (ArcGIS Online org account 'McHenryCounty')"
+url = "https://services1.arcgis.com/6iYC5AXXYapRVNzl/arcgis/rest/services/McHenry_County_TaxParcels/FeatureServer/0"
+apn_fields = ["ParcelNumber"]
+situs_field = "SiteAddress"
+city_field = "SiteCity"
+county_field = ""
+county_values = "none"
+coverage = "All of McHenry County"
+vintage = "Hosted copy refreshed regularly (item modified 2026-10-16)"
+max_record_count = 2000
+terms = "Public, no token; McHenry County hosted layer, no license text on the item"
+owner_field = "Owner"
+legal_field = "LegalDescription"
+notes = "Hosted FeatureServer (Query only). ParcelNumber is DASHED, e.g. '08-32-201-004'; strip/insert dashes to match 10-digit user input. SiteAddress is situs street ('2200 N SEMINARY AVE'), SiteCity the situs city. Owner is space-padded and in 'LAST FIRST' / 'NAME OF' order ('MCHENRY CO OF'). LegalDescription often cites the recorded document (e.g. 'DOC 1956R0309438'). The county's own server mchenrycountygis.org (parcelsfull/MapServer) sits behind a Cloudflare bot check, so use this hosted layer."
+
+[verified]
+date = "2026-10-20"
+point = [-88.44046, 42.34072]
+point_result = "ParcelNumber '08-32-201-004' at 2200 N SEMINARY AVE, WOODSTOCK (McHenry County Administration Building), owner MCHENRY CO OF; outSR 3435 returned IL East ftUS coords (955875, 2066957)"
+apn_test = "ParcelNumber = '08-32-201-004' returned 1 polygon"

@@ -1,0 +1,25 @@
+state = "SC"
+county = "Horry"
+name = "Horry County Parcels (County GIS parcel app)"
+publisher = "Horry County Government GIS (www.horrycounty.org)"
+url = "https://www.horrycounty.org/parcelapp/rest/services/HorryCountyGISApp/MapServer/24"
+apn_fields = ["PINtext", "TMS", "PIN"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Horry County (about 302,000 parcel features, including condo units)"
+vintage = "County parcel layer joined to Land Records / assessor data (current roll)"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "OwnerName"
+deed_book_field = "DeedBook"
+deed_page_field = "DeedPage"
+legal_field = "LegalDescr"
+notes = "Layer 24 'Parcels' of the county parcel-app MapServer (same data as gisweb/rest/services/Public/Parcels/MapServer/1, which caps at 1000 records). PINtext is the 11-digit PIN as text, e.g. '36804030009'; PIN is the same as a number; TMS is the 10-digit tax map number ('1370614010'). No situs address field: OwnerStreet/OwnerCity/OwnerState/OwnerZip are the owner mailing address, and LegalDescr often carries the street or building name. OwnerName can have a trailing space. Condo units appear as stacked parcels (PARCELTYPE, CONDOLABEL)."
+
+[verified]
+date = "2026-10-20"
+point = [-79.04940, 33.83322]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); PIN 36804030009 / TMS '1370614010' on Beaty St, Conway (county-owned Thompson Building by the Government & Justice Center, 1301 2nd Ave), owner HORRY COUNTY SC A BODY POLITIC, deed 1192/297"
+apn_test = "PINtext = '36804030005' returned 1 polygon; TMS = '1370614014' returned 1 polygon"

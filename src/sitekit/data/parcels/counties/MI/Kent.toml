@@ -1,0 +1,21 @@
+state = "MI"
+county = "Kent"
+name = "Kent County Parcels With Condos (Open Data)"
+publisher = "Kent County, MI GIS (gis.kentcountymi.gov)"
+url = "https://gis.kentcountymi.gov/agisprod/rest/services/OpenData/Parcel_Related_Layers/MapServer/0"
+apn_fields = ["PNUM"]
+situs_field = "PROPERTYADDRESS"
+city_field = "PROPADDRESSCITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Kent County"
+vintage = "Live county open data parcel service"
+max_record_count = 2000
+terms = "County open data service; no license text on the service. No token."
+notes = "MapServer layer 0 of OpenData/Parcel_Related_Layers (layer 1 is retired parcels). PNUM is dashed 'CC-TT-SS-BBB-PPP', e.g. '41-13-25-227-016' (41 = Kent). Text fields are fixed-width and space-padded ('300 MONROE AVE NW              ', 'GRAND RAPIDS             '), so trim or use LIKE. PROPADDRESSCITY is the situs city. No owner, deed or legal fields. TAXPARCEL_FLAG distinguishes tax parcels from condo common areas."
+
+[verified]
+date = "2026-10-20"
+point = [-85.6719, 42.9690]
+point_result = "PNUM '41-13-25-227-016', 300 MONROE AVE NW, GRAND RAPIDS (Kent County Administration Building), 1.56 ac; outSR 2253 returned State Plane MI South intl-ft coords (12774500, 537958)"
+apn_test = "PNUM = '41-13-25-227-016' returned 1 polygon"

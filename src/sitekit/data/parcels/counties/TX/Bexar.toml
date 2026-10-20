@@ -1,0 +1,23 @@
+state = "TX"
+county = "Bexar"
+name = "BCAD Parcels (PAMapSearch parcelLayer)"
+publisher = "Bexar Appraisal District (maps.bcad.org)"
+url = "https://maps.bcad.org/arcgis/rest/services/PAMapSearch/MapServer/6"
+apn_fields = ["PAMaps.dbo.web_map_property.geo_id", "PAMaps.DBO.ParcelFabric_Parcels.PROP_ID"]
+situs_field = "PAMaps.dbo.web_map_property.situs"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Bexar County"
+vintage = "BCAD parcel fabric joined to current appraisal roll (prop_val_yr 2027 at verification)"
+max_record_count = 20000
+terms = "Public Bexar Appraisal District MapServer used by its property search map, no token; no license text on the service."
+owner_field = "PAMaps.dbo.web_map_property.owner_name"
+legal_field = "PAMaps.dbo.web_map_property.legal_desc"
+notes = "MapServer layer 6 of BCAD's PAMapSearch service; it is a join, so every field name is fully qualified (e.g. 'PAMaps.dbo.web_map_property.geo_id') and must be used verbatim in where clauses and outFields. geo_id is the BCAD geographic ID 'NNNNN-NNN-NNNN' (NCB-block-lot), e.g. '00100-000-0050'; PROP_ID (integer) is the BCAD property/account ID, e.g. 101165. situs includes city and ZIP and is not always clean ('100 DOLOROSA 9 SAN ANTONIO, TX 78205'), so match with LIKE '100 %DOLOROSA%'. addr_city is the owner mailing city. Bexar County also republishes an older BCAD extract at maps.bexar.org/arcgis/rest/services/Parcels/MapServer/0 (fields PropID, AcctNumb, Situs), but its metadata dates from 2019, so the BCAD layer is preferred. No deed or plat fields."
+
+[verified]
+date = "2026-10-20"
+point = [-98.49371, 29.42309]
+point_result = "geo_id '00100-000-0050' / PROP_ID 101165 at 100 DOLOROSA, San Antonio (Bexar County Courthouse), owner BEXAR COUNTY; geometry returned in EPSG:2278 (wkid 102740) feet"
+apn_test = "PAMaps.dbo.web_map_property.geo_id = '00100-000-0050' returned 1 polygon; PAMaps.DBO.ParcelFabric_Parcels.PROP_ID = 101165 returned 1 polygon"

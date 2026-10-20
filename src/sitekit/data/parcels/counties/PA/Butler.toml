@@ -1,0 +1,23 @@
+state = "PA"
+county = "Butler"
+name = "Butler County Parcels 202304 (via PASDA)"
+publisher = "Butler County, PA; hosted by PASDA (Pennsylvania Spatial Data Access, the Commonwealth's geospatial clearinghouse at Penn State)"
+url = "https://mapservices.pasda.psu.edu/server/rest/services/pasda/ButlerCounty/MapServer/0"
+apn_fields = ["DPIN", "PIN"]
+situs_field = "Paddr1"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Butler County"
+vintage = "April 2023 snapshot (PASDA release 202304); Butler County runs no public parcel REST service of its own"
+max_record_count = 1000
+terms = "Metadata: access constraints none; Butler County provides the data as a public information service, informational purposes only, no warranty, no liability."
+owner_field = "Own1"
+legal_field = "Legal1"
+notes = "MapServer layer on PASDA, not the county. DPIN is the compact display parcel id 'DDD-M-PPP', e.g. '563-9-209'; PIN is the same id space-padded to fixed width ('563-    9-     209-0000'), so match on DPIN. Paddr1 is the situs street address ('108 N MAIN ST'); Paddr3 is 'BUTLER PA 16001' style city/state/zip of the property, not split out. DistrictDe is the municipality name. Instruno is the deed instrument number (no book/page). Data is 2023, so recent splits are missing; the per-county layers on the PA_Parcels statewide service are older still."
+
+[verified]
+date = "2026-10-20"
+point = [-79.8960, 40.8613]
+point_result = "DPIN '563-9-209', 108 N MAIN ST, Butler City Ward 3 (block of the Butler County Government Center); outSR 2272 returned State Plane PA South ft coords (1375067, 563864)"
+apn_test = "DPIN = '563-9-209' returned 1 polygon"

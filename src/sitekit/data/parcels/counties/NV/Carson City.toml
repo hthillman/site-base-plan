@@ -1,0 +1,21 @@
+state = "NV"
+county = "Carson City"
+name = "Carson City Parcels (Open Data)"
+publisher = "Carson City GIS Department and Assessor's Office (portal.carsoncity.gov)"
+url = "https://portal.carsoncity.gov/server/rest/services/CarsonCity/CarsonCityNV_OpenData/MapServer/36"
+apn_fields = ["APN", "APN_NUM"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Carson City (consolidated municipality, about 21,700 parcels)"
+vintage = "Live city GIS parcel layer, edited from recorder engineering drawings"
+max_record_count = 20000
+terms = "Public open data, no token; copyright text 'Carson City, NV GIS Department, Carson City, NV Assessor's Office'. City GIS disclaimer applies."
+notes = "MapServer layer 36 of the city's open-data service (native Web Mercator); reprojects on outSR. Consolidated city: geocoders (Census) name the county 'Carson City'. APN is an 8-digit zero-padded string with no dashes, e.g. '00420104' (shown as 004-201-04); APN_NUM is the same as an integer (420104). No situs, owner, deed, plat or legal fields; ZONECODE is zoning, and ASSRDETAIL links to the Assessor record. The Address Points layer 37 on the same service can supply situs addresses. The old host portal.carson.org no longer resolves."
+
+[verified]
+date = "2026-10-20"
+point = [-119.76656, 39.16488]
+point_result = "APN '00420104', zoning PR, 0.66 ac, at the 201 N CARSON ST address point (Carson City Hall, from layer 37); returned in EPSG:3423 (NV West ftUS)"
+apn_test = "APN = '00420104' returned 1 polygon; APN_NUM = 420104 also returned 1"

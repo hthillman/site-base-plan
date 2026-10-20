@@ -1,0 +1,23 @@
+state = "IL"
+county = "Kane"
+name = "Kane County Parcels (KanePINList, Parcels_v2025)"
+publisher = "Kane County GIS-Technologies with Supervisor of Assessments and County Clerk (gistech.countyofkane.org)"
+url = "https://gistech.countyofkane.org/arcgis/rest/services/KanePINList/MapServer/0"
+apn_fields = ["PIN"]
+situs_field = "SiteAddress"
+city_field = "SiteCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Kane County"
+vintage = "Snapshot of the active cadastral layer plus assessment records (layer Kane.DBO.Parcels_v2025); not the certified tax parcels"
+max_record_count = 1000
+terms = "Public, no token; Kane County GIS/Assessments/Clerk; no license text on the service"
+owner_field = "TaxName"
+legal_field = "LegalDesc"
+notes = "MapServer layer. PIN is a 10-digit string with no dashes, e.g. '1210252027' (printed 12-10-252-027). SiteAddress is situs street ('719 BATAVIA AVE'), SiteCity the situs city. TaxName is the taxpayer name (may have trailing space). LegalDesc is a short legal description that often cites the recorded document (e.g. 'DOC 2005K136998'). DocNumber/DocDate are the latest recorded document, not book/page. The layer name carries a year (Parcels_v2025); if the service is re-pointed to a new year the URL stays the same."
+
+[verified]
+date = "2026-10-20"
+point = [-88.3093, 41.8797]
+point_result = "PIN '1210252027' at 719 BATAVIA AVE, GENEVA (Kane County Government Center), TaxName KANE COUNTY, 16.25 ac; outSR 3435 returned IL East ftUS coords (990967, 1897853)"
+apn_test = "PIN = '1210252027' returned 1 polygon"

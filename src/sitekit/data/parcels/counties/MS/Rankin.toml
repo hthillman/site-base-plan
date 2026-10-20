@@ -1,0 +1,28 @@
+state = "MS"
+county = "Rankin"
+name = "Mississippi Statewide Parcels, West half (MDEQ / MARIS, August 2024) - Rankin County"
+publisher = "Mississippi Department of Environmental Quality parcel project, served by MARIS (gis.mississippi.edu)"
+url = "https://gis.mississippi.edu/server/rest/services/Cadastral/MS_MDEQPARCELS_West_2024/MapServer/0"
+apn_fields = ["PARNO", "ALTPARNO"]
+situs_field = "SITEADD"
+city_field = "SCITY"
+county_field = "CNTYNAME"
+county_values = "name"
+coverage = "All of Rankin County as compiled in the statewide MDEQ/MARIS West layer (tax year 2024)"
+vintage = "August 2024 release of the MDEQ county parcel collection (tax year 2024); no newer release published"
+max_record_count = 2000
+terms = "Public state service, no token; license 'none'; credits county tax assessors and their mapping contractors (Tri-State Consulting, TabMap, Spatial Net, Sanders and Associates) via MDEQ/MARIS"
+owner_field = "OWNNAME"
+deed_ref_field = "DEEDREF"
+plat_ref_field = "PLATREF"
+legal_field = "LEGLDESC"
+subdivision_field = "SUBNAME"
+notes = "Rankin County has no public county-run parcel REST service, so this points at the state's MDEQ/MARIS compilation, which is split into a West and an East layer; Rankin is in the West layer. The layer holds many counties, so county_field is CNTYNAME (upper-case name, e.g. 'RANKIN') to narrow parcel-number hits; PPIN is a county-local integer that collides across counties, so it is not an apn field. Rankin PARNO is a letter, map code and parcel with an embedded space, e.g. 'I08K000082 00000'; ALTPARNO is usually blank. SITEADD is often '0' or blank when the county did not supply a situs; SCITY is the situs city. DEEDREF is 'book - page' (e.g. '3381 - 130'), sometimes '  -' when empty. Data is a 2024 snapshot and lags the county roll."
+
+filter = "CNTYNAME = 'RANKIN'"  # shared MDEQ West layer: only this county's parcels
+
+[verified]
+date = "2026-10-20"
+point = [-89.9865, 32.2740]
+point_result = "outSR 6510 honored (NAD83(2011) State Plane MS West, US ft); PARNO 'I08K000082 00000' (PPIN 32539) at the Rankin County Courthouse block, Brandon (E North St / Jail St), owner RANKIN CO"
+apn_test = "PARNO = 'I08K000082 00000' returned 1 polygon (CNTYNAME RANKIN)"

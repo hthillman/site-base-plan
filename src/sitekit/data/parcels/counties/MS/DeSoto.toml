@@ -1,0 +1,25 @@
+state = "MS"
+county = "DeSoto"
+name = "DeSoto County Tax Parcels"
+publisher = "DeSoto County, Mississippi GIS / Tax Assessor (gis.desotocountyms.gov)"
+url = "https://gis.desotocountyms.gov/arcgis/rest/services/CountyWebMap/Tax_Assessors_County_Web_Map/MapServer/29"
+apn_fields = ["PIN"]
+situs_field = "FULL_ADDR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of DeSoto County (about 85,000 parcels)"
+vintage = "Tax Assessor parcel layer in the county web map (current roll)"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "OWNER_NAME"
+deed_book_field = "DEED_BOOK1"
+deed_page_field = "DEED_PAGE1"
+subdivision_field = "SUBD_NAME"
+notes = "Layer 29 'Tax Parcels' of the Tax_Assessors_County_Web_Map MapServer. PIN is stored with internal space padding exactly as the county prints it, e.g. '308613004      0002500' (9 digits, 6 spaces, 7 digits); a run-together '3086130040002500' does NOT match, so rebuild the padding or use LIKE '308613004%0002500'. CITY/STATE/ZIP_CODE are the owner mailing address, not situs; FULL_ADDR has no city. WD_Link and Plat_Link give county land-records URLs. A preliminary 2026 landroll layer exists at Hosted/Landroll_Parcels_2026_Prelim/FeatureServer/0. DeSoto County sits in State Plane MS West (EPSG 6510 / 2255)."
+
+[verified]
+date = "2026-10-20"
+point = [-89.9935, 34.8228]
+point_result = "outSR 6510 honored (NAD83(2011) State Plane MS West, US ft); PIN '308613004      0002500' at 231 W CENTER ST, Hernando (courthouse square area), owner MURPHY DANIEL L TRUSTEE ETAL, deed 813/677"
+apn_test = "PIN = '308613004      0002500' returned 1 polygon"

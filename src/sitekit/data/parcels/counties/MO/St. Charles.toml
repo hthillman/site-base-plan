@@ -1,0 +1,25 @@
+state = "MO"
+county = "St. Charles"
+name = "St. Charles County Parcels (hosted, updated daily)"
+publisher = "St. Charles County Department of Information Systems, GIS Services (ArcGIS Online org 'stcharlescounty')"
+url = "https://services1.arcgis.com/YuFpgTDhSxjvnQtm/arcgis/rest/services/Parcels/FeatureServer/2"
+apn_fields = ["Parcel_ID", "Account"]
+situs_field = "SiteAddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of St. Charles County"
+vintage = "Assessor parcels, hosted copy updated daily"
+max_record_count = 2000
+terms = "Public, no token; St. Charles County no-warranty disclaimer ('as is', reference only, not for survey)"
+owner_field = "Owner"
+deed_ref_field = "BookPage1"
+legal_field = "Legal"
+subdivision_field = "Subdivision"
+notes = "Hosted FeatureServer, layer id 2 (not 0). Parcel_ID is the long dashed form with a decimal suffix, e.g. '6-009D-B068-00-0001.0000000'; users often type it without the '.0000000' tail, so try LIKE '6-009D-B068-00-0001%'. Account is the 10-character assessor account ('005520A000'). SiteAddress is situs street with a trailing space ('201 N 2ND ST '). Municipality is the jurisdiction ('City of St Charles', 'Unincorporated'), not a postal city, so city_field is empty. BookPage1 is the deed book-page of the most recent sale ('00980-000554'); BookPage2..4 are earlier sales. The county's own server gis.sccmo.org sits behind a Cloudflare challenge; gis-dev.sccmo.org/scc_gis/rest/services/open_data/Tax_Information_o/FeatureServer/2 serves the same schema as a fallback."
+
+[verified]
+date = "2026-10-20"
+point = [-90.48225, 38.78312]
+point_result = "Parcel_ID '6-009D-B068-00-0001.0000000' (Account 005520A000) at 201 N 2ND ST, St. Charles (St. Charles County Administration Building), owner ST CHARLES COUNTY; outSR 2815 returned MO East meter coords (251548, 327396)"
+apn_test = "Parcel_ID = '6-009D-B068-00-0001.0000000' returned 1 polygon; Account = '005520A000' also returned 1 on the county open-data mirror"

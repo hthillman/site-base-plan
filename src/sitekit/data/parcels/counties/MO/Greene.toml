@@ -1,0 +1,26 @@
+state = "MO"
+county = "Greene"
+name = "Greene County MO Parcels (Assessor IasWorldParcel5)"
+publisher = "Greene County, Missouri Assessor (greenecountyassessor.org)"
+url = "https://greenecountyassessor.org/arcgis/rest/services/IasWorldParcel5/MapServer/0"
+apn_fields = ["PARID", "DPIN", "PIN"]
+situs_field = "PropAdr"
+city_field = "L_CITYNAME"
+county_field = ""
+county_values = "none"
+coverage = "All of Greene County (about 124,000 parcels)"
+vintage = "Assessor iasWorld extract; sales through Aug 2026 present at verification"
+max_record_count = 1000
+terms = "Public, no token; (c) Greene County Mo, no license text on the service"
+owner_field = "OWN1"
+deed_book_field = "BOOK"
+deed_page_field = "PAGE"
+legal_field = "LEGAL1"
+subdivision_field = "SUBDIV"
+notes = "MapServer layer (native SR 3857). PARID is 10 digits with no separators ('1313303009'); DPIN is the dashed form ('13-13-303-009'); PIN is PARID with an '88' county prefix ('881313303009'). PropAdr is the situs street ('940 N BOONVILLE AVE') and L_CITYNAME the situs city. CAUTION: ADRNO/ADRDIR/ADRSTR/CITYNAME are the OWNER MAILING address, not the situs. BOOK/PAGE are the latest deed reference (newer ones use a year in BOOK and an instrument number in PAGE, e.g. '2015' / '04590515'). The assessor publishes many near-duplicate services; ParcelPolygon2 and CountyParcelsNEW answer where-queries but returned nothing for spatial queries at verification, so use this one."
+
+[verified]
+date = "2026-10-20"
+point = [-93.29189, 37.21812]
+point_result = "PARID '1313303009' (DPIN 13-13-303-009) at 940 N BOONVILLE AVE, SPRINGFIELD (Greene County Historic Courthouse), owner GREENE COUNTY, 3.32 ac; outSR 2816 returned MO Central meter coords (429737, 154014)"
+apn_test = "PARID = '1313303009' returned 1 polygon; DPIN = '13-13-303-009' also returned 1"

@@ -1,0 +1,24 @@
+state = "NM"
+county = "Santa Fe"
+name = "Santa Fe County Tax Parcels"
+publisher = "Santa Fe County Assessor / County GIS (sfcomaps.santafecountynm.gov)"
+url = "https://sfcomaps.santafecountynm.gov/restsvc/rest/services/TaxParcelsDB/MapServer/0"
+apn_fields = ["parcelid", "lowparcelid"]
+situs_field = "siteaddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Santa Fe County (about 90,700 features)"
+vintage = "Live Assessor tax parcel layer (GISEDIT.ASSESSOR.TaxParcels)"
+max_record_count = 2000
+terms = "Public, no token. No license or copyright text on the service; county disclaimer applies."
+owner_field = "ownernme1"
+legal_field = "prprtydscrp"
+subdivision_field = "cnvyname"
+notes = "MapServer layer on the county's own server, native EPSG:2258 (NM Central ftUS, reported as wkid 102713); reprojects on outSR. Field names are lowercase. parcelid is the Assessor parcel/account number, 8 or 9 digits ('910017952'); lowparcelid is the 19-character NM UPC padded with zeros ('1054099180227000000'; condos end in 'CM0001' etc.). Try parcelid first; for a 13-digit UPC from the user, match lowparcelid LIKE '<upc>%'. Text fields are space-padded (siteaddress, ownernme1), so trim. siteaddress has no city; pstlcity is the mailing city. prprtydscrp carries the legal description (TRS, map, block, lots). The building and unit fields hold unrelated values on some records. A TaxDistribution table (id 1) sits on the same service."
+
+[verified]
+date = "2026-10-20"
+point = [-105.94124, 35.68861]
+point_result = "parcelid '910017952', 102 GRANT AVE, Santa Fe (Santa Fe County Administration Building), owner SANTA FE COUNTY, OFFICIAL KINGS MAP BLK 11 LOTS 1, 2 & 26; returned in EPSG:2903 (NM Central ftUS HARN) to confirm reprojection"
+apn_test = "parcelid = '910017952' returned 1 polygon; lowparcelid = '1054099180227000000' also returned 1"

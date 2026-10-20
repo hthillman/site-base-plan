@@ -1,0 +1,21 @@
+state = "CA"
+county = "San Diego"
+name = "San Diego County Assessor Parcels (public-use, redacted)"
+publisher = "County of San Diego (gis-public.sandiegocounty.gov), data from SanGIS / County Assessor"
+url = "https://gis-public.sandiegocounty.gov/arcgis/rest/services/cosd_warehouse/parcels_all_for_public_use/MapServer/0"
+apn_fields = ["APN", "APN_8"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of San Diego County (about 1.09 million parcel records, including stacked condo/possessory-interest records)"
+vintage = "PARCELS_ALL redacted for public use (SanGIS regional warehouse, refreshed regularly)"
+max_record_count = 1000
+terms = "Copyright SanGIS, County of San Diego Assessor. Covered by the SanGIS GIS Data End User Use Agreement and Disclaimer (as-is, no warranty, indemnify SanGIS; redistribution discouraged but not prohibited; altered data must be cited as derived from SanGIS, e.g. 'GIS data derived from SanGIS'). Publicly served, no token or click-through."
+notes = "MapServer layer, native SR EPSG 2230 (CA zone 6 ftUS); reprojects on request (2229 tested). APN is the 10-digit assessor number with no dashes, e.g. '5335900100' (printed form is 533-590-01-00); APN_8 is the first 8 digits (book-page-parcel, '53359001'). Users who type 533-590-01-00 need dashes stripped. Condos and possessory-interest records (APNs starting 760 etc.) are stacked duplicate polygons on the same footprint, so a point query can return many features (12 at the County Administration Center, 161 at a condo tower); prefer the record with ACREAGE set / lowest stacking or match by APN. No single situs string: the address is split into SITUS_ADDRESS (house number, integer), SITUS_PRE_DIR, SITUS_STREET, SITUS_SUFFIX, SITUS_POST_DIR, SITUS_SUITE, SITUS_ZIP, so situs_field is left empty and must be assembled. SITUS_JURIS is a 2-letter jurisdiction code ('SD' = City of San Diego, 'CN' = unincorporated), not a city name. Owner names are redacted in this public layer; no deed, plat or legal fields. Do not label the drawing as SanGIS-sourced at large scales without the 'derived from' wording (SanGIS asks not to be cited as sole source below 1:24,000)."
+
+[verified]
+date = "2026-10-20"
+point = [-117.1720, 32.7222]
+point_result = "12 stacked records at 1600 PACIFIC HWY, San Diego (County Administration Center); base parcel APN '5335900100', 16.62 ac; outSR=2230 and outSR=2229 both returned projected coordinates"
+apn_test = "APN = '5335900100' returned 1 polygon; APN_8 = '53359001' returned 1 polygon"

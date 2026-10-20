@@ -1,0 +1,24 @@
+state = "OK"
+county = "Canadian"
+name = "Canadian County Parcel Data (Public)"
+publisher = "Canadian County Assessor's Office (ArcGIS Online org CanadianCounty)"
+url = "https://services2.arcgis.com/0NjdXxmJp53hZWPd/arcgis/rest/services/ParcelDataService_2_view/FeatureServer/3"
+apn_fields = ["parcel_id", "account"]
+situs_field = "situs"
+city_field = "situs_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Canadian County (about 84,800 parcels)"
+vintage = "Assessor public view, edited continuously (last edit 2026-10-16)"
+max_record_count = 2000
+terms = "Public item, no token. Assessor disclaimer: informational, planning reference and guidance only; not surveyed; no warranty."
+owner_field = "owners_name"
+legal_field = "legal"
+subdivision_field = "subdiv_name"
+notes = "Hosted FeatureServer view, layer id 3 ('Parcel Data (External)'); native EPSG:6553 (OK North ftUS, NAD83(2011), reported as wkid 103133); reprojects on outSR. parcel_id is a dashed 20-character string 'SSTTRR-BBBBBB-LLLLLL' style, e.g. '020170-075000-000000' (some end in a letter, '310181-030000-00000C'); account is the 9-digit Assessor account ('090024929'). Match parcel_id with dashes; if the user gives 18 bare digits, re-insert dashes after positions 6 and 12. situs/situs_city/situs_zip are the property address; mail_* is the owner mailing address. subdiv_block and subdiv_lot are separate fields. Layers 0, 2 and 4 on the same service are subdivisions, lots and blocks."
+
+[verified]
+date = "2026-10-20"
+point = [-97.95551, 35.53457]
+point_result = "parcel_id '020170-075000-000000', 201 N CHOCTAW, EL RENO (Canadian County government block, owner CANADIAN COUNTY / Board of Commissioners), EL RENO ORIG TOWN ALL BLK 75; returned in EPSG:2267 (OK North ftUS)"
+apn_test = "parcel_id = '020170-075000-000000' returned 1 polygon; account = '090024929' also returned 1"

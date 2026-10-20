@@ -1,0 +1,23 @@
+state = "MI"
+county = "Kalamazoo"
+name = "Kalamazoo County Parcels 2025"
+publisher = "Kalamazoo County, MI GIS (kalcounty ArcGIS Online org)"
+url = "https://services3.arcgis.com/RGltUbqpl4h9E3Qh/arcgis/rest/services/Parcels_2025/FeatureServer/11"
+apn_fields = ["PELNUMBER"]
+situs_field = "PCOMBINED"
+city_field = "PRESSCITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Kalamazoo County"
+vintage = "2025 tax roll parcels"
+max_record_count = 2000
+terms = "Public item in Kalamazoo County's ArcGIS Online org; no license text. No token."
+owner_field = "ONERNAME1"
+legal_field = "legaldesc"
+notes = "Layer id is 11. Field names are truncated (ONERNAME1 = owner name, PCOMBINED = combined situs, PRESSCITY = situs city, OTADDRESS = owner mailing street). PELNUMBER is dashed 'TT-SS-BBB-PPP', e.g. '06-15-356-003'. Condo units are stacked identical polygons (a point in a condo building returns one feature per unit), so dedupe by geometry. Annual layer: a 'Parcels_<year>' successor may appear."
+
+[verified]
+date = "2026-10-20"
+point = [-85.5880, 42.2913]
+point_result = "PELNUMBER '06-15-356-003', 405 W MICHIGAN AVE UNIT 3, KALAMAZOO (downtown, 6 stacked condo units returned); outSR 2253 returned State Plane MI South intl-ft coords (12793082, 290631)"
+apn_test = "PELNUMBER = '06-15-356-003' returned 1 polygon"

@@ -1,0 +1,23 @@
+state = "OK"
+county = "Cleveland"
+name = "Cleveland County Tax Parcels (June 2026)"
+publisher = "Cleveland County Assessor's Office (ArcGIS Online org CCAO)"
+url = "https://services1.arcgis.com/kxHJSF07PF5lbQ3z/arcgis/rest/services/ClevelandTaxParcelsJune2026/FeatureServer/0"
+apn_fields = ["UserAccount", "ParcelID", "name"]
+situs_field = "FormattedLocation"
+city_field = "LocationCity"
+county_field = ""
+county_values = "none"
+coverage = "All of Cleveland County (about 122,000 features, including about 1,800 retired parcel-fabric records)"
+vintage = "June 2026 snapshot of the Assessor parcel fabric joined to CAMA (item modified 2026-06-19); the item name suggests periodic re-publication under a new name"
+max_record_count = 2000
+terms = "Public item in the Cleveland County Assessor ArcGIS Online org, no token. No license or copyright text published."
+owner_field = "OwnerNameFormatted"
+subdivision_field = "Subdivision"
+notes = "Hosted FeatureServer, native EPSG:2268 (OK South ftUS, reported as wkid 102725); reprojects on outSR. UserAccount is the Assessor account 'R' + 7 digits ('R0023734') and is the cleanest key. ParcelID (= name = GISKey) is a fixed-width code with embedded runs of spaces, e.g. 'NC29AAAOT  7   6001', so exact-match only with the spacing intact. This is a parcel fabric export: about 1,800 features are retired parcels (retiredbyrecord IS NOT NULL) that can overlap current ones, so add 'retiredbyrecord IS NULL' to point queries when possible; about 1,100 current polygons have no CAMA join (UserAccount null). FormattedLocation is the situs street, LocationCity the situs city; Mailing* fields are the owner mailing address. Block, Lot, Section, Township, Range are separate fields; LegalReference is mostly null. The assessor's own server gis.clevelandcountyassessor.us did not respond on 2026-10-20. If this item is retired for a newer month, look for a successor in org kxHJSF07PF5lbQ3z."
+
+[verified]
+date = "2026-10-20"
+point = [-97.44161, 35.21985]
+point_result = "UserAccount 'R0023734' (ParcelID 'NC29AAAOT  7   6001'), 201 S JONES AVE, NORMAN (Cleveland County Courthouse), owner CLEVELAND COUNTY, Norman Original Town; returned in EPSG:32125 (OK South m) to confirm reprojection"
+apn_test = "UserAccount = 'R0023734' returned 1 polygon; ParcelID = 'NC29AAAOT  7   6001' also returned 1"

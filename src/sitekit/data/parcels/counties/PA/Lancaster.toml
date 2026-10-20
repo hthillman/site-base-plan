@@ -1,0 +1,23 @@
+state = "PA"
+county = "Lancaster"
+name = "Lancaster County Parcels (Assessment Office)"
+publisher = "County of Lancaster, PA GIS (arcgis.lancastercountypa.gov)"
+url = "https://arcgis.lancastercountypa.gov/arcgis/rest/services/Parcels_app/FeatureServer/0"
+apn_fields = ["ACCOUNT", "PIN", "OLD_PIN"]
+situs_field = "ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Lancaster County"
+vintage = "Live assessment-office parcel layer (EDIT_DATE per record)"
+max_record_count = 2000
+terms = "County-hosted public layer; no license or use text on the service. No token."
+owner_field = "OWNER_NAME"
+deed_ref_field = "DEED_BK_PG"
+notes = "ACCOUNT is the 13-digit tax account number, e.g. '3329402710001' (starts with the 3-digit DISTRICT '332'); strip dashes from user input. PIN is the coordinate-based GIS id '332-2372940-260727-1-0001'. OLD_PIN is the legacy district/map/block/lot. ADDRESS is the street without house number in some records; HOUSE_NO holds the number. OWNER_CITY is the owner mailing city, not situs. DEED_BK_PG is a combined book/page or instrument string ('6436656'). SUBPLAN holds the subdivision plan number."
+
+[verified]
+date = "2026-10-20"
+point = [-76.3055, 40.0397]
+point_result = "ACCOUNT '3329402710001', N QUEEN ST, Lancaster city (by the county government center at 150 N Queen St); outSR 2272 returned State Plane PA South ft coords (2372923, 260770)"
+apn_test = "ACCOUNT = '3329402710001' returned 1 polygon"

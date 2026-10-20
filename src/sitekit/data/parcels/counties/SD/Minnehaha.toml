@@ -1,0 +1,24 @@
+state = "SD"
+county = "Minnehaha"
+name = "Minnehaha County Parcels (outside Sioux Falls)"
+publisher = "Minnehaha County GIS / Equalization (gis.minnehahacounty.gov)"
+url = "https://gis.minnehahacounty.gov/minnemap/rest/services/Parcels/MapServer/0"
+apn_fields = ["TAG", "MAP_ID", "MRRDID"]
+situs_field = "FULL_ADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "Minnehaha County outside the City of Sioux Falls only (about 23,000 parcels: small cities such as Brandon, Hartford, Dell Rapids, Garretson, and the townships). Sioux Falls city parcels are maintained by the City and are not in this layer."
+vintage = "County parcel layer with assessor attributes, edited continuously (edits through October 2026)"
+max_record_count = 1000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "MRTNM1"
+legal_field = "LEGAL_DESC"
+subdivision_field = "ADDITION"
+notes = "MapServer layer 'County Parcels' (same data as MinnEmap/Cadastral/MapServer/0, which allows 2000 records). TAG is the 15-digit parcel tag with no separators, e.g. '012319426006000'; MAP_ID is the dashed form '01-23-19-426-006-000'; MRRDID is the assessor record id ('11142'). FULL_ADDRESS is the situs (blank on many rural parcels); NWLOCN/NWPRED/NWLOCS/NWSTYP are its space-padded parts. MRTNM1/MRTNM2 are owner names and MRTADR/MRTCTY/MRTSTATE/MRTZPC the owner mailing address. SUBDIVISION is a numeric code; ADDITION is the plat name. Assmnt_Year is the year the parcel record was created, not the roll year. The server returns 403 to requests with no User-Agent and occasionally drops a connection; retry. No deed or plat book fields."
+
+[verified]
+date = "2026-10-20"
+point = [-96.63197, 43.53598]
+point_result = "outSR 6574 honored (NAD83(2011) State Plane SD South, US ft); TAG '012319426006000' at 7601 E ARROWHEAD PKWY (Split Rock Township, east of Sioux Falls), owner CITY OF SIOUX FALLS BUDGET & OPERATIONS. The geocoded Minnehaha County Administration Building (415 N Dakota Ave) is inside Sioux Falls and returns no parcel from this layer."
+apn_test = "TAG = '012319426006000' returned 1 polygon; MAP_ID = '01-23-19-426-006-000' returned the same"

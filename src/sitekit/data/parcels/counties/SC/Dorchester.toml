@@ -1,0 +1,25 @@
+state = "SC"
+county = "Dorchester"
+name = "Dorchester County Parcels (Parcel_PUBLIC)"
+publisher = "Dorchester County, South Carolina GIS (maps.dorchestercounty.net), Assessor public CAMA join"
+url = "https://maps.dorchestercounty.net/server/rest/services/General_Data/Parcel_PUBLIC/MapServer/0"
+apn_fields = ["PARCELNO", "TMS13", "FULL_TMS", "TMS", "ACCOUNTNO"]
+situs_field = "PROPERTY_LOCATION"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Dorchester County, SC (about 80,000 parcels)"
+vintage = "County parcel fabric linked to the Assessor's public CAMA data (edited through 2026)"
+max_record_count = 2000
+terms = "Public, no token; no license or use constraints stated on the service"
+owner_field = "OWNER"
+deed_ref_field = "DEED"
+plat_ref_field = "PLAT"
+subdivision_field = "SUBDIVISION"
+notes = "MapServer layer. The parcel number appears in several forms: PARCELNO / TMS13 13 digits run together ('1370305001000'), FULL_TMS / FULL_PARCELNO dashed with suffix ('137-03-05-001.000'), TMS dashed without suffix ('137-03-05-001'); ACCOUNTNO is the assessor account ('R0021355'). PROPERTY_LOCATION is the situs with a trailing space and no city; MAILING_ADDRESS/CITY_STATE_ZIP are the owner's. DEED is 'book-page' zero padded ('000065-138'); PLAT is a short code ('A_28'). Host is dorchestercounty.net (the SC county's GIS server), not the Maryland county. Native SR is 2273 (SC State Plane, international ft)."
+
+[verified]
+date = "2026-10-20"
+point = [-80.17134, 33.02656]
+point_result = "outSR 6570 honored (NAD83(2011) State Plane SC, US ft); PARCELNO '1370305001000' at 500 N MAIN ST, Summerville (Dorchester County Council / administration building), owner DORCHESTER COUNTY, deed 000065-138"
+apn_test = "PARCELNO = '1370305001000' returned 1 polygon; TMS = '137-03-05-001' returned the same"

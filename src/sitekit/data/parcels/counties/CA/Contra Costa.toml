@@ -1,0 +1,23 @@
+state = "CA"
+county = "Contra Costa"
+name = "Contra Costa County Assessment Parcels (CCMAP)"
+publisher = "Contra Costa County Department of Information Technology GIS (gis.cccounty.us)"
+url = "https://gis.cccounty.us/arcgis/rest/services/CCMAP/Assessment_Parcels_ArcPro/MapServer/0"
+apn_fields = ["parcel_dashes", "APN"]
+situs_field = "full_address_search"
+city_field = "s_city"
+county_field = ""
+county_values = "none"
+coverage = "All of Contra Costa County (about 388,000 parcels)"
+vintage = "CCMAP public parcel layer with current Assessor roll attributes"
+max_record_count = 2000
+terms = "Contra Costa County: for informational purposes only; parcel boundaries are approximate and not a legal survey; verify with the County Assessor. Public, no token."
+legal_field = "DESC_"
+deed_ref_field = "C_DED_NBR"
+notes = "MapServer layer behind the county's public Parcel Viewer; native SR Web Mercator, reprojects on request (2226 and 2229 tested). APN is 9 digits with no dashes ('373163001'); parcel_dashes is the printed 3-3-3 form ('373-163-001'); APN_CHECK is a separate check digit, not part of the APN. full_address_search is the situs street line (number + street, space padded; just the street name when the parcel has no number); full_address_display adds ', CITY'; s_city is the situs city (S_CTY_ABBR is a 5-letter code such as 'MRTNZ'). N_* fields and full_n_address / N_CTY_ST are the owner mailing address. No owner name field. DESC_ is a short assessor legal description; C_DED_NBR / C_DED_DT are the last deed document number and date (YYYYMMDD). assr_url links the assessor map PDF. The Assessor folder on the same server requires a token; this CCMAP layer does not."
+
+[verified]
+date = "2026-10-20"
+point = [-122.1347, 38.0172]
+point_result = "APN '373163001' (373-163-001), WARD ST, MARTINEZ, government-owned parcel in the county civic center block (County Administration Building, 1025 Escobar St); outSR=2226 returned projected coordinates"
+apn_test = "APN = '373163001' returned 1 polygon; parcel_dashes = '373-163-001' returned 1 polygon (outSR=2229)"

@@ -1,0 +1,24 @@
+state = "IA"
+county = "Black Hawk"
+name = "Black Hawk County Parcels (ParcelFabricPublished, Pclwattr)"
+publisher = "Black Hawk County, Iowa GIS / County Assessor (ArcGIS Online, blackhawkcounty.iowa.gov account)"
+url = "https://services5.arcgis.com/ya62ECiavqTkK0wv/arcgis/rest/services/ParcelFabricPublished_gdb/FeatureServer/15"
+apn_fields = ["PIN", "parcel"]
+situs_field = "propertyad"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Black Hawk County, incl. Waterloo and Cedar Falls (about 76,000 parcels)"
+vintage = "Published parcel fabric with assessor attributes (item modified 2026-10 at verification)"
+max_record_count = 2000
+terms = "Public, no token; Black Hawk County / Assessor no-warranty disclaimer (not a survey, verify independently)"
+owner_field = "deedholder"
+deed_ref_field = "bookpage"
+legal_field = "legal"
+notes = "Hosted FeatureServer layer 15 'Pclwattr' (parcels with attributes; native SR ESRI 102675, IA North ftUS). Field names are truncated shapefile-style. PIN is a 12-digit string with no separators ('891325126005'); parcel is identical. propertyad is the situs street ('316 E 5TH ST'); property_2 holds 'CITY, IA ZIP', so city_field is empty (parse from property_2). deedholder is the deed holder; contract1 a contract buyer. bookpage is the latest recorded document reference as a single number ('462183'). Legal text in 'legal' is truncated to about 60 characters."
+
+[verified]
+date = "2026-10-20"
+point = [-92.33297, 42.49838]
+point_result = "PIN '891325126005' at 316 E 5TH ST, WATERLOO (Black Hawk County Courthouse), deed holder BLACK HAWK COUNTY, 2.06 ac; outSR 3417 returned IA North ftUS coords (5236170, 3646851)"
+apn_test = "PIN = '891325126005' returned 1 polygon"

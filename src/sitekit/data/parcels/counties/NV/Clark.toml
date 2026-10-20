@@ -1,0 +1,21 @@
+state = "NV"
+county = "Clark"
+name = "Clark County Assessor Parcels"
+publisher = "Clark County GIS Management Office (maps.clarkcountynv.gov) for the Clark County Assessor"
+url = "https://maps.clarkcountynv.gov/arcgis/rest/services/Assessor/Layers/MapServer/1"
+apn_fields = ["APN"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Clark County (about 952,000 features)"
+vintage = "Live Assessor parcel layer"
+max_record_count = 2000
+terms = "Public, no token. No license or copyright text on the service; county GIS disclaimer applies."
+notes = "MapServer layer, native EPSG:3421 (NV East ftUS, reported as wkid 102707); reprojects on outSR. APN is an 11-digit string with no dashes, e.g. '13933710002' (shown as 139-33-710-002); strip dashes from user input. Geometry and APN only: no situs, owner, deed, plat or legal fields in this layer (the Assessor's web parcel lookup holds those). PARCELTYPE 0 is a regular parcel; other values (e.g. 2) mark common areas, roads and similar. Layer minScale 3000 only affects drawing, not query. The same geometry is also published at GISMO/AssessorMapv2/FeatureServer/1."
+
+[verified]
+date = "2026-10-20"
+point = [-115.1530, 36.1660]
+point_result = "APN '13933710002' (139-33-710-002), 38.8 assessor acres, at Clark County Government Center, 500 S Grand Central Pkwy, Las Vegas; returned in EPSG:32107 (NV East m) to confirm reprojection"
+apn_test = "APN = '13933710002' returned 1 polygon"

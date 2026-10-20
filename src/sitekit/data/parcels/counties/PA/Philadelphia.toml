@@ -1,0 +1,22 @@
+state = "PA"
+county = "Philadelphia"
+name = "Philadelphia PWD Parcels"
+publisher = "City of Philadelphia (Philadelphia Water Department, maps.phl.data on ArcGIS Online)"
+url = "https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/PWD_PARCELS/FeatureServer/0"
+apn_fields = ["brt_id", "parcel_id", "pin"]
+situs_field = "address"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Philadelphia (consolidated city-county)"
+vintage = "Current PWD stormwater-billing parcel layer, maintained by the City"
+max_record_count = 2000
+terms = "City of Philadelphia open data; provided as is, no warranty, user holds the City harmless. No token."
+owner_field = "owner1"
+notes = "brt_id is the 9-digit OPA (Office of Property Assessment) account number most users have, stored as text, e.g. '782273400'. parcel_id is the PWD parcel id as text ('480565'); pin is the numeric DOR PIN (1001295858), no quotes. One polygon can carry several OPA accounts (num_brt > 1); brt_id holds one of them. address is the full situs string ('1400 JOHN F KENNEDY BLVD'); no city field (all Philadelphia). No deed/plat fields. The DOR_Parcel layer in the same org (legal registry parcels) has the same geometry but no OPA number."
+
+[verified]
+date = "2026-10-20"
+point = [-75.1636, 39.9524]
+point_result = "brt_id '782273400', 1400 JOHN F KENNEDY BLVD (City Hall), owner CITY OF PHILA; outSR 2272 returned State Plane PA South ft coords (2693182, 236453)"
+apn_test = "brt_id = '782273400' returned 1 polygon"
