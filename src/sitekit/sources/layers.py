@@ -4,6 +4,7 @@ fetch becomes status="failed" with the error text, so outputs can show it."""
 from __future__ import annotations
 
 import io
+import time
 import json
 import os
 from datetime import datetime, timezone
@@ -16,7 +17,7 @@ from shapely.validation import make_valid
 
 from ..config import US_FT_PER_M
 from ..crs import reproject
-from ..http import get_json, session
+from ..http import get_json, plain_session, session
 from ..model import Feature, LayerResult, now_iso
 from .arcgis import query_features
 
@@ -262,6 +263,59 @@ def _lidar_sources(clip: BaseGeometry, epsg: int) -> list[dict]:
     return sorted(seen.values(), key=lambda s: (-(s["coverage"] or 0), s["collect_end"] or ""), reverse=False) if with_geom else sorted(seen.values(), key=lambda s: s["collect_end"] or "", reverse=True)
 
 
+USGS_DEM_TIMEOUT_S = 20  # then the backup tiles
+TERRAIN_TILES = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
+TERRAIN_TILES_Z = 15
+BACKUP_DEM_RES_M = 10.0  # mostly USGS NED 1/3 arc-second in the US; treated as 10 m for contour limits
+
+
+def backup_dem(x0: float, y0: float, w: int, h: int, cell_ft: float, epsg: int) -> np.ndarray:
+    """Elevation in meters on the same grid as exportImage, from the public AWS Terrain Tiles
+    (Mapzen terrarium PNGs, built mostly from USGS NED in the US). Used when 3DEP doesn't answer."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    from PIL import Image
+    from pyproj import Transformer
+
+    tr = Transformer.from_crs(epsg, 4326, always_xy=True)
+    xs = x0 + (np.arange(w) + 0.5) * cell_ft
+    ys = y0 + h * cell_ft - (np.arange(h) + 0.5) * cell_ft  # row 0 is the north edge, like exportImage
+    X, Y = np.meshgrid(xs, ys)
+    lon, lat = tr.transform(X, Y)
+    n = 2 ** TERRAIN_TILES_Z
+    tx = (lon + 180.0) / 360.0 * n
+    lat_r = np.radians(lat)
+    ty = (1.0 - np.log(np.tan(lat_r) + 1.0 / np.cos(lat_r)) / np.pi) / 2.0 * n
+    px, py = tx * 256 - 0.5, ty * 256 - 0.5  # pixel space across tiles, pixel centers
+    tiles = {(int(a), int(b)) for a in range(int(np.floor(px.min() / 256)), int(np.floor(px.max() / 256)) + 2)
+             for b in range(int(np.floor(py.min() / 256)), int(np.floor(py.max() / 256)) + 2)}
+    if len(tiles) > 64:
+        raise RuntimeError(f"backup elevation would need {len(tiles)} tiles; extent too large")
+
+    def get(t):
+        r = session().get(TERRAIN_TILES.format(z=TERRAIN_TILES_Z, x=t[0], y=t[1]), timeout=20)
+        r.raise_for_status()
+        a = np.asarray(Image.open(io.BytesIO(r.content)).convert("RGB"), dtype="float64")
+        return t, a[..., 0] * 256 + a[..., 1] + a[..., 2] / 256 - 32768
+
+    with ThreadPoolExecutor(8) as ex:
+        got = dict(ex.map(get, tiles))
+    bx0 = min(t[0] for t in got) * 256
+    by0 = min(t[1] for t in got) * 256
+    W = (max(t[0] for t in got) + 1) * 256 - bx0
+    H = (max(t[1] for t in got) + 1) * 256 - by0
+    mosaic = np.full((H, W), np.nan)
+    for (a, b), arr in got.items():
+        mosaic[b * 256 - by0:(b + 1) * 256 - by0, a * 256 - bx0:(a + 1) * 256 - bx0] = arr
+    u, v = px - bx0, py - by0
+    i0, j0 = np.clip(np.floor(v).astype(int), 0, H - 2), np.clip(np.floor(u).astype(int), 0, W - 2)
+    fv, fu = np.clip(v - i0, 0, 1), np.clip(u - j0, 0, 1)
+    z = (mosaic[i0, j0] * (1 - fu) * (1 - fv) + mosaic[i0, j0 + 1] * fu * (1 - fv)
+         + mosaic[i0 + 1, j0] * (1 - fu) * fv + mosaic[i0 + 1, j0 + 1] * fu * fv)
+    z[z < -1000] = np.nan
+    return z
+
+
 def dem_source_resolution(clip: BaseGeometry, epsg: int) -> list[dict]:
     """Finest 3DEP source dataset under the site (centre + corners), from the
     ImageServer's catalog. Returns [{res_m, title, end_date}], finest first."""
@@ -322,23 +376,46 @@ def fetch_dem(clip: BaseGeometry, epsg: int, cell_ft: float = 3.0, pad_ft: float
         side = ThreadPoolExecutor(2)
         fut_res = side.submit(dem_source_resolution, clip, epsg)
         fut_idx = side.submit(_lidar_sources, clip, epsg)
-        resp = session().get(f"{DEM_URL}/exportImage", params=params, timeout=75)
-        resp.raise_for_status()
-        if "image" not in resp.headers.get("Content-Type", ""):
-            raise RuntimeError(f"unexpected response: {resp.text[:300]}")
         from PIL import Image
 
-        z = np.asarray(Image.open(io.BytesIO(resp.content)), dtype="float64")  # F32 TIFF -> mode "F"
-        if z.shape != (h, w):
-            raise RuntimeError(f"DEM came back {z.shape}, expected {(h, w)}")
-        z[(z <= -9000) | ~np.isfinite(z)] = np.nan
+        t_start = time.time()
+        try:
+            resp = plain_session().get(f"{DEM_URL}/exportImage", params=params, timeout=USGS_DEM_TIMEOUT_S)
+            resp.raise_for_status()
+            if "image" not in resp.headers.get("Content-Type", ""):
+                raise RuntimeError(f"unexpected response: {resp.text[:300]}")
+            z = np.asarray(Image.open(io.BytesIO(resp.content)), dtype="float64")  # F32 TIFF -> mode "F"
+            if z.shape != (h, w):
+                raise RuntimeError(f"DEM came back {z.shape}, expected {(h, w)}")
+            z[(z <= -9000) | ~np.isfinite(z)] = np.nan
+        except Exception as usgs_err:  # noqa: BLE001 - 3DEP down or slow: use the backup tiles
+            z = backup_dem(x0, y0, w, h, cell_ft, epsg)
+            side.shutdown(wait=False, cancel_futures=True)
+            r.source = "Backup: AWS Terrain Tiles (Mapzen terrarium, built mostly from USGS NED), because USGS 3DEP didn't answer"
+            r.url = TERRAIN_TILES
+            r.extra["fallback"] = True
+            r.extra["source_res_m"] = BACKUP_DEM_RES_M
+            r.extra["min_interval_ft"] = 5.0
+            r.vintage = "USGS NED-era elevation (mostly 1/3 arc-second, about 10 m), via AWS Terrain Tiles"
+            r.resolution = f"About {BACKUP_DEM_RES_M:g} m source; resampled to {cell_ft:.1f} ft grid"
+            r.notes.append(f"USGS 3DEP didn't answer within {USGS_DEM_TIMEOUT_S} s ({type(usgs_err).__name__}), so elevation comes from "
+                           "the backup source. Run the site again later for LiDAR contours.")
+            r.limitations.insert(0, "Elevation is from the coarser backup source (about 10 m), not LiDAR. Contours finer than 5 ft and "
+                                    "small slope features are not reliable.")
+            if np.isnan(z).all():
+                raise RuntimeError("Backup DEM is all no-data for this extent") from usgs_err
+            z *= ft_per_m
+            r.extra.update(z=z, x0=x0, y0=y0, cell=cell_ft, w=w, h=h, nodata_frac=float(np.isnan(z).mean()))
+            r.status = "ok"
+            r.retrieved_at = now_iso()
+            return r
         if np.isnan(z).all():
             raise RuntimeError("DEM is all no-data for this extent")
         z *= ft_per_m
         r.extra.update(z=z, x0=x0, y0=y0, cell=cell_ft, w=w, h=h, nodata_frac=float(np.isnan(z).mean()))
         r.resolution = f"Resampled to {cell_ft:.1f} ft grid (source GSD below)"
         try:
-            srcs = fut_idx.result(timeout=45)
+            srcs = fut_idx.result(timeout=max(1.0, 30 - (time.time() - t_start)))
             r.extra["lidar"] = srcs
             if srcs:
                 main = srcs[0]
@@ -353,7 +430,7 @@ def fetch_dem(clip: BaseGeometry, epsg: int, cell_ft: float = 3.0, pad_ft: float
             r.notes.append(f"Could not read 3DEP source index: {e}")
         # Source resolution decides how fine the contours may be.
         try:
-            res = fut_res.result(timeout=45)
+            res = fut_res.result(timeout=max(1.0, 30 - (time.time() - t_start)))
         except Exception as e:  # noqa: BLE001
             res = []
             r.notes.append(f"Could not read DEM source resolution: {e}")

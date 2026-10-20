@@ -525,6 +525,7 @@ def sources() -> str:
         ("Flood zones", "FEMA National Flood Hazard Layer", "Public domain (FEMA)"),
         ("Wetlands", "U.S. Fish & Wildlife Service National Wetlands Inventory", "Public domain (USFWS)"),
         ("Road centerlines and names", "U.S. Census Bureau TIGER/Line via TIGERweb", "Public domain (U.S. Census Bureau)"),
+        ("Topography backup (when 3DEP doesn't answer)", "AWS Terrain Tiles (Mapzen terrarium), built mostly from USGS NED", "Public; credit Mapzen and USGS"),
         ("Existing buildings (footprints and heights)", "FEMA / Oak Ridge National Laboratory USA Structures, via Esri", "CC BY 4.0; credit FEMA, ORNL, Esri"),
         ("Aerial imagery", "Esri World Imagery (Vantor/Maxar, Earthstar Geographics, local contributors); USDA NAIP fallback",
          "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community. NAIP: public domain (USDA)"),

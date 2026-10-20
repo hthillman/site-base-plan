@@ -476,13 +476,19 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     grid = slope = None
     dem = layers["dem"]
     t2 = time.time()
-    contours = LayerResult("contours", f"Contours ({opts.contour_interval:g} ft)", "Derived from 3DEP DEM", "", retrieved_at=now_iso())
-    slopes = LayerResult("slope", "Slope analysis", "Derived from 3DEP DEM", "", retrieved_at=now_iso())
     floor = dem.extra.get("min_interval_ft", 1.0) if dem.ok() else 1.0
-    if opts.contour_interval < floor:
-        site.warnings.append(f"Contour interval raised from {opts.contour_interval:g} ft to {floor:g} ft: the best elevation data here is "
-                             f"{dem.extra.get('source_res_m'):.1f} m, too coarse for finer contours.")
-        opts.contour_interval = floor
+    if dem.ok() and dem.extra.get("fallback"):
+        site.warnings.append("USGS's LiDAR elevation service didn't answer, so topography comes from a coarser backup source (about 10 m). "
+                             f"Contours are {max(opts.contour_interval, floor):g} ft and approximate; run this site again later for LiDAR contours.")
+        contour_src = "Derived from backup DEM (AWS Terrain Tiles, about 10 m)"
+    else:
+        contour_src = "Derived from 3DEP DEM"
+        if opts.contour_interval < floor:
+            site.warnings.append(f"Contour interval raised from {opts.contour_interval:g} ft to {floor:g} ft: the best elevation data here is "
+                                 f"{dem.extra.get('source_res_m'):.1f} m, too coarse for finer contours.")
+    opts.contour_interval = max(opts.contour_interval, floor)
+    contours = LayerResult("contours", f"Contours ({opts.contour_interval:g} ft)", contour_src, "", retrieved_at=now_iso())
+    slopes = LayerResult("slope", "Slope analysis", contour_src, "", retrieved_at=now_iso())
     if dem.ok():
         grid = Grid(dem.extra["z"], dem.extra["x0"], dem.extra["y0"], dem.extra["cell"])
         log(f"Generating {opts.contour_interval:g} ft contours")
