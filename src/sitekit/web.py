@@ -267,12 +267,30 @@ def interest():
     return jsonify(ok=True)
 
 
-FIRM_WANTS = {"zoning", "batch", "standards", "coverage"}
+FIRM_WANTS = {"zoning", "batch", "standards", "coverage", "massing"}
+NOTIFY_URL = os.environ.get("NOTIFY_URL", "")  # optional: ntfy.sh topic, Slack or Discord webhook, pinged on Pro signups
+
+
+def notify(text: str) -> None:
+    """Best-effort ping to the site owner. Never includes email addresses. Never raises."""
+    if not NOTIFY_URL:
+        return
+    from .http import session
+
+    try:
+        if "hooks.slack.com" in NOTIFY_URL:
+            session().post(NOTIFY_URL, json={"text": text}, timeout=5)
+        elif "discord.com/api/webhooks" in NOTIFY_URL:
+            session().post(NOTIFY_URL, json={"content": text}, timeout=5)
+        else:
+            session().post(NOTIFY_URL, data=text.encode(), headers={"Title": "Basesheet"}, timeout=5)
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN notify failed: {e}", flush=True)
 
 
 @app.post("/api/firms")
 def firm_interest():
-    """Early-access request from the For firms page (stored privately)."""
+    """Pro early-access signup (stored privately)."""
     from datetime import datetime, timezone
 
     from .pages import FIRMS_PAGE
@@ -292,35 +310,9 @@ def firm_interest():
     private_put("firms", {"firm": firm, "role": str(d.get("role") or "").strip()[:80], "sites": str(d.get("sites") or "")[:10],
                           "want": want, "places": str(d.get("places") or "").strip()[:300], "notes": str(d.get("notes") or "").strip()[:2000],
                           "email": email, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    notify(f"New Pro early-access signup: {firm} ({str(d.get('role') or '')[:80]}), {str(d.get('sites') or '?')[:10]} sites/mo, "
+           f"wants {', '.join(want) or 'nothing picked'}; works in {str(d.get('places') or '-')[:120]}")
     return jsonify(ok=True)
-
-
-TESTFIT_PRICE = os.environ.get("TESTFIT_PRICE", "")      # e.g. "$40", shown on the request box; blank = quote by email
-TESTFIT_PAY_URL = os.environ.get("TESTFIT_PAY_URL", "")  # Stripe payment link shown after a request, if set
-
-
-@app.post("/api/testfit-request")
-def testfit_request():
-    """Paid test-fit request for a site in a covered jurisdiction (stored privately, done by hand for now)."""
-    from datetime import datetime, timezone
-
-    from .plugins import testfit_available
-
-    if not testfit_available():
-        abort(404)
-    d = request.get_json(force=True, silent=True) or {}
-    if d.get("website"):
-        return jsonify(ok=True)
-    email = str(d.get("email") or "").strip()[:254]
-    site = str(d.get("site") or "").strip()[:200]
-    if not EMAIL_RE.match(email):
-        return jsonify(error="That doesn't look like an email address."), 400
-    if not site:
-        return jsonify(error="Missing the site address."), 400
-    private_put("testfit", {"site": site, "zones": [str(z)[:80] for z in (d.get("zones") or [])][:3],
-                            "units": str(d.get("units") or "").strip()[:60], "notes": str(d.get("notes") or "").strip()[:2000],
-                            "email": email, "price": TESTFIT_PRICE, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-    return jsonify(ok=True, pay_url=TESTFIT_PAY_URL)
 
 
 @app.post("/api/feedback")
@@ -385,6 +377,13 @@ def sources():
 
 
 @app.get("/firms")
+def firms_redirect():
+    from flask import redirect
+
+    return redirect("/pro", code=301)
+
+
+@app.get("/pro")
 def firms_page():
     from .pages import FIRMS_PAGE, firms
 
@@ -470,7 +469,7 @@ def sitemap():
     base = _site_url()
     from .guides import all_paths
 
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/firms"] if FIRMS_PAGE else []) + all_paths()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/pro"] if FIRMS_PAGE else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")

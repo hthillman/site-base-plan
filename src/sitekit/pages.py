@@ -14,7 +14,7 @@ from .plugins import testfit_available
 SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
 TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>' if TIP_URL else ""
-FIRMS_FOOTER = ' · <a href="/firms">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
+FIRMS_FOOTER = ' · <a href="/pro">Basesheet Pro, coming soon</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
 CSS = """
 :root{--bg:#fbfaf7;--ink:#1c1c1a;--muted:#6a6963;--faint:#9a988f;--line:#e4e1d8;--field:#fff;--accent:#2f5d50;--accent-ink:#fff;
@@ -115,16 +115,15 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
+.soon{display:inline-block;vertical-align:middle;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin-left:6px}
 .rsec{margin-top:26px}.rsec h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
 .flag.plain{grid-template-columns:1fr;color:var(--ink)}
 .zone{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--field);margin-bottom:8px}
 .zone .zt{font-weight:600}.zone .zj{color:var(--muted);font-size:14px}
 .zone ul{margin:6px 0 4px;padding-left:18px;font-size:14.5px}.zone li{margin:2px 0}
 .zone .src{font-size:12.5px;color:var(--faint);margin:6px 0 0}
-.tfcta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-top:4px;font-size:14px}
-.tfcta button.quiet{padding:7px 12px;font-size:14px}
-#tff input:not(.hp){flex:1 1 220px}#tff button{flex:0 0 auto;padding:9px 16px}
 details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-bottom:8px}
+.pro{margin:22px 0 0;padding:10px 14px;border-left:2px solid var(--accent);background:var(--field)}
 .vote{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:14px}.vote .chips{margin-top:8px}
 .vote .chip{font-size:13px;padding:5px 11px}
 .answer{font-size:17px;line-height:1.6;margin:0 0 8px}
@@ -145,7 +144,8 @@ GITHUB_ICON = (f'<a class="gh" href="{REPO_URL}" target="_blank" rel="noopener" 
                '0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 '
                '3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>')
 
-NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/privacy", "Privacy")]
+NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/privacy", "Privacy")] + (
+    [("/pro", "Pro")] if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else [])
 
 
 SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # canonical origin, e.g. https://basesheet.site
@@ -205,7 +205,7 @@ def index(parcel_states: list[str], needs_code: bool) -> str:
     county_txt = "".join(f" + {len(v)} {k} counties" for k, v in sorted(county_sources().items()))
     actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
     if FIRMS_PAGE:
-        actions.append('<a href="/firms">Using this at a firm?</a>')
+        actions.append('<a href="/pro">Basesheet Pro, coming soon</a>')
     if TIP_URL:
         actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>')
     body = f"""
@@ -336,6 +336,7 @@ function render(j){
  (TIP_URL?'<p class="note tip">Saved you some time? <a href="'+TIP_URL+'" target="_blank" rel="noopener">Chip in for hosting</a>.</p>':'')+
  '<div class="rsec"><h4>About this site</h4><ul class="flags">'+flags+'</ul></div>'+
  zoningBox(j.zoning)+
+ (PRO?'<p class="note pro">Coming soon in <a href="/pro">Basesheet Pro</a>: test fits for the places you work, your title block and CAD standards, and batch runs. <a href="/pro">Get early access</a></p>':'')+
  '<details class="files rsec"><summary>What\\'s in the zip and how to open it</summary><ul class="contents">'+
  '<li><b>AutoCAD / Civil 3D</b> · site.dxf (open it directly), surface.xml (LandXML surface)</li>'+
  '<li><b>SketchUp</b> · File › Import › terrain.dae for textured 3D ground; site-local.dxf for linework (SketchUp Pro)</li>'+
@@ -344,28 +345,16 @@ function render(j){
  '<li><b>Google Earth</b> · site.kml</li>'+
  '<li><b>Everyone</b> · site-summary.pdf, provenance.md (sources and dates), and HOW-TO-OPEN.txt</li></ul></details>'+
  nextRow(j.zoning)+'</div>';
- wireNext(j.state);wireTf(j.zoning);}
+ wireNext(j.state);}
 const TIP_URL="__TIP_URL__";
-const TF_PRICE="__TF_PRICE__";
+const PRO=__PRO__;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 function zoningBox(z){if(!z||!(z.details||[]).length)return '';
  const zs=z.details.map(d=>'<div class="zone"><div><span class="zt">'+esc(d.zone)+' '+esc(d.name||'')+'</span> <span class="zj">· '+esc(d.jurisdiction)+
   (d.share?' · '+Math.round(d.share*100)+'% of parcel':'')+(d.at_point?' · at the address point':'')+'</span></div>'+
   (d.facts.length?'<ul>'+d.facts.map(f=>'<li>'+esc(cap(f))+'</li>').join('')+'</ul>':'<p class="note">No rule sheet for this district yet.</p>')+
   (d.source?'<p class="src">'+esc(d.source)+' Base district only; overlays and recent amendments can change these. Confirm with the jurisdiction.</p>':'')+'</div>').join('');
- const tf=z.details.some(d=>d.facts.length)?'<div class="tfcta" id="tfbox"><span><b>Need a test fit?</b> Units, buildable area, parking and a CAD layout from these rules'+
-  (TF_PRICE?' · '+esc(TF_PRICE):'')+' · within 2 business days.</span><button type="button" class="quiet" id="tfopen">Request a test fit</button>'+
-  '<form id="tff" class="nextdetail" hidden style="flex-wrap:wrap;max-width:none;width:100%"><input name="email" type="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
-  '<input name="units" maxlength="60" placeholder="What you have in mind (e.g. walk-up apartments)" aria-label="What you have in mind">'+
-  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Send request</button></form><span class="fine" id="tfmsg"></span></div>':'';
- return '<div class="rsec"><h4>Zoning</h4>'+zs+tf+'</div>';}
-function wireTf(z){const f=document.getElementById('tff');if(!f)return;
- document.getElementById('tfopen').onclick=e=>{e.target.hidden=true;f.hidden=false;f.email.focus()};
- f.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('tfmsg');
-  const r=await fetch('/api/testfit-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:f.email.value,units:f.units.value,website:f.website.value,site:document.querySelector('#f [name=query]').value,zones:z.zones})});
-  const j=await r.json().catch(()=>({}));
-  if(r.ok){f.hidden=true;m.className='fine ok';m.innerHTML=j.pay_url?'Got it. <a href="'+esc(j.pay_url)+'" target="_blank" rel="noopener">Pay here to confirm</a> and I\\'ll start on it.':'Got it. I\\'ll email you to confirm before starting.'}
-  else{m.className='fine err';m.textContent=j.error||'Something went wrong.'}};}
+ return '<div class="rsec"><h4>Zoning</h4>'+zs+'</div>';}
 const NEXT=[["zoning","Zoning test fit (setbacks, max units, parking layout)"],["county","Parcel lines for my county"],["batch","Run many sites at once"],
  ["titleblock","My firm's title block and CAD standards"],["massing","3D building massing for SketchUp"],["other","Something else"]];
 const ASK={zoning:"Which city or county?",county:"Which county and state?",batch:"Roughly how many sites, how often?",titleblock:"Anything specific? (optional)",massing:"What would you use it for? (optional)",other:"What should it do?"};
@@ -384,7 +373,7 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
-</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__TF_PRICE__", escape(os.environ.get("TESTFIT_PRICE", "")))
+</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false")
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -561,12 +550,9 @@ def privacy() -> str:
 <h2>"What should it do next?"</h2>
 <p>After a run you can click an option to say what you'd like built next. That records the option, anything you type in the box,
 and the run's state. Nothing that identifies you.</p>
-<h2>Early access for firms</h2>
-<p>If you request early access on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
+<h2>Basesheet Pro early access</h2>
+<p>If you join the Pro early access list, your firm, role, answers and email are stored privately and used only to follow up
 about it. Never shared or sold; ask to have them deleted any time.</p>
-<h2>Test fit requests</h2>
-<p>If you request a test fit, the site address, what you have in mind and your email are stored privately and used only to do the
-work and reply. Never shared or sold; ask to have them deleted any time.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
 Never shared or sold. Ask through the feedback form to have it deleted.</p>
@@ -581,28 +567,28 @@ FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hoste
 
 
 def firms() -> str:
-    body = """
-<h1>Using this at a firm?</h1>
-<p class="lede">The base tool is free and <a href="https://github.com/hthillman/site-base-plan">open source</a>. After getting a lot of
-positive feedback and feature requests, I'm exploring a few things for offices that run regular site studies.</p>
+    body = f"""
+<h1>Basesheet Pro <span class="soon">Coming soon</span></h1>
+<p class="lede">Basesheet stays free and <a href="{REPO_URL}">open source</a>. Pro is for offices that run regular site studies,
+and it's being built with a small group of early firms.</p>
 
 <h2>Free, and staying free</h2>
 <ul>
 <li>Base plans from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
 <li>Every export: DXF, SketchUp terrain, LandXML, GIS, KML and the PDF summary.</li>
-<li>Multi-parcel sites and your own CAD layer names.</li>
+<li>Multi-parcel sites, your own CAD layer names, and the zoning lookup where it's available.</li>
 </ul>
 
-<h2>What I'm exploring for firms</h2>
+<h2>Coming in Pro</h2>
 <ul>
-<li><b>Zoning test fits for your jurisdictions:</b> setbacks, buffers and maximum units with a building and parking layout, using zoning rules reviewed for the cities you work in.</li>
-<li><b>Batch runs:</b> many sites at once, for feasibility studies and site selection.</li>
+<li><b>Test fits for the places you work:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking layout you can open in CAD, from zoning rules checked for your jurisdictions.</li>
 <li><b>Your office standards on every output:</b> your title block and logo on the PDF, your CAD layer standard set up once for the whole office.</li>
+<li><b>Batch runs:</b> many sites at once, for feasibility studies and site selection.</li>
+<li><b>Parcel lines where you work,</b> including counties the free tool doesn't cover yet.</li>
 </ul>
-<p class="note">Early access is a small pilot: you tell me what you need, I build it for your jurisdictions or workflow, you tell me
-what works. Nothing to buy here, and nothing changes for the free tool.</p>
 
 <h2>Early access</h2>
+<p>Early firms decide what gets built first, for their own jurisdictions, and get it first. Nothing to pay now.</p>
 <form id="ff">
 <div class="grid2">
 <label>Firm<input name="firm" maxlength="120" required></label>
@@ -610,18 +596,19 @@ what works. Nothing to buy here, and nothing changes for the free tool.</p>
 </div>
 <label>Roughly how many sites do you look at a month?
 <select name="sites" required><option value="">Choose</option><option>1-2</option><option>3-10</option><option>11-30</option><option>30+</option></select></label>
-<fieldset class="checks"><legend>What would matter to you? (pick any)</legend>
-<label><input type="checkbox" name="want" value="zoning"> Zoning test fits</label>
-<label><input type="checkbox" name="want" value="batch"> Batch runs</label>
+<fieldset class="checks"><legend>What would matter most? (pick any)</legend>
+<label><input type="checkbox" name="want" value="zoning"> Test fits</label>
 <label><input type="checkbox" name="want" value="standards"> Title block and CAD standards</label>
+<label><input type="checkbox" name="want" value="batch"> Batch runs</label>
 <label><input type="checkbox" name="want" value="coverage"> Parcel lines where I work</label>
+<label><input type="checkbox" name="want" value="massing"> 3D massing</label>
 </fieldset>
 <label>Which cities or counties do you work in most?<input name="places" maxlength="300" placeholder="e.g. Columbus OH, Franklin County"></label>
 <label>Anything else? (optional)<textarea name="notes" maxlength="2000"></textarea></label>
 <label>Email<input name="email" type="email" required maxlength="254"></label>
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-<div><button>Request early access</button> <span class="fine" id="ffmsg"></span></div>
-<p class="fine">I'll only use this to follow up about early access. See <a href="/privacy">Privacy</a>.</p>
+<div><button>Join early access</button> <span class="fine" id="ffmsg"></span></div>
+<p class="fine">I'll only use this to follow up about Pro. See <a href="/privacy">Privacy</a>.</p>
 </form>
 """
     script = """<script>
@@ -631,5 +618,5 @@ document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.ta
  const j=await r.json().catch(()=>({}));
  if(r.ok){f.innerHTML='<p class="ok"><b>Thanks, got it.</b> I\\'ll be in touch by email.</p>'}else{m.textContent=j.error||'Something went wrong.';m.className='fine err'}};
 </script>"""
-    return layout("For firms · Basesheet", "/firms", body, script,
-                  description="Early access for offices that run regular site studies: zoning test fits for your jurisdictions, batch runs, and your title block and CAD standards on every output.")
+    return layout("Basesheet Pro (coming soon): test fits, office standards, batch runs", "/pro", body, script,
+                  description="Basesheet stays free. Pro, coming soon for firms: zoning test fits for your jurisdictions, your title block and CAD standards on every output, and batch runs. Join early access.")
