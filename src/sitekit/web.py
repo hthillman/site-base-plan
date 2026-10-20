@@ -420,6 +420,12 @@ def favicon():
     return r
 
 
+@app.get("/BingSiteAuth.xml")
+def bing_site_auth():
+    f = STATIC_DIR / "BingSiteAuth.xml"  # hosted site only; not in the open-source mirror
+    return send_file(f, mimetype="application/xml") if f.exists() else abort(404)
+
+
 @app.get("/og.png")
 def og_image():
     r = send_file(STATIC_DIR / "og.png", mimetype="image/png")
