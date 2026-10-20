@@ -48,7 +48,19 @@ button.quiet{background:transparent;color:var(--accent);border:1px solid var(--l
 .opts input,.opts select{padding:4px 8px;font-size:14px;border-radius:6px}
 .opts input[type=number]{width:72px}
 .opts .check{color:var(--ink)}
-.example{font-size:14px;color:var(--muted);margin:18px 0 0}
+.example{font-size:14px;color:var(--muted);margin:10px 0 0}
+.meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:12px;font-size:14px}
+.meta .linkbtn{padding:0;font-size:14px}
+.meta .sep{color:var(--faint)}
+.meta .note{font-size:14px}
+.panel{margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.panel .opts{margin-top:0}
+#apnrow{margin-top:10px}
+footer .actions{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin:0 0 6px}
+footer .actions .linkbtn{padding:0;font-size:13.5px;font-weight:400}
+footer .actions a{text-decoration:none}
+footer .actions a:hover,footer .actions .linkbtn:hover{text-decoration:underline}
+footer #fb{margin-top:10px}
 #out{margin-top:28px}
 .result{border-top:1px solid var(--line);padding-top:22px}
 .result h3{margin:0 0 4px;font-size:18px}
@@ -65,7 +77,7 @@ pre{margin:0;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:v
 .lvl{font-size:11px;font-weight:700;letter-spacing:.05em;padding-top:2px}
 .alert{color:var(--alert)}.caution{color:var(--caution)}.missing{color:var(--missing)}.info{color:var(--info)}
 .err{color:var(--alert)}
-footer{margin-top:56px;border-top:1px solid var(--line);padding:22px 0 48px;font-size:13.5px;color:var(--muted)}
+footer{margin-top:44px;border-top:1px solid var(--line);padding:18px 0 40px;font-size:13.5px;color:var(--muted)}
 footer p{margin:0 0 10px}
 footer details{margin:0 0 10px}
 footer summary{cursor:pointer;color:var(--accent);display:inline}
@@ -102,7 +114,7 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
-@media(max-width:560px){h1{font-size:24px}.search{flex-direction:column}.search button{padding:13px}main{padding-top:28px}}
+@media(max-width:560px){.meta .sep,footer .actions .sep{display:none}.meta,footer .actions{gap:6px 16px}h1{font-size:24px}.search{flex-direction:column}.search button{padding:13px}main{padding-top:28px}}
 """
 
 REPO_URL = "https://github.com/hthillman/site-base-plan"
@@ -153,11 +165,16 @@ def index(parcel_states: list[str], needs_code: bool) -> str:
     _cfg = load_config()
     layer_lines = "\n".join(f"{st.name} = {st.name}" for k, st in _cfg.layers.items() if not k.startswith("tf_"))
     n = len(parcel_states)
-    county_txt = "".join(f" plus {len(v)} {STATES.get(k, k)} counties" for k, v in sorted(county_sources().items()))
+    county_txt = "".join(f" + {len(v)} {k} counties" for k, v in sorted(county_sources().items()))
+    actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
+    if FIRMS_PAGE:
+        actions.append('<a href="/firms">Using this at a firm?</a>')
+    if TIP_URL:
+        actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>')
     body = f"""
 <h1>A site base plan from any US address</h1>
 <p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands and aerial, ready for AutoCAD, SketchUp, Civil 3D and GIS.
-Takes about a minute. Free, no account.</p>
+Free, no account.</p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
@@ -171,18 +188,27 @@ Takes about a minute. Free, no account.</p>
 <button id="go">Build base plan</button>
 </div>
 <div id="also"></div>
-<button type="button" class="linkbtn" id="addparcel">+ Add another parcel (combine up to 5 into one site)</button>
+<div id="apnrow" class="opts" hidden>
+<label>State <select name="state" aria-label="State (needed for parcel numbers)">{opts}</select></label>
+<label>County <input name="county" placeholder="if needed" style="width:130px"></label>
+</div>
+<div class="meta">
+<button type="button" class="linkbtn" id="addparcel">+ Add parcel</button>
+<span class="sep" aria-hidden="true">·</span>
+<span id="optsum" class="note"></span>
+<button type="button" class="linkbtn" id="optbtn" aria-expanded="false" aria-controls="optpanel">Change</button>
+</div>
+<div id="optpanel" class="panel" hidden>
+<div class="opts">
+<label>Buffer <input name="buffer" type="number" value="100" min="0" max="1000" step="10"> ft</label>
+<label>Contours <select name="interval"><option value="1">1 ft</option><option value="2" selected>2 ft</option><option value="5">5 ft</option></select></label>
+<label>Layers <select name="layers" aria-label="CAD layer names"><option value="default">Default (SITE-*)</option><option value="ncs">NCS-style (V-PROP-LINE…)</option><option value="custom">Custom…</option></select></label>
+<label id="tfwrap" class="check" hidden><input type="checkbox" name="testfit"> Apartment test fit (experimental, Thurston Co. WA)</label>
+</div>
 <div id="layermap" hidden>
 <label class="note" style="display:block;margin:12px 0 4px">Your layer names: edit the right side of each line. Saved in this browser.</label>
 <textarea name="layer_map" rows="10" spellcheck="false" style="width:100%;font:12.5px/1.5 ui-monospace,Menlo,monospace">{escape(layer_lines)}</textarea>
 </div>
-<div class="opts">
-<label>Buffer <input name="buffer" type="number" value="100" min="0" max="1000" step="10"> ft</label>
-<label>Contours <select name="interval"><option value="1">1 ft</option><option value="2" selected>2 ft</option><option value="5">5 ft</option></select></label>
-<label>State <select name="state" aria-label="State (needed for parcel numbers)">{opts}</select></label>
-<label id="countywrap" hidden>County <input name="county" placeholder="if needed" style="width:120px"></label>
-<label>Layers <select name="layers" aria-label="CAD layer names"><option value="default">Default (SITE-*)</option><option value="ncs">NCS-style (V-PROP-LINE…)</option><option value="custom">Custom…</option></select></label>
-<label id="tfwrap" class="check" hidden><input type="checkbox" name="testfit"> Apartment test fit (experimental, Thurston Co. WA)</label>
 </div>
 </form>
 {example}
@@ -190,17 +216,14 @@ Takes about a minute. Free, no account.</p>
 <div id="out"></div>
 
 <footer>
-<p>Planning-level data from public sources, not a survey. Parcel lines are tax lines, not legal boundaries.
-Parcel lines are available in <a href="/about#coverage">{n} states{county_txt}</a>; elsewhere the plan is drawn around the address.</p>
-<details id="fbd"><summary>Send feedback</summary>
-<form id="fb">
+<p class="fine">Planning-level public data, not a survey. Parcel lines in <a href="/about#coverage">{n} states{county_txt}</a>.</p>
+<p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
+<form id="fb" hidden>
 <textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
 <div class="inline"><input name="email" type="email" maxlength="254" placeholder="Email, if you'd like a reply" aria-label="Email (optional)"><button>Send</button></div>
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 <span class="fine" id="fbmsg"></span>
-</form></details>
-
-<p class="fine">No cookies, no account. Files are deleted after 2 days. <a href="/privacy">Privacy</a> · <a href="/sources">Data sources</a> · <a href="https://github.com/hthillman/site-base-plan" target="_blank" rel="noopener">Open source</a>{TIP_FOOTER}{FIRMS_FOOTER}</p>
+</form>
 </footer>
 """
     script = """<script>
@@ -213,17 +236,27 @@ const looksApn=v=>/^[0-9A-Za-z][0-9A-Za-z.\\- ]{4,}$/.test(v)&&!/[A-Za-z]{3,}/.t
 const alsoBox=document.getElementById('also');
 document.getElementById('addparcel').onclick=()=>{if(alsoBox.children.length>=4)return;
  const row=document.createElement('div');row.className='search';
- row.innerHTML='<input name="also" placeholder="Another address or parcel number (same state)" aria-label="Another parcel"><button type="button" aria-label="Remove">Remove</button>';
+ row.innerHTML='<input name="also" placeholder="Another parcel to combine into one site (same state, up to 5)" aria-label="Another parcel"><button type="button" aria-label="Remove">Remove</button>';
  row.querySelector('button').onclick=()=>row.remove();alsoBox.appendChild(row);row.querySelector('input').focus();
  if(alsoBox.children.length>=4)document.getElementById('addparcel').hidden=true;};
+// Options: one summary line; the controls open in place. Non-default choices are remembered.
+const sum=document.getElementById('optsum'),panel=document.getElementById('optpanel'),optbtn=document.getElementById('optbtn');
+const LAYER_LABEL={default:'SITE-* layers',ncs:'NCS-style layers',custom:'custom layers'};
+['buffer','interval'].forEach(n=>{const v=(()=>{try{return localStorage.getItem('sitekit-'+n)}catch(e){return null}})();if(v)f[n].value=v;});
+function updSum(){sum.textContent=(f.buffer.value||0)+' ft buffer · '+f.interval.value+' ft contours · '+LAYER_LABEL[f.layers.value];}
+['buffer','interval','layers'].forEach(n=>f[n].addEventListener('change',()=>{updSum();if(n!=='layers'){try{localStorage.setItem('sitekit-'+n,f[n].value)}catch(e){}}}));
+f.buffer.addEventListener('input',updSum);
+optbtn.onclick=()=>{const open=panel.hidden;panel.hidden=!open;optbtn.textContent=open?'Done':'Change';optbtn.setAttribute('aria-expanded',open)};
+const fbt=document.getElementById('fbtoggle');
+fbt.onclick=()=>{const fb=document.getElementById('fb');fb.hidden=!fb.hidden;fbt.setAttribute('aria-expanded',!fb.hidden);if(!fb.hidden)fb.message.focus()};
 const lm=document.getElementById('layermap');
 const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 if(LS.get('sitekit-layers'))f.layers.value=LS.get('sitekit-layers');
 if(LS.get('sitekit-layermap'))f.layer_map.value=LS.get('sitekit-layermap');
 const syncLayers=()=>{lm.hidden=f.layers.value!=='custom';LS.set('sitekit-layers',f.layers.value)};
-f.layers.addEventListener('change',syncLayers);syncLayers();
+f.layers.addEventListener('change',syncLayers);syncLayers();updSum();
 f.layer_map.addEventListener('input',()=>LS.set('sitekit-layermap',f.layer_map.value));
-f.query.addEventListener('input',()=>{document.getElementById('countywrap').hidden=!looksApn(f.query.value.trim())});
+f.query.addEventListener('input',()=>{document.getElementById('apnrow').hidden=!looksApn(f.query.value.trim())});
 const gate=document.getElementById('gate');let CODE='';
 const getStored=()=>{try{return localStorage.getItem('sitekit-code')||''}catch(e){return ''}};
 const setStored=v=>{try{v?localStorage.setItem('sitekit-code',v):localStorage.removeItem('sitekit-code')}catch(e){}};
