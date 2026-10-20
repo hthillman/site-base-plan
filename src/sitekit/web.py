@@ -377,6 +377,36 @@ def _site_url() -> str:
     return os.environ.get("SITE_URL", "").rstrip("/") or request.host_url.rstrip("/")
 
 
+@app.get("/guides")
+def guides_index():
+    from .guides import guides_index as page
+
+    return page()
+
+
+@app.get("/guides/<slug>")
+def guide(slug):
+    from .guides import guide_page
+
+    html = guide_page(slug)
+    return html if html else abort(404)
+
+
+@app.get("/parcels")
+def parcels_index():
+    from .guides import parcels_index as page
+
+    return page()
+
+
+@app.get("/parcels/<slug>")
+def parcels_state(slug):
+    from .guides import parcel_state_page
+
+    html = parcel_state_page(slug)
+    return html if html else abort(404)
+
+
 @app.get("/robots.txt")
 def robots():
     return Response(f"User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: {_site_url()}/sitemap.xml\n", mimetype="text/plain")
@@ -402,7 +432,9 @@ def sitemap():
     from .pages import FIRMS_PAGE
 
     base = _site_url()
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/firms"] if FIRMS_PAGE else [])
+    from .guides import all_paths
+
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/firms"] if FIRMS_PAGE else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")
@@ -413,7 +445,10 @@ def llms_txt():
     from .pages import REPO_URL
     from .parcel import all_sources, county_sources
 
+    from .guides import GUIDES
+
     base = _site_url()
+    guides = "\n".join(f"- [{g.h1}]({base}/guides/{g.slug}): {g.description}" for g in GUIDES)
     states = ", ".join(sorted(all_sources()))
     counties = sum(len(v) for v in county_sources().values())
     text = f"""# Basesheet
@@ -428,6 +463,10 @@ Built for landscape architects, site designers and civil engineers doing early s
 - [Data sources]({base}/sources): every public data source, with publisher and resolution
 - [Privacy]({base}/privacy)
 - [Source code]({REPO_URL}): MIT-licensed Python core and the parcel source registry
+- [Free parcel data by state]({base}/parcels): every verified free statewide parcel layer, with publisher, coverage, vintage, fields and REST endpoint
+
+## Guides
+{guides}
 
 ## Outputs
 - DXF in State Plane feet (AutoCAD, Civil 3D), plus a copy near 0,0 for SketchUp; layer names configurable (default or US National CAD Standard)

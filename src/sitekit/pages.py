@@ -115,6 +115,13 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
+.answer{font-size:17px;line-height:1.6;margin:0 0 8px}
+.crumbs{font-size:13.5px;margin:0 0 8px}.crumbs a{color:var(--muted)}
+ol{padding-left:22px}
+code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+.cta{margin:32px 0 8px;padding:16px;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.cta p{margin:0 0 12px}.cta .btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:600;padding:9px 16px;border-radius:8px}
+th[scope],.tablewrap th{white-space:nowrap}
 @media(max-width:560px){.meta .sep,footer .actions .sep{display:none}.meta,footer .actions{gap:6px 16px}h1{font-size:24px}.search{flex-direction:column}.search button{padding:13px}main{padding-top:28px}}
 """
 
@@ -158,7 +165,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav>{links}{GITHUB_ICON}</nav></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a></p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -235,6 +242,7 @@ Free, no account.</p>
 
 <footer>
 <p class="fine">Planning-level public data, not a survey. Parcel lines in <a href="/about#coverage">{n} states{county_txt}</a>.</p>
+<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a></p>
 <p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
 <form id="fb" hidden>
 <textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
@@ -466,6 +474,7 @@ contour interval to what the data supports (5 ft at 10 m) and says so.</p>
 
 
 def sources() -> str:
+    from .guides import state_slug
     from .parcel import all_sources
 
     national = [
@@ -482,7 +491,7 @@ def sources() -> str:
     nrows = "".join(f"<tr><td>{escape(a)}</td><td>{escape(b)}</td><td>{escape(c)}</td></tr>" for a, b, c in national)
     src = all_sources()
     prows = "".join(
-        f"<tr><td>{escape(STATES.get(k, k))}</td><td>{escape(s.publisher or s.name)}</td><td>{escape(s.coverage)}</td>"
+        f'<tr><td><a href="/parcels/{state_slug(k)}">{escape(STATES.get(k, k))}</a></td><td>{escape(s.publisher or s.name)}</td>' f"<td>{escape(s.coverage)}</td>"
         f"<td>{escape(s.terms)}</td><td>{escape(str((s.verified or {}).get('date', '')))}</td></tr>"
         for k, s in sorted(src.items(), key=lambda kv: STATES.get(kv[0], kv[0])))
     body = f"""
