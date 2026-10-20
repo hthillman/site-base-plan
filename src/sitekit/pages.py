@@ -115,6 +115,18 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
+.rsec{margin-top:26px}.rsec h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
+.flag.plain{grid-template-columns:1fr;color:var(--ink)}
+.zone{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--field);margin-bottom:8px}
+.zone .zt{font-weight:600}.zone .zj{color:var(--muted);font-size:14px}
+.zone ul{margin:6px 0 4px;padding-left:18px;font-size:14.5px}.zone li{margin:2px 0}
+.zone .src{font-size:12.5px;color:var(--faint);margin:6px 0 0}
+.tfcta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-top:4px;font-size:14px}
+.tfcta button.quiet{padding:7px 12px;font-size:14px}
+#tff input:not(.hp){flex:1 1 220px}#tff button{flex:0 0 auto;padding:9px 16px}
+details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-bottom:8px}
+.vote{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:14px}.vote .chips{margin-top:8px}
+.vote .chip{font-size:13px;padding:5px 11px}
 .answer{font-size:17px;line-height:1.6;margin:0 0 8px}
 .crumbs{font-size:13.5px;margin:0 0 8px}.crumbs a{color:var(--muted)}
 ol{padding-left:22px}
@@ -315,30 +327,40 @@ f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working
 };
 function render(j){
  const order={missing:0,alert:1,caution:2,info:3};
- const flags=j.flags.slice().sort((a,b)=>order[a.level]-order[b.level]).map(x=>'<li class="flag"><span class="lvl '+x.level+'">'+x.level.toUpperCase()+'</span><span>'+esc(x.text)+'</span></li>').join('');
+ const fl=j.flags.filter(x=>x.kind!=='zoning'||!(j.zoning&&j.zoning.details&&j.zoning.details.length)).slice().sort((a,b)=>order[a.level]-order[b.level]);
+ const flags=fl.map(x=>x.level==='info'?'<li class="flag plain"><span>'+esc(x.text)+'</span></li>':
+  '<li class="flag"><span class="lvl '+x.level+'">'+x.level.toUpperCase()+'</span><span>'+esc(x.text)+'</span></li>').join('');
  const pdf=j.files.pdf?'<a class="secondary" href="'+esc(j.files.pdf)+'" target="_blank" rel="noopener">Open PDF</a>':'';
- out.innerHTML='<div class="result"><h3>Ready</h3><span class="note">Built in '+j.seconds+' s. Links last 2 days.</span>'+
+ out.innerHTML='<div class="result"><h3>Ready</h3><span class="note">Built in '+j.seconds+' s · links last 2 days</span>'+
  '<div class="dl"><a class="primary" href="'+esc(j.files.zip)+'">Download files (.zip)</a>'+pdf+'</div>'+
- (TIP_URL?'<p class="note tip">If this saved you some time, you can <a href="'+TIP_URL+'" target="_blank" rel="noopener">chip in for hosting</a>.</p>':'')+
- '<ul class="contents">'+
+ (TIP_URL?'<p class="note tip">Saved you some time? <a href="'+TIP_URL+'" target="_blank" rel="noopener">Chip in for hosting</a>.</p>':'')+
+ '<div class="rsec"><h4>About this site</h4><ul class="flags">'+flags+'</ul></div>'+
+ zoningBox(j.zoning)+
+ '<details class="files rsec"><summary>What\\'s in the zip and how to open it</summary><ul class="contents">'+
  '<li><b>AutoCAD / Civil 3D</b> · site.dxf (open it directly), surface.xml (LandXML surface)</li>'+
  '<li><b>SketchUp</b> · File › Import › terrain.dae for textured 3D ground; site-local.dxf for linework (SketchUp Pro)</li>'+
  '<li><b>Rhino, Blender</b> · terrain.obj</li>'+
  '<li><b>GIS</b> · gis/*.geojson, dem.tif</li>'+
  '<li><b>Google Earth</b> · site.kml</li>'+
- '<li><b>Everyone</b> · site-summary.pdf, provenance.md (sources and dates), and HOW-TO-OPEN.txt</li></ul>'+
- tfBox(j.zoning)+nextRow()+
- '<ul class="flags">'+flags+'</ul></div>';
+ '<li><b>Everyone</b> · site-summary.pdf, provenance.md (sources and dates), and HOW-TO-OPEN.txt</li></ul></details>'+
+ nextRow(j.zoning)+'</div>';
  wireNext(j.state);wireTf(j.zoning);}
 const TIP_URL="__TIP_URL__";
 const TF_PRICE="__TF_PRICE__";
-function tfBox(z){if(!z||!z.covered||!(z.zones||[]).length)return '';
- return '<div class="next" id="tfbox"><b>Want a test fit for this site?</b><span class="note">How many units fit, the buildable area after setbacks and buffers, '+
- 'parking, and a layout you can open in CAD, worked from this site\\'s zoning (below)'+(TF_PRICE?'. '+esc(TF_PRICE)+' per site':'')+'. Done within two business days.</span>'+
- '<form id="tff" class="nextdetail" style="flex-wrap:wrap;max-width:560px"><input name="email" type="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
- '<input name="units" maxlength="60" placeholder="What you have in mind (e.g. walk-up apartments)" aria-label="What you have in mind">'+
- '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Request</button></form><span class="fine" id="tfmsg"></span></div>';}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function zoningBox(z){if(!z||!(z.details||[]).length)return '';
+ const zs=z.details.map(d=>'<div class="zone"><div><span class="zt">'+esc(d.zone)+' '+esc(d.name||'')+'</span> <span class="zj">· '+esc(d.jurisdiction)+
+  (d.share?' · '+Math.round(d.share*100)+'% of parcel':'')+(d.at_point?' · at the address point':'')+'</span></div>'+
+  (d.facts.length?'<ul>'+d.facts.map(f=>'<li>'+esc(cap(f))+'</li>').join('')+'</ul>':'<p class="note">No rule sheet for this district yet.</p>')+
+  (d.source?'<p class="src">'+esc(d.source)+' Base district only; overlays and recent amendments can change these. Confirm with the jurisdiction.</p>':'')+'</div>').join('');
+ const tf=z.details.some(d=>d.facts.length)?'<div class="tfcta" id="tfbox"><span><b>Need a test fit?</b> Units, buildable area, parking and a CAD layout from these rules'+
+  (TF_PRICE?' · '+esc(TF_PRICE):'')+' · within 2 business days.</span><button type="button" class="quiet" id="tfopen">Request a test fit</button>'+
+  '<form id="tff" class="nextdetail" hidden style="flex-wrap:wrap;max-width:none;width:100%"><input name="email" type="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
+  '<input name="units" maxlength="60" placeholder="What you have in mind (e.g. walk-up apartments)" aria-label="What you have in mind">'+
+  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Send request</button></form><span class="fine" id="tfmsg"></span></div>':'';
+ return '<div class="rsec"><h4>Zoning</h4>'+zs+tf+'</div>';}
 function wireTf(z){const f=document.getElementById('tff');if(!f)return;
+ document.getElementById('tfopen').onclick=e=>{e.target.hidden=true;f.hidden=false;f.email.focus()};
  f.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('tfmsg');
   const r=await fetch('/api/testfit-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:f.email.value,units:f.units.value,website:f.website.value,site:document.querySelector('#f [name=query]').value,zones:z.zones})});
   const j=await r.json().catch(()=>({}));
@@ -347,8 +369,9 @@ function wireTf(z){const f=document.getElementById('tff');if(!f)return;
 const NEXT=[["zoning","Zoning test fit (setbacks, max units, parking layout)"],["county","Parcel lines for my county"],["batch","Run many sites at once"],
  ["titleblock","My firm's title block and CAD standards"],["massing","3D building massing for SketchUp"],["other","Something else"]];
 const ASK={zoning:"Which city or county?",county:"Which county and state?",batch:"Roughly how many sites, how often?",titleblock:"Anything specific? (optional)",massing:"What would you use it for? (optional)",other:"What should it do?"};
-function nextRow(){return '<div class="next" id="next"><b>What should it do next?</b><span class="note">One click helps decide what gets built. No sign-up.</span><div class="chips">'+
- NEXT.map(([k,l])=>'<button type="button" class="chip" data-k="'+k+'">'+esc(l)+'</button>').join('')+'</div>'+
+function nextRow(z){const covered=z&&(z.details||[]).some(d=>d.facts.length);
+ return '<div class="vote" id="next"><b>What should it build next?</b> <span class="note">One click, no sign-up.</span><div class="chips">'+
+ NEXT.filter(([k])=>!(covered&&k==='zoning')).map(([k,l])=>'<button type="button" class="chip" data-k="'+k+'">'+esc(l)+'</button>').join('')+'</div>'+
  '<form class="nextdetail" id="nextdetail" hidden><input name="detail" maxlength="300"><button>Send</button></form><span class="fine" id="nextmsg"></span></div>';}
 function wireNext(state){const box=document.getElementById('next');if(!box)return;let cur=null,vid=null;
  const send=(choice,detail)=>fetch('/api/interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({choice,detail,state,vote_id:vid})});
