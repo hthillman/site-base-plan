@@ -180,7 +180,7 @@ Parcel lines are available in <a href="/about#coverage">{n} states{county_txt}</
 <span class="fine" id="fbmsg"></span>
 </form></details>
 
-<p class="fine">No cookies, no account. Files are deleted after 2 days. <a href="/privacy">Privacy</a> · <a href="/sources">Data sources</a>{TIP_FOOTER}</p>
+<p class="fine">No cookies, no account. Files are deleted after 2 days. <a href="/privacy">Privacy</a> · <a href="/sources">Data sources</a> · <a href="https://github.com/hthillman/site-base-plan" target="_blank" rel="noopener">Open source</a>{TIP_FOOTER}</p>
 </footer>
 """
     script = """<script>
@@ -316,6 +316,11 @@ data came from. It's built for landscape architects, civil engineers, architects
 <li>Not a wetland delineation, geotechnical report or flood determination.</li>
 </ul>
 <p class="note">{escape(DISCLAIMER)}</p>
+
+<h2>Open source</h2>
+<p>The base plan code and the parcel source list are open source (MIT) at
+<a href="https://github.com/hthillman/site-base-plan">github.com/hthillman/site-base-plan</a>. If your county publishes parcels
+and isn't covered, you can add it: it's one small file. See the contributing guide there.</p>
 
 <h2 id="coverage">Coverage</h2>
 <p>Topography, soils, flood zones, wetlands and imagery cover all 50 states. Parcel lines come from free statewide parcel layers, which
