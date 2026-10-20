@@ -16,7 +16,7 @@ def write_provenance(res, cfg, opts) -> dict[str, str]:
     shutil.copy(cfg.source_file, out / "layers.toml")
     data = {
         "generated_at": now_iso(),
-        "tool": "Site Base Plan (https://github.com/hthillman/site-base-plan)",
+        "tool": "Basesheet (https://basesheet.site, source: https://github.com/hthillman/site-base-plan)",
         "disclaimer": DISCLAIMER,
         "input": {"query": site.query, "buffer_ft": site.buffer_ft, "contour_interval_ft": opts.contour_interval},
         "site": {

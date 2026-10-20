@@ -28,6 +28,20 @@ ACCESS_CODE = os.environ.get("ACCESS_CODE")  # shared code; unset = open
 PRIVATE_TOKEN = os.environ.get("PRIVATE_READ_WRITE_TOKEN")  # private Blob store: feedback
 
 app = Flask(__name__)
+
+# Old hostnames (e.g. site-toolkit.vercel.app) that should 301 to SITE_URL. Pages only; /api keeps
+# working everywhere so runs started on an old tab still finish.
+REDIRECT_HOSTS = {h.strip().lower() for h in os.environ.get("REDIRECT_HOSTS", "").split(",") if h.strip()}
+
+
+@app.before_request
+def redirect_old_hosts():
+    site = os.environ.get("SITE_URL", "").rstrip("/")
+    if site and request.host.lower() in REDIRECT_HOSTS and not request.path.startswith("/api/"):
+        from flask import redirect
+
+        qs = request.query_string.decode()
+        return redirect(f"{site}{request.path}" + (f"?{qs}" if qs else ""), code=301)
 LOCAL_RUNS: dict[str, Path] = {}  # run id -> folder, for local file serving
 
 CONTENT_TYPES = {".pdf": "application/pdf", ".dxf": "application/dxf", ".dwg": "application/acad", ".png": "image/png",
@@ -402,9 +416,9 @@ def llms_txt():
     base = _site_url()
     states = ", ".join(sorted(all_sources()))
     counties = sum(len(v) for v in county_sources().values())
-    text = f"""# Site Base Plan
+    text = f"""# Basesheet
 
-> Free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files. No account. Open source (MIT).
+> Basesheet is a free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files. No account. Open source (MIT).
 
 Built for landscape architects, site designers and civil engineers doing early site studies, feasibility and concept design. It replaces the hour or two of pulling public GIS layers into CAD by hand. It is not a survey.
 
@@ -443,7 +457,7 @@ def main():
     p = argparse.ArgumentParser(prog="sitekit-web")
     p.add_argument("--port", type=int, default=5055)
     a = p.parse_args()
-    print(f"Site base plan UI: http://127.0.0.1:{a.port}")
+    print(f"Basesheet UI: http://127.0.0.1:{a.port}")
     app.run(host="127.0.0.1", port=a.port, debug=False)
 
 

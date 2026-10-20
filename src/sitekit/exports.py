@@ -145,7 +145,7 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
               if tex else '<effect id="aerial-fx"><profile_COMMON><technique sid="t"><lambert><diffuse><color>0.6 0.55 0.45 1</color></diffuse></lambert></technique></profile_COMMON></effect>')
     dae = f"""<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-  <asset><contributor><authoring_tool>Site Base Plan</authoring_tool><comments>{escape(f"Terrain, origin at base point E {bx:.0f} N {by:.0f}, {site.crs_label}. Elevations NAVD88 {site.units}. Planning-level data only; not a survey.")}</comments></contributor>
+  <asset><contributor><authoring_tool>Basesheet (basesheet.site)</authoring_tool><comments>{escape(f"Terrain, origin at base point E {bx:.0f} N {by:.0f}, {site.crs_label}. Elevations NAVD88 {site.units}. Planning-level data only; not a survey.")}</comments></contributor>
     <unit name="foot" meter="0.3048"/><up_axis>Z_UP</up_axis></asset>
   {'<library_images><image id="tex-img"><init_from>' + tex + '</init_from></image></library_images>' if tex else ''}
   <library_effects>{effect}
@@ -188,7 +188,7 @@ def write_landxml(res, grid, out: Path) -> str:
 <LandXML xmlns="http://www.landxml.org/schema/LandXML-1.2" version="1.2" date="{__import__('datetime').date.today().isoformat()}" time="00:00:00">
   <Units><Imperial areaUnit="squareFoot" linearUnit="{unit}" volumeUnit="cubicFeet" temperatureUnit="fahrenheit" pressureUnit="inHG" angularUnit="decimal degrees" directionUnit="decimal degrees"/></Units>
   <CoordinateSystem name="{escape(site.crs_label)}" desc="{wkid_text(site.epsg)}; vertical NAVD88"/>
-  <Application name="Site Base Plan" desc="Planning-level data only; not a survey"/>
+  <Application name="Basesheet" desc="Planning-level data only; not a survey"/>
   <Surfaces>
     <Surface name="Existing ground (3DEP)" desc="{escape(res.layers['dem'].vintage or '3DEP DEM')}; {spacing:.1f} ft grid">
       <Definition surfType="TIN" elevMin="{np.nanmin(zs):.3f}" elevMax="{np.nanmax(zs):.3f}">

@@ -129,7 +129,7 @@ GITHUB_ICON = (f'<a class="gh" href="{REPO_URL}" target="_blank" rel="noopener" 
 NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/privacy", "Privacy")]
 
 
-SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # canonical origin, e.g. https://site-toolkit.vercel.app
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # canonical origin, e.g. https://basesheet.site
 DEFAULT_DESCRIPTION = ("Free planning-level site base plans from any US address: parcel lines, LiDAR contours, slopes, soils, "
                        "FEMA flood zones, wetlands and aerial, as DXF, SketchUp terrain, LandXML, GIS and PDF.")
 
@@ -146,7 +146,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <meta name="description" content="{escape(description)}">
 <link rel="canonical" href="{escape(url)}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Site Base Plan">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Basesheet">
 <meta property="og:title" content="{escape(title)}"><meta property="og:description" content="{escape(description)}">
 <meta property="og:url" content="{escape(url)}"><meta property="og:image" content="{escape(og_img)}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
@@ -157,7 +157,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
-<header><div class="wrap"><a class="brand" href="/">Site Base Plan</a><nav>{links}{GITHUB_ICON}</nav></div></header>
+<header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav>{links}{GITHUB_ICON}</nav></div></header>
 <main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
@@ -340,7 +340,7 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
 </script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL))
     app_ld = {
-        "@context": "https://schema.org", "@type": "WebApplication", "name": "Site Base Plan",
+        "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
         "description": DEFAULT_DESCRIPTION, "isAccessibleForFree": True,
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
@@ -351,8 +351,8 @@ document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/ap
         "author": {"@type": "Person", "name": "Hunter Hillman"},
         "license": "https://opensource.org/licenses/MIT", "sameAs": [REPO_URL],
     }
-    return layout("Site Base Plan: free site base plans from any US address (DXF, SketchUp, Civil 3D, GIS)", "/", body, script,
-                  jsonld=[app_ld, {"@context": "https://schema.org", "@type": "WebSite", "name": "Site Base Plan", "url": SITE_URL or "/"}])
+    return layout("Basesheet: free site base plans from any US address (DXF, SketchUp, Civil 3D, GIS)", "/", body, script,
+                  jsonld=[app_ld, {"@context": "https://schema.org", "@type": "WebSite", "name": "Basesheet", "url": SITE_URL or "/"}])
 
 
 TF_SECTION_HTML = """<h2>Experimental: apartment test fit</h2>
@@ -423,7 +423,7 @@ def about(parcel_states: list[str]) -> str:
     missing = [STATES[k] for k in sorted(STATES, key=lambda k: STATES[k]) if k not in src and k not in csrc]
     body = f"""
 <h1>About & coverage</h1>
-<p class="sub">Site Base Plan turns an address into the first sheet of a site design: what's on the ground, what's regulated, and where the
+<p class="sub">Basesheet turns an address into the first sheet of a site design: what's on the ground, what's regulated, and where the
 data came from. It's built for landscape architects, civil engineers, architects and developers doing early site work.</p>
 
 <h2>What you get</h2>
@@ -460,8 +460,8 @@ contour interval to what the data supports (5 ft at 10 m) and says so.</p>
 <h2 id="faq">Common questions</h2>
 {"".join(f'<h3>{escape(q)}</h3><p>{escape(ans)}</p>' for q, ans in faq_items())}
 """
-    return layout("About, coverage and FAQ · Site Base Plan", "/about", body,
-                  description="What Site Base Plan makes, what it isn't, which states have parcel lines, and answers to common questions about data sources, accuracy and file formats.",
+    return layout("About, coverage and FAQ · Basesheet", "/about", body,
+                  description="What Basesheet makes, what it isn't, which states have parcel lines, and answers to common questions about data sources, accuracy and file formats.",
                   jsonld=[faq_jsonld()])
 
 
@@ -495,8 +495,8 @@ services answered, when, and with what resolution and date.</p>
 <div class="tablewrap"><table><tr><th>State</th><th>Publisher</th><th>Coverage</th><th>Terms</th><th>Last verified</th></tr>{prows}</table></div>
 <p class="note">Parcel layers are assessor tax-parcel compilations, not legal boundaries. Where a publisher limits commercial use, the outputs say so.</p>
 """
-    return layout("Data sources and credits · Site Base Plan", "/sources", body,
-                  description="Every public data source behind Site Base Plan: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
+    return layout("Data sources and credits · Basesheet", "/sources", body,
+                  description="Every public data source behind Basesheet: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
 
 
 def privacy() -> str:
@@ -523,7 +523,7 @@ Never shared or sold. Ask through the feedback form to have it deleted.</p>
 <h2>Professional use</h2>
 <p>Outputs are planning-level. Verify conditions in the field and with a licensed surveyor before relying on them.</p>
 """
-    return layout("Privacy · Site Base Plan", "/privacy", body,
+    return layout("Privacy · Basesheet", "/privacy", body,
                   description="What happens to an address you enter: which services see it, how long files are kept (2 days), and what anonymous usage data is recorded.")
 
 
@@ -581,5 +581,5 @@ document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.ta
  const j=await r.json().catch(()=>({}));
  if(r.ok){f.innerHTML='<p class="ok"><b>Thanks, got it.</b> I\\'ll be in touch by email.</p>'}else{m.textContent=j.error||'Something went wrong.';m.className='fine err'}};
 </script>"""
-    return layout("For firms · Site Base Plan", "/firms", body, script,
+    return layout("For firms · Basesheet", "/firms", body, script,
                   description="Early access for offices that run regular site studies: zoning test fits for your jurisdictions, batch runs, and your title block and CAD standards on every output.")
