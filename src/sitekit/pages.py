@@ -124,6 +124,14 @@ ul{padding-left:20px}li{margin:5px 0}
 .zone .src{font-size:12.5px;color:var(--faint);margin:6px 0 0}
 details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-bottom:8px}
 .firmline{margin:18px 0 0}
+#savebox{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;flex-basis:100%}
+.dl #savebox:empty{display:none}
+.savef{display:flex;gap:8px;flex-wrap:wrap}.savef input:not(.hp){flex:1 1 220px;font-size:15px}.savef button{padding:9px 14px}
+.plan{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
+.plan:first-child{border-top:0}
+.plan .t{font-weight:600}.plan .acts{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:14px}
+.plan .acts button{background:none;border:0;padding:0;color:var(--muted);font-weight:500;font-size:14px;cursor:pointer}
+.plan .acts button.really{color:var(--alert)}
 .vote{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:14px}.vote .chips{margin-top:8px}
 .vote .chip{font-size:13px;padding:5px 11px}
 .answer{font-size:17px;line-height:1.6;margin:0 0 8px}
@@ -154,7 +162,10 @@ DEFAULT_DESCRIPTION = ("Free planning-level site base plans from any US address:
 
 def layout(title: str, active: str, body: str, script: str = "", description: str = DEFAULT_DESCRIPTION,
            jsonld: list[dict] | None = None) -> str:
-    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{escape(t)}</a>' for h, t in NAV[1:])
+    from .accounts import current_email
+
+    nav = NAV[1:] + ([("/plans", "My plans")] if current_email() else [])
+    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{escape(t)}</a>' for h, t in nav)
     url = f"{SITE_URL}{active}" if SITE_URL else active
     og_img = f"{SITE_URL}/og.png" if SITE_URL else "/og.png"
     ld = "".join(f'<script type="application/ld+json">{json.dumps(j, separators=(",", ":"))}</script>' for j in (jsonld or []))
@@ -343,7 +354,7 @@ function render(j){
   '<li class="flag"><span class="lvl '+x.level+'">'+x.level.toUpperCase()+'</span><span>'+esc(x.text)+'</span></li>').join('');
  const pdf=j.files.pdf?'<a class="secondary" href="'+esc(j.files.pdf)+'" target="_blank" rel="noopener">Open PDF</a>':'';
  out.innerHTML='<div class="result"><h3>Ready</h3><span class="note">Built in '+j.seconds+' s · links last 2 days</span>'+
- '<div class="dl"><a class="primary" href="'+esc(j.files.zip)+'">Download files (.zip)</a>'+pdf+'</div>'+
+ '<div class="dl"><a class="primary" href="'+esc(j.files.zip)+'">Download files (.zip)</a>'+pdf+'<span id="savebox"></span></div>'+
  (TIP_URL?'<p class="note tip">Saved you some time? <a href="'+TIP_URL+'" target="_blank" rel="noopener">Chip in for hosting</a>.</p>':'')+
  '<div class="rsec"><h4>About this site</h4><ul class="flags">'+flags+'</ul></div>'+
  zoningBox(j.zoning)+
@@ -356,10 +367,27 @@ function render(j){
  '<li><b>Everyone</b> · site-summary.pdf, provenance.md (sources and dates), and HOW-TO-OPEN.txt</li></ul></details>'+
  nextRow(j.zoning)+
  (PRO?'<p class="note firmline">Using this at a firm? I\\'m working with a few offices on test fits, title blocks and batch runs. <a href="/firms">Tell me what you need</a>.</p>':'')+'</div>';
- wireNext(j.state);}
+ wireNext(j.state);wireSave(j);}
 const TIP_URL="__TIP_URL__";
 const PRO=__PRO__;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+async function wireSave(j){const box=document.getElementById('savebox');if(!box||!j.run_id)return;
+ let me={};try{me=await (await fetch('/api/me')).json()}catch(e){return}
+ if(!me.email&&!me.can_sign_up)return;
+ const plan={run_id:j.run_id,title:j.title,files:j.files,state:j.state};
+ box.innerHTML='<button type="button" class="quiet" id="savebtn">Save to my plans</button>';
+ document.getElementById('savebtn').onclick=async()=>{
+  if(me.email){box.textContent='Saving…';
+   const r=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan)});const k=await r.json().catch(()=>({}));
+   box.innerHTML=r.ok?'<span class="ok">Saved.</span> <a href="/plans">My plans</a>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';return}
+  box.innerHTML='<form id="sf" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a link</button></form>'+
+   '<span class="fine" id="sfmsg">Click the link in the email and this plan is saved. No password.</span>';
+  const sf=document.getElementById('sf');sf.email.focus();
+  sf.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('sfmsg');
+   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:sf.email.value,website:sf.website.value,save:plan})});
+   const k=await r.json().catch(()=>({}));
+   if(r.ok){sf.hidden=true;m.className='fine ok';m.innerHTML='Check your email for the sign-in link. It works for 30 minutes.'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':'')}
+   else{m.className='fine err';m.textContent=k.error||'Something went wrong.'}};};}
 function zoningBox(z){if(!z||!(z.details||[]).length)return '';
  const zs=z.details.map(d=>'<div class="zone"><div><span class="zt">'+esc(d.zone)+' '+esc(d.name||'')+'</span> <span class="zj">· '+esc(d.jurisdiction)+
   (d.share?' · '+Math.round(d.share*100)+'% of parcel':'')+(d.at_point?' · at the address point':'')+'</span></div>'+
@@ -577,6 +605,10 @@ and the run's state. Nothing that identifies you.</p>
 <h2>Firms</h2>
 <p>If you tell me about your firm on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
 about it. Never shared or sold; ask to have them deleted any time.</p>
+<h2>Saved plans</h2>
+<p>Saving is optional. If you sign in to save a plan, your email address and the plans you save (address, files and date) are
+stored privately and kept until you delete them. Your email is used only to send sign-in links. Never shared or sold. Delete a
+plan from My plans any time; ask through the feedback form to have your account removed.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
 Never shared or sold. Ask through the feedback form to have it deleted.</p>
@@ -585,6 +617,49 @@ Never shared or sold. Ask through the feedback form to have it deleted.</p>
 """
     return layout("Privacy · Basesheet", "/privacy", body,
                   description="What happens to an address you enter: which services see it, how long files are kept (2 days), and what anonymous usage data is recorded.")
+
+
+def plans() -> str:
+    body = """
+<h1>My plans</h1>
+<p class="lede" id="plede">Base plans you've saved. Files stay here until you delete them.</p>
+<div id="pmsg" class="note" aria-live="polite"></div>
+<div id="plist"></div>
+<form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
+<p class="fine" id="signout-row" hidden><span id="who"></span> · <button type="button" class="linkbtn" id="signout" style="padding:0">Sign out</button></p>
+"""
+    script = """<script>
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const msg=document.getElementById('pmsg'),list=document.getElementById('plist'),signin=document.getElementById('signin');
+const q=new URLSearchParams(location.search);
+if(q.get('saved')==='1')msg.innerHTML='<span class="ok">Saved to your plans.</span>';
+if(q.get('saved')==='0')msg.innerHTML='<span class="err">Signed in, but that plan couldn\\'t be saved. Its files may have expired; build it again and save.</span>';
+if(q.get('link')==='expired')msg.innerHTML='<span class="err">That sign-in link has expired. Enter your email for a new one.</span>';
+if(q.get('link')==='bad')msg.innerHTML='<span class="err">That sign-in link didn\\'t work. Enter your email for a new one.</span>';
+async function load(){
+ const me=await (await fetch('/api/me')).json().catch(()=>({}));
+ if(!me.email){document.getElementById('plede').textContent=me.can_sign_up?'Sign in with your email to see the plans you\\'ve saved. No password: we email you a link.':'Saving plans isn\\'t available yet.';signin.hidden=!me.can_sign_up;return}
+ document.getElementById('signout-row').hidden=false;document.getElementById('who').textContent='Signed in as '+me.email;
+ const r=await fetch('/api/plans');const d=await r.json().catch(()=>({plans:[]}));
+ if(!d.plans||!d.plans.length){list.innerHTML='<p class="note">No saved plans yet. Build a base plan on the <a href="/">home page</a> and choose Save to my plans.</p>';return}
+ list.innerHTML=d.plans.map(p=>'<div class="plan" data-id="'+esc(p.id)+'"><span class="t">'+esc(p.title)+'</span><span class="note">Saved '+esc((p.saved_at||'').slice(0,10))+'</span>'+
+  '<span class="acts"><a href="'+esc(p.files.zip)+'">Download files (.zip)</a>'+(p.files.pdf?'<a href="'+esc(p.files.pdf)+'" target="_blank" rel="noopener">Open PDF</a>':'')+
+  '<button type="button" class="del">Delete</button></span></div>').join('');
+ list.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{
+  if(!b.classList.contains('really')){b.classList.add('really');b.textContent='Delete for good?';setTimeout(()=>{b.classList.remove('really');b.textContent='Delete'},4000);return}
+  const row=b.closest('.plan');b.textContent='Deleting…';
+  const r=await fetch('/api/plans/'+encodeURIComponent(row.dataset.id),{method:'DELETE'});
+  if(r.ok){row.remove();if(!list.children.length)load()}else{b.textContent='Couldn\\'t delete'}});}
+signin.onsubmit=async e=>{e.preventDefault();
+ const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:signin.email.value,website:signin.website.value})});
+ const k=await r.json().catch(()=>({}));
+ if(r.ok){signin.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':'')}
+ else{msg.innerHTML='<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}};
+document.getElementById('signout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/plans'};
+load();
+</script>"""
+    return layout("My plans · Basesheet", "/plans", body, script, description="Your saved Basesheet base plans.")
 
 
 FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hosted site only

@@ -28,6 +28,13 @@ ACCESS_CODE = os.environ.get("ACCESS_CODE")  # shared code; unset = open
 PRIVATE_TOKEN = os.environ.get("PRIVATE_READ_WRITE_TOKEN")  # private Blob store: feedback
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY") or "dev-only-secret"
+app.config.update(SESSION_COOKIE_SECURE=bool(os.environ.get("SECRET_KEY")), SESSION_COOKIE_SAMESITE="Lax",
+                  SESSION_COOKIE_HTTPONLY=True, PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 180)
+
+from .accounts import bp as accounts_bp  # noqa: E402
+
+app.register_blueprint(accounts_bp)
 
 # Old hostnames (e.g. site-toolkit.vercel.app) that should 301 to SITE_URL. Pages only; /api keeps
 # working everywhere so runs started on an old tab still finish.
@@ -184,7 +191,7 @@ def start():
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
             })
             events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
-                                   "zoning": res.zoning}})
+                                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address}})
         except Exception as e:  # noqa: BLE001
             record_usage({"outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
@@ -394,6 +401,16 @@ def firms_page():
     if not FIRMS_PAGE:
         abort(404)
     return firms()
+
+
+@app.get("/plans")
+def plans_page():
+    from .accounts import enabled
+    from .pages import plans
+
+    if not enabled():
+        abort(404)
+    return plans()
 
 
 @app.get("/privacy")
