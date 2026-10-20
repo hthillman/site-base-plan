@@ -568,9 +568,9 @@ def firms() -> str:
     body = f"""
 <h1>For firms</h1>
 <p class="lede">Basesheet is free and <a href="{REPO_URL}">open source</a>, and it stays that way. A few offices that run regular
-site studies have asked for more, so I'm building some firm features together with them.</p>
+site studies have asked for firm-specific features, so I'm working with them to improve the tool for professional usage.</p>
 
-<h2>Free, and staying free</h2>
+<h2>Free forever</h2>
 <ul>
 <li>Base plans from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
 <li>Every export: DXF, SketchUp terrain, LandXML, GIS, KML and the PDF summary.</li>
@@ -586,7 +586,7 @@ site studies have asked for more, so I'm building some firm features together wi
 </ul>
 
 <h2>Tell me what your office needs</h2>
-<p>If any of this would help, a few details go a long way. The places and problems firms tell me about are what I build next.</p>
+<p>If any of this would help, a few details go a long way.</p>
 <form id="ff">
 <div class="grid2">
 <label>Firm<input name="firm" maxlength="120" required></label>
