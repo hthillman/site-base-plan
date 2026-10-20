@@ -30,7 +30,13 @@ header .wrap{display:flex;align-items:baseline;gap:20px;padding-top:22px;padding
 .brand{font-weight:650;color:var(--ink);text-decoration:none;letter-spacing:-.01em;margin-right:auto}
 header nav{display:flex;gap:18px}header nav a{color:var(--muted);text-decoration:none;font-size:14px}
 header nav a:hover,header nav a.on{color:var(--ink)}
-header nav{align-items:center}header nav a.gh{display:inline-flex;align-items:center;padding:2px;margin-left:2px}
+header nav{align-items:center}header a.gh{display:inline-flex;align-items:center;padding:2px;color:var(--muted)}header a.gh:hover{color:var(--ink)}
+header .hright{display:flex;align-items:center;gap:10px;align-self:center}
+header .menu{display:none;background:none;border:0;padding:6px;margin:-6px -6px -6px 0;color:var(--ink);cursor:pointer;line-height:0}
+header .menu:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+@media(max-width:560px){header .wrap{align-items:center}header .menu{display:block}
+header nav{display:none;order:3;flex-basis:100%;flex-direction:column;align-items:stretch;gap:0;margin-top:8px;border-top:1px solid var(--line)}
+header.open nav{display:flex}header nav a{font-size:16px;padding:12px 0;border-bottom:1px solid var(--line)}}
 main{padding:40px 0 24px}
 h1{font-size:28px;line-height:1.2;letter-spacing:-.02em;margin:0 0 10px;font-weight:650}
 h2{font-size:17px;margin:32px 0 8px}
@@ -186,7 +192,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
-<header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav>{links}{GITHUB_ICON}</nav></div></header>
+<header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
 <main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a></p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
