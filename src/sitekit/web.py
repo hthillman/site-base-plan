@@ -356,9 +356,85 @@ def privacy():
     return page()
 
 
+STATIC_DIR = Path(__file__).parent / "static"
+
+
+def _site_url() -> str:
+    return os.environ.get("SITE_URL", "").rstrip("/") or request.host_url.rstrip("/")
+
+
 @app.get("/robots.txt")
 def robots():
-    return Response("User-agent: *\nAllow: /\nDisallow: /api/\n", mimetype="text/plain")
+    return Response(f"User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: {_site_url()}/sitemap.xml\n", mimetype="text/plain")
+
+
+@app.get("/favicon.svg")
+@app.get("/favicon.ico")
+def favicon():
+    r = send_file(STATIC_DIR / "favicon.svg", mimetype="image/svg+xml")
+    r.headers["Cache-Control"] = "public, max-age=604800"
+    return r
+
+
+@app.get("/og.png")
+def og_image():
+    r = send_file(STATIC_DIR / "og.png", mimetype="image/png")
+    r.headers["Cache-Control"] = "public, max-age=604800"
+    return r
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    from .pages import FIRMS_PAGE
+
+    base = _site_url()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/firms"] if FIRMS_PAGE else [])
+    urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
+    return Response(xml, mimetype="application/xml")
+
+
+@app.get("/llms.txt")
+def llms_txt():
+    from .pages import REPO_URL
+    from .parcel import all_sources, county_sources
+
+    base = _site_url()
+    states = ", ".join(sorted(all_sources()))
+    counties = sum(len(v) for v in county_sources().values())
+    text = f"""# Site Base Plan
+
+> Free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files. No account. Open source (MIT).
+
+Built for landscape architects, site designers and civil engineers doing early site studies, feasibility and concept design. It replaces the hour or two of pulling public GIS layers into CAD by hand. It is not a survey.
+
+## Pages
+- [Home: build a base plan]({base}/): enter an address or parcel number; results in about 15-30 seconds as a zip
+- [About, coverage and FAQ]({base}/about): what it does, limits, state-by-state parcel coverage, common questions
+- [Data sources]({base}/sources): every public data source, with publisher and resolution
+- [Privacy]({base}/privacy)
+- [Source code]({REPO_URL}): MIT-licensed Python core and the parcel source registry
+
+## Outputs
+- DXF in State Plane feet (AutoCAD, Civil 3D), plus a copy near 0,0 for SketchUp; layer names configurable (default or US National CAD Standard)
+- Textured 3D terrain (COLLADA .dae and OBJ) for SketchUp, Rhino, Blender
+- LandXML surface (Civil 3D), GeoTIFF elevation model, GeoJSON layers, KML for Google Earth
+- PDF with scaled sheets and plain-language site flags (floodplain, wetlands, steep slopes, soils)
+- Provenance file listing each layer's source, date and resolution, and any layer that failed
+
+## Data
+- Topography: USGS 3DEP (1 m LiDAR where available, otherwise 3 m or 10 m; contour interval adapts)
+- Soils: USDA NRCS SSURGO
+- Flood: FEMA National Flood Hazard Layer
+- Wetlands: USFWS National Wetlands Inventory
+- Roads: US Census TIGER; aerial: Esri World Imagery
+- Parcels: free statewide layers in {states}, plus {counties} Georgia counties. Elsewhere the plan is drawn around the address without a parcel line.
+
+## Limits
+- Planning-level only. Parcel lines are assessor tax lines, often 5-50 ft off the legal boundary. Wetland and flood layers are screening maps. Confirm with a licensed surveyor and specialists.
+- One site up to 5 adjoining parcels / 20 acres per run.
+"""
+    return Response(text, mimetype="text/plain")
 
 
 def main():

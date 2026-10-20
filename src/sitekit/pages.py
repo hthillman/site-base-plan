@@ -34,6 +34,7 @@ header nav{align-items:center}header nav a.gh{display:inline-flex;align-items:ce
 main{padding:40px 0 24px}
 h1{font-size:28px;line-height:1.2;letter-spacing:-.02em;margin:0 0 10px;font-weight:650}
 h2{font-size:17px;margin:32px 0 8px}
+h3{font-size:15px;margin:20px 0 4px}
 .lede{color:var(--muted);margin:0 0 28px;max-width:600px}
 .search{display:flex;gap:8px}
 .search input{flex:1;min-width:0;font-size:17px;padding:13px 14px}
@@ -128,14 +129,31 @@ GITHUB_ICON = (f'<a class="gh" href="{REPO_URL}" target="_blank" rel="noopener" 
 NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/privacy", "Privacy")]
 
 
-def layout(title: str, active: str, body: str, script: str = "") -> str:
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # canonical origin, e.g. https://site-toolkit.vercel.app
+DEFAULT_DESCRIPTION = ("Free planning-level site base plans from any US address: parcel lines, LiDAR contours, slopes, soils, "
+                       "FEMA flood zones, wetlands and aerial, as DXF, SketchUp terrain, LandXML, GIS and PDF.")
+
+
+def layout(title: str, active: str, body: str, script: str = "", description: str = DEFAULT_DESCRIPTION,
+           jsonld: list[dict] | None = None) -> str:
     links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{escape(t)}</a>' for h, t in NAV[1:])
+    url = f"{SITE_URL}{active}" if SITE_URL else active
+    og_img = f"{SITE_URL}/og.png" if SITE_URL else "/og.png"
+    ld = "".join(f'<script type="application/ld+json">{json.dumps(j, separators=(",", ":"))}</script>' for j in (jsonld or []))
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(title)}</title>
-<meta name="description" content="Free planning-level site base plans from any US address: contours, slopes, soils, flood zones, wetlands and aerial, as DXF, PDF, SketchUp terrain, LandXML and GIS files.">
+<meta name="description" content="{escape(description)}">
+<link rel="canonical" href="{escape(url)}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Site Base Plan">
+<meta property="og:title" content="{escape(title)}"><meta property="og:description" content="{escape(description)}">
+<meta property="og:url" content="{escape(url)}"><meta property="og:image" content="{escape(og_img)}">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
 <style>{CSS}</style>
+{ld}
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
@@ -321,7 +339,20 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
 </script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL))
-    return layout("Site Base Plan", "/", body, script)
+    app_ld = {
+        "@context": "https://schema.org", "@type": "WebApplication", "name": "Site Base Plan",
+        "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
+        "description": DEFAULT_DESCRIPTION, "isAccessibleForFree": True,
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "featureList": ["Parcel lines from statewide and county parcel data", "LiDAR contours and slope analysis",
+                        "NRCS soils, FEMA flood zones and NWI wetlands", "Road centerlines, adjacent parcels and approximate right-of-way",
+                        "DXF for AutoCAD, COLLADA terrain for SketchUp, LandXML for Civil 3D, GeoJSON and GeoTIFF for GIS, KML, PDF",
+                        "Multi-parcel sites and custom CAD layer names"],
+        "author": {"@type": "Person", "name": "Hunter Hillman"},
+        "license": "https://opensource.org/licenses/MIT", "sameAs": [REPO_URL],
+    }
+    return layout("Site Base Plan: free site base plans from any US address (DXF, SketchUp, Civil 3D, GIS)", "/", body, script,
+                  jsonld=[app_ld, {"@context": "https://schema.org", "@type": "WebSite", "name": "Site Base Plan", "url": SITE_URL or "/"}])
 
 
 TF_SECTION_HTML = """<h2>Experimental: apartment test fit</h2>
@@ -329,6 +360,47 @@ TF_SECTION_HTML = """<h2>Experimental: apartment test fit</h2>
 and buffers, and proposes walk-up apartment and parking layouts that meet the district's density, parking, coverage and height rules. Its rule
 sheets are AI-extracted from the codes and not yet reviewed, so it's off by default.</p>
 """
+
+
+def faq_items() -> list[tuple[str, str]]:
+    """Visible FAQ on the About page; the FAQPage JSON-LD is built from the same list."""
+    from .parcel import all_sources, county_sources
+
+    n = len(all_sources())
+    counties = sum(len(v) for v in county_sources().values())
+    return [
+        ("How do I get a base plan for a property?",
+         "Type the street address (or a parcel number and state) on the home page and select Build base plan. In about 15 to 30 "
+         "seconds you get a zip with CAD, 3D, GIS and PDF files for the parcel plus a buffer around it (100 ft by default)."),
+        ("What files do I get?",
+         "A DXF in State Plane feet for AutoCAD and Civil 3D, a copy moved near 0,0 for SketchUp, textured 3D terrain (COLLADA "
+         "and OBJ), a LandXML surface, GeoJSON layers and a GeoTIFF elevation model for GIS, a KML for Google Earth, and a PDF "
+         "with scaled sheets and plain-language findings about floodplain, wetlands, steep slopes and soils."),
+        ("Where does the data come from?",
+         "Public sources, queried live for each site: USGS 3DEP LiDAR for topography, USDA NRCS SSURGO for soils, the FEMA "
+         "National Flood Hazard Layer, the USFWS National Wetlands Inventory, Census TIGER roads, Esri World Imagery, and "
+         f"free statewide or county parcel layers. Every download includes a provenance file with each layer's source, date and resolution."),
+        ("Is this a survey?",
+         "No. It's planning-level data for early site work. Parcel lines are assessor tax lines, often 5 to 50 ft from the legal "
+         "boundary, and wetlands and flood zones are screening maps. Use a licensed land surveyor and the appropriate specialists "
+         "before design decisions that depend on exact boundaries or conditions."),
+        ("Which states have parcel lines?",
+         f"{n} states publish a free statewide parcel layer it can use, plus {counties} Georgia counties so far. Elsewhere the "
+         "plan is drawn around the address without a parcel line; everything else still works. The coverage table above lists each state."),
+        ("How accurate are the contours?",
+         "They come from the best USGS 3DEP elevation data at the site: usually 1 m LiDAR, sometimes older 3 m LiDAR or a 10 m "
+         "model where there's no LiDAR. The tool raises the contour interval to what the data supports (5 ft at 10 m) and says so."),
+        ("Can I use it with SketchUp?",
+         "Yes. In SketchUp, use File, Import, choose COLLADA (.dae) and pick terrain.dae for textured 3D ground with the parcel "
+         "line on it. site-local.dxf has the linework in the same coordinates for SketchUp Pro."),
+        ("Does it cost anything? Is it open source?",
+         "It's free with no account. The base plan code and parcel source list are open source under the MIT license on GitHub."),
+    ]
+
+
+def faq_jsonld() -> dict:
+    return {"@context": "https://schema.org", "@type": "FAQPage",
+            "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq_items()]}
 
 
 def about(parcel_states: list[str]) -> str:
@@ -384,8 +456,13 @@ and isn't covered, you can add it: it's one small file. See the contributing gui
 contour interval to what the data supports (5 ft at 10 m) and says so.</p>
 
 {TF_SECTION}
+
+<h2 id="faq">Common questions</h2>
+{"".join(f'<h3>{escape(q)}</h3><p>{escape(ans)}</p>' for q, ans in faq_items())}
 """
-    return layout("About & coverage · Site Base Plan", "/about", body)
+    return layout("About, coverage and FAQ · Site Base Plan", "/about", body,
+                  description="What Site Base Plan makes, what it isn't, which states have parcel lines, and answers to common questions about data sources, accuracy and file formats.",
+                  jsonld=[faq_jsonld()])
 
 
 def sources() -> str:
@@ -418,7 +495,8 @@ services answered, when, and with what resolution and date.</p>
 <div class="tablewrap"><table><tr><th>State</th><th>Publisher</th><th>Coverage</th><th>Terms</th><th>Last verified</th></tr>{prows}</table></div>
 <p class="note">Parcel layers are assessor tax-parcel compilations, not legal boundaries. Where a publisher limits commercial use, the outputs say so.</p>
 """
-    return layout("Data sources · Site Base Plan", "/sources", body)
+    return layout("Data sources and credits · Site Base Plan", "/sources", body,
+                  description="Every public data source behind Site Base Plan: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
 
 
 def privacy() -> str:
@@ -445,7 +523,8 @@ Never shared or sold. Ask through the feedback form to have it deleted.</p>
 <h2>Professional use</h2>
 <p>Outputs are planning-level. Verify conditions in the field and with a licensed surveyor before relying on them.</p>
 """
-    return layout("Privacy · Site Base Plan", "/privacy", body)
+    return layout("Privacy · Site Base Plan", "/privacy", body,
+                  description="What happens to an address you enter: which services see it, how long files are kept (2 days), and what anonymous usage data is recorded.")
 
 
 FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hosted site only
@@ -502,4 +581,5 @@ document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.ta
  const j=await r.json().catch(()=>({}));
  if(r.ok){f.innerHTML='<p class="ok"><b>Thanks, got it.</b> I\\'ll be in touch by email.</p>'}else{m.textContent=j.error||'Something went wrong.';m.className='fine err'}};
 </script>"""
-    return layout("For firms · Site Base Plan", "/firms", body, script)
+    return layout("For firms · Site Base Plan", "/firms", body, script,
+                  description="Early access for offices that run regular site studies: zoning test fits for your jurisdictions, batch runs, and your title block and CAD standards on every output.")
