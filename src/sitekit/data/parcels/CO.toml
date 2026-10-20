@@ -1,0 +1,24 @@
+state = "CO"
+name = "Colorado Public Parcels"
+publisher = "Colorado Governor's Office of Information Technology (OIT) GIS"
+url = "https://gis.colorado.gov/public/rest/services/Address_and_Parcel/Colorado_Public_Parcels/FeatureServer/0"
+apn_fields = ["parcel_id", "account"]
+situs_field = "situsAdd"
+city_field = "sitAddCty"
+county_field = "countyFips"
+county_values = "fips"
+coverage = "44 of 64 counties. Missing: Alamosa, Baca, Bent, Chaffee, Cheyenne, Conejos, Costilla, Crowley, Delta, Fremont, Jackson, Kiowa, Kit Carson, Las Animas, Lincoln, Mineral, Montrose, Otero, Phillips, Prowers"
+vintage = "Collected annually; dateReceived April 2026 for sampled counties"
+max_record_count = 2000
+terms = "Public; attribution: Colorado OIT GIS Team and contributing county/local governments"
+notes = "countyFips is the 3-digit county part as text ('031' Denver), countyName also available. account is the county assessor account number and is NOT unique statewide (R0008939 matched 3 parcels); filter by county when using it. A point that hits only a street returns 0 features."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "owner"
+legal_field = "legalDesc"
+subdivision_field = "subName"
+[verified]
+date = "2026-10-19"
+point = [-104.9600, 39.7250]
+point_result = "parcel_id 0511103011000, 520 N CIRCLE DR, Denver (031), 1 polygon; Boulder point -105.27,40.015 returned parcel_id 146330844007 at 1520 19TH ST"
+apn_test = "parcel_id = '0511103011000' returned 1 polygon; account = 'R0008939' returned 3 (multiple counties)"

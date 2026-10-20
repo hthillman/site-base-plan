@@ -1,0 +1,23 @@
+state = "NC"
+name = "North Carolina Parcels (Polygons)"
+publisher = "NC OneMap / NC Center for Geographic Information and Analysis"
+url = "https://services.nconemap.gov/secure/rest/services/NC1Map_Parcels/MapServer/1"
+apn_fields = ["parno", "altparno", "nparno"]
+situs_field = "siteadd"
+city_field = "scity"
+county_field = "cntyfips"
+county_values = "fips"
+coverage = "All 100 counties plus Eastern Band of Cherokee Indians lands"
+vintage = "County submissions aggregated by NC OneMap; item last modified 2026-09-17"
+max_record_count = 5000
+terms = "Public; NC OneMap terms https://www.nconemap.gov/pages/terms; source data from NC counties"
+notes = "Despite '/secure/' in the path, no token is required. cntyfips is the 3-digit county FIPS as a string (e.g. '183' = Wake); cntyname also available. nparno = '37' + county FIPS + '_' + parno (statewide-unique). MapServer layer, not FeatureServer."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "ownname"
+subdivision_field = "subdivisio"
+[verified]
+date = "2026-10-19"
+point = [-78.6391, 35.7804]
+point_result = "parno 1703790137 (altparno 0179249) at 1 E EDENTON ST, RALEIGH, Wake County (NC State Capitol)"
+apn_test = "parno = '1703790137' returned 1 polygon; altparno = '0179249' returned the same parcel"

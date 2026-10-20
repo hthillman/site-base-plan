@@ -1,0 +1,22 @@
+state = "ID"
+name = "Public Idaho Parcels (Idaho Parcel Data Exchange Standard)"
+publisher = "State of Idaho (Idaho Geospatial Office statewide parcel framework), data from participating county assessors"
+url = "https://services1.arcgis.com/CNPdEkvnGl65jCX8/arcgis/rest/services/Public_Idaho_Parcels_/FeatureServer/7"
+apn_fields = ["PARCEL_ID", "FP_ID"]
+situs_field = "SITE_ADD"
+city_field = "SITE_CITY"
+county_field = "FIPS"
+county_values = "fips"
+coverage = "13 of 44 counties only: Ada, Bear Lake, Boise, Camas, Gooding, Jerome, Lincoln, Minidoka, Nez Perce, Oneida, Teton, Valley, Washington. All other counties missing."
+vintage = "County UPDATED dates Aug 2024 - Apr 2025 (Minidoka undated); service last modified Apr 2026"
+max_record_count = 2000
+terms = "Public; follow the terms of use in the Idaho Parcel Data Exchange Standard; attribution: participating Idaho counties / State of Idaho"
+notes = "FIPS is 5-digit text ('16001' Ada); County holds the name. FP_ID = '<County>-<PARCEL_ID>' and is unique statewide. Ada County rows have null SITE_ADD/OWNER1 (attributes withheld); other counties populate them. Text fields are space-padded, trim before use. Layer 0 in the same service is centroids (points), use layer 7 for polygons."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNER1"
+[verified]
+date = "2026-10-19"
+point = [-116.1900, 43.6000]
+point_result = "PARCEL_ID S1014234000, Ada County (Boise), 1 polygon, no situs; Lewiston point -117.0176,46.4165 returned RPL0810003001A at 1212 IDAHO ST (Nez Perce)"
+apn_test = "PARCEL_ID = 'S1014234000' returned 1 polygon; FP_ID = 'Ada-S1014234000' returned 1 polygon"

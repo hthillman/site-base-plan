@@ -1,0 +1,22 @@
+state = "GA"
+county = "Coweta"
+name = "Coweta County Tax Parcels (WeeklyUpdate_WinGapParcels)"
+publisher = "Coweta County GIS (ArcGIS Online org cowetamaps, user tforeman_coweta_county)"
+url = "https://services1.arcgis.com/AaPyNbrJpNGryRqh/arcgis/rest/services/WeeklyUpdate_WinGapParcels/FeatureServer/0"
+apn_fields = ["ParcelNumber", "PID", "RealKey"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Coweta County (about 65,900 parcels, incl. Newnan, Senoia, Grantville)"
+vintage = "Weekly refresh from the WinGAP assessor system; last refresh 2026-10"
+max_record_count = 2000
+terms = "Public; Coweta County, Georgia"
+owner_field = "OwnerName"
+notes = "ParcelNumber (= PID) is space-padded fixed-width, e.g. 'N04  0007 001', '036A      199'; match exactly or normalize whitespace. IMPORTANT: StreetAddress/City/State/Zip are the OWNER'S MAILING address, not the situs. The situs is split across HouseNumber + StreetDirection + StreetName + StreetType (e.g. 22 / 'E ' / 'BROAD' / 'ST'), all space-padded. Text fields are space-padded. No deed or plat fields. This is the parcel layer used in the county's own web maps; the older county servers (cccjcgiswa.coweta.ga.us, coweta-gis-web.coweta.ga.us) no longer resolve, and the 'WinGapParcels_DroneSense' view returns 0 features."
+
+[verified]
+date = "2026-10-19"
+point = [-84.79778, 33.37458]
+point_result = "ParcelNumber 'N04  0007 001' with situs 22 E BROAD ST (downtown Newnan), owner CALDWELL DEVELOPMENT INVESTMENTS LLC"
+apn_test = "ParcelNumber = 'N04  0007 001' returned 1 polygon"

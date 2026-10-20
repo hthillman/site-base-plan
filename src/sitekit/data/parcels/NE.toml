@@ -1,0 +1,20 @@
+state = "NE"
+name = "Nebraska Statewide Parcels"
+publisher = "Nebraska Office of the Chief Information Officer (OCIO), compiled from county assessors"
+url = "https://gis.ne.gov/Enterprise/rest/services/StatewideParcelsExternal/FeatureServer/0"
+apn_fields = ["Parcel_ID", "State_PID"]
+situs_field = "Situs_Address"
+city_field = "Ph_City"
+county_field = "County_ID"
+county_values = "fips"
+coverage = "All 93 counties (1,154,898 parcels)"
+vintage = "2025 parcels (county CAMA + GIS snapshot)"
+max_record_count = 2000
+terms = "Public; general use and analysis, authority lies with the county assessors"
+notes = "County_ID is the 3-digit county FIPS without the state prefix ('055' Douglas, '109' Lancaster). State_PID = County_ID + Parcel_ID, but the separator differs by county (Douglas: '055' + '310190003' with the leading 0 of Parcel_ID dropped). Situs_Address format varies by county (Lancaster includes city/state/zip, Douglas does not); Ph_City and Situs_Address can be blank. Some locations return stacked/duplicate polygons (2 hits at one Omaha point). Some exempt parcels (e.g. the Lincoln Capitol block) return no polygon."
+
+[verified]
+date = "2026-10-19"
+point = [-96.70800, 40.81400]
+point_result = "Parcel_ID 1023450001000 (State_PID 1091023450001000) at 129 N 10TH ST LINCOLN NE 68508, County_ID 109. Also Omaha (-95.93360, 41.25880) -> Parcel_ID 0310190003, 1314 DOUGLAS ST, OMAHA (plus a second stacked polygon 0310190001)"
+apn_test = "Parcel_ID = '1023450001000' returned 1 polygon; Parcel_ID = '0310190003' and State_PID = '055310190003' each returned 1 polygon"

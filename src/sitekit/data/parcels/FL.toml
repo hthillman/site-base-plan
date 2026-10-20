@@ -1,0 +1,25 @@
+state = "FL"
+name = "Florida Statewide Cadastral"
+publisher = "Florida Geographic Information Office (data: Florida Department of Revenue, Property Tax Oversight)"
+url = "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Cadastral/FeatureServer/0"
+apn_fields = ["PARCEL_ID", "PARCELNO", "STATE_PAR_", "ALT_KEY"]
+situs_field = "PHY_ADDR1"
+city_field = "PHY_CITY"
+county_field = "CO_NO"
+county_values = "code"
+coverage = "All 67 counties"
+vintage = "2026 tax roll (ASMNT_YR 2026; exported August 2026, updated annually each August)"
+max_record_count = 2000
+terms = "Public; attribution: Florida county property appraisers / Florida Department of Revenue PTO / FGIO. DOR does not guarantee accuracy."
+notes = "CO_NO is the Florida DOR county number (11 = Alachua ... 77 = Washington, alphabetical; 47 = Leon), NOT FIPS. About 97k features have CO_NO = 0. CO_NO is an integer field. PARCEL_ID and PARCELNO matched in the test record."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWN_NAME"
+deed_book_field = "OR_BOOK1"
+deed_page_field = "OR_PAGE1"
+legal_field = "S_LEGAL"
+[verified]
+date = "2026-10-19"
+point = [-84.2809, 30.4381]
+point_result = "PARCEL_ID 2136251531450 at 400 S MONROE ST, TALLAHASSEE, CO_NO 47 (Leon), ASMNT_YR 2026"
+apn_test = "PARCEL_ID = '2136251531450' returned 1 polygon"

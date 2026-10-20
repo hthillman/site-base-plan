@@ -1,0 +1,26 @@
+state = "GA"
+county = "Cherokee"
+name = "Cherokee County Parcels (MainLayers)"
+publisher = "Cherokee County GIS (gis.cherokeecountyga.gov)"
+url = "https://gis.cherokeecountyga.gov/arcgis/rest/services/MainLayers/MapServer/1"
+apn_fields = ["PIN", "TIN", "TINNoSpace"]
+situs_field = "Property_Address"
+city_field = "Property_City"
+county_field = ""
+county_values = "none"
+coverage = "All of Cherokee County (about 116,000 parcels, incl. Canton, Woodstock, Holly Springs, Ball Ground)"
+vintage = "County-maintained live parcel layer with assessor owner/deed join"
+max_record_count = 1000
+terms = "Public; Cherokee County, Georgia GIS"
+owner_field = "Owner"
+deed_book_field = "DEEDBOOK"
+deed_page_field = "DEEDPAGE"
+plat_book_field = "PlatBook"
+plat_page_field = "PlatPage"
+notes = "MapServer layer. Host moved: the old gis.cherokeega.com hostname now serves a *.cherokeecountyga.gov certificate (TLS name mismatch), so use gis.cherokeecountyga.gov. PIN is dashed ('14-0226-0014'); TIN is the space-padded tax ID ('14N22   006  N'), TINNoSpace the same without spaces. Property_Address is street only, mixed case ('1130 Bluffs Pkwy'). Deed book/page are zero-padded strings ('08642'/'00145'). Layer description says it can include deleted (historic) parcels, but every feature tested had ParcelType 0 and the count (~116k) matches the current roll. Owner is null on some exempt/public parcels (~850)."
+
+[verified]
+date = "2026-10-19"
+point = [-84.47201, 34.26833]
+point_result = "PIN '14-0226-0014' (TIN '14N22   006  N') at 1130 Bluffs Pkwy, Canton (Cherokee County Administration Building), DEEDBOOK 08642 / DEEDPAGE 00145"
+apn_test = "PIN = '14-0226-0014' returned 1 polygon"

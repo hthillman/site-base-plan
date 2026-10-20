@@ -1,0 +1,26 @@
+[project]
+name = "sitekit"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "Hunter Hillman" }]
+requires-python = ">=3.12"
+dependencies = [
+    "contourpy>=1.4.0",
+    "ezdxf>=1.4.5",
+    "flask>=3.1.3",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pillow>=12.3.0",
+    "pyproj>=3.8.0",
+    "requests>=2.34.2",
+    "shapely>=2.2.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.6,<0.12.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+sitekit = "sitekit.cli:main"
+sitekit-web = "sitekit.web:main"

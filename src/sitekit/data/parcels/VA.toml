@@ -1,0 +1,20 @@
+state = "VA"
+name = "Virginia Parcels (VGIN)"
+publisher = "Virginia Geographic Information Network (VGIN), Virginia Department of Emergency Management"
+url = "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VA_Parcels/FeatureServer/0"
+apn_fields = ["PARCELID", "PTM_ID", "VGIN_QPID"]
+situs_field = ""
+city_field = "LOCALITY"
+county_field = "FIPS"
+county_values = "fips"
+coverage = "132 of 133 counties/independent cities (plus 4 towns that submit separately). Missing: Rappahannock County"
+vintage = "Locality submissions 2017-2026 (LASTUPDATE); most recent 2026-09"
+max_record_count = 2000
+terms = "Public; attribution: VGIN and contributing localities"
+notes = "Geometry and ids only: no owner, situs or assessment attributes. PARCELID and PTM_ID are locality ids, unique only within FIPS. FIPS is 5-digit for counties/cities but 7-digit for the 4 separately submitted towns (Bedford, Colonial Beach, Culpeper, Farmville). Not edge-matched."
+
+[verified]
+date = "2026-10-19"
+point = [-77.4339, 37.5385]
+point_result = "PARCELID 517466 / PTM_ID E0000146001, Richmond City (FIPS 51760), 1 polygon"
+apn_test = "PTM_ID = 'E0000146001' AND FIPS = '51760' returned 1 polygon; PARCELID = '517466' AND FIPS = '51760' returned 1"

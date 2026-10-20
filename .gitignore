@@ -1,0 +1,9 @@
+out/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.vercel
+.env*
+.gstack/
+ACCESS_CODE.txt

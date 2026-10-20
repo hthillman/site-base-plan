@@ -1,0 +1,24 @@
+state = "GA"
+county = "Chatham"
+name = "SAGIS Parcel Digest 2025 (Chatham County)"
+publisher = "SAGIS - Savannah Area GIS (Chatham County / City of Savannah consortium)"
+url = "https://pub.sagis.org/arcgis/rest/services/OpenData/Parcels/MapServer/27"
+apn_fields = ["PIN"]
+situs_field = "PropAddress_Full"
+city_field = "PropAddress_City"
+county_field = ""
+county_values = "none"
+coverage = "All of Chatham County, incl. Savannah, Tybee Island, Pooler, Garden City and other cities"
+vintage = "2025 tax digest (Date_Updated 2025-05-06); annual snapshot"
+max_record_count = 2000
+terms = "Public; SAGIS OpenData"
+owner_field = "Owner"
+deed_book_field = "Sale_Book"
+deed_page_field = "Sale_Page"
+notes = "Layer 27 of the OpenData/Parcels MapServer is the newest digest; SAGIS adds one layer per year (layer 26 = 2024, 25 = 2023, ...), so check the service for a 'Parcel Digest 2026' layer and bump the id when it appears. PIN has a space, e.g. '20016 23001'. PropAddress_Full is street only; Municipality is a 3-digit code. Sale_Book/Sale_Page are the deed book/page of the most recent sale. No plat book field. A daily-edited plat layer exists at OpenData/DPLAT_Chatham/MapServer/6 but without assessor attributes."
+
+[verified]
+date = "2026-10-19"
+point = [-81.09689, 32.07927]
+point_result = "PIN '20016 23001' at 133 MONTGOMERY ST, SAVANNAH (Chatham County Courthouse), owner DOWNTOWN SAVANNAH AUTHORITY, Sale_Book 2043 / Sale_Page 0357"
+apn_test = "PIN = '20016 23001' returned 1 polygon"

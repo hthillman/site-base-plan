@@ -1,0 +1,24 @@
+state = "NJ"
+name = "Parcels and MOD-IV Composite of NJ (Web Mercator)"
+publisher = "NJ Office of Information Technology, Office of GIS (NJOGIS)"
+url = "https://services2.arcgis.com/XVOqAjTOJ5P6ngMu/arcgis/rest/services/Parcels_Composite_NJ_WM/FeatureServer/0"
+apn_fields = ["PAMS_PIN", "GIS_PIN", "PIN_NODUP"]
+situs_field = "PROP_LOC"
+city_field = "MUN_NAME"
+county_field = "COUNTY"
+county_values = "name"
+coverage = "All 21 counties"
+vintage = "Parcel publish dates 2023-2026 by county; MOD-IV tax attributes joined"
+max_record_count = 2000
+terms = "Public; attribution: NJOGIS and contributing counties"
+notes = "PAMS_PIN = '<4-digit muni code>_<block>_<lot>[_<qualifier>]', e.g. 1111_2001_1. A user's block/lot can also match PCLBLOCK + PCLLOT within PCL_MUN. Some parcels have no MOD-IV match, so attributes (COUNTY, PROP_LOC) can be null."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNER_NAME"
+deed_book_field = "DEED_BOOK"
+deed_page_field = "DEED_PAGE"
+[verified]
+date = "2026-10-19"
+point = [-74.7699, 40.2206]
+point_result = "PAMS_PIN 1111_2001_1 at 117 W STATE ST, TRENTON CITY, MERCER (State House complex), 1 polygon"
+apn_test = "PAMS_PIN = '1111_2001_1' returned 1 polygon"

@@ -1,0 +1,192 @@
+# Layer naming for the base plan output (DXF + PDF legend).
+#
+# Anything downstream that reads the DXF by layer name (scripts, CAD
+# templates) depends on these, so rename with care. Keys on the left are fixed
+# (the code refers to them); the `name` values are yours to change.
+#
+# color = AutoCAD Color Index (ACI), 1-255. linetype must be a standard
+# AutoCAD linetype (CONTINUOUS, DASHED, HIDDEN, CENTER, PHANTOM, DOT).
+
+[layers.parcel]
+name = "SITE-PARCEL"
+color = 1          # red
+linetype = "PHANTOM"
+description = "Tax parcel boundary (WA statewide parcels). Not a survey."
+
+[layers.parcel_site]
+name = "SITE-PARCEL-ASSEMBLED"
+color = 1
+linetype = "CONTINUOUS"
+description = "Outer boundary of a multi-parcel site (only when several parcels are combined)."
+
+[layers.clip]
+name = "SITE-EXTENT"
+color = 8
+linetype = "DASHED"
+description = "Data extent: parcel bounding box plus buffer."
+
+[layers.contour_major]
+name = "SITE-CONTOUR-MAJOR"
+color = 32         # brown
+linetype = "CONTINUOUS"
+description = "Major contours. Each polyline carries its elevation (ft NAVD88)."
+
+[layers.contour_minor]
+name = "SITE-CONTOUR-MINOR"
+color = 33
+linetype = "CONTINUOUS"
+description = "Minor contours. Each polyline carries its elevation (ft NAVD88)."
+
+[layers.contour_label]
+name = "SITE-CONTOUR-LABEL"
+color = 32
+linetype = "CONTINUOUS"
+description = "Elevation labels on major contours."
+
+[layers.parcel_adj]
+name = "SITE-PARCEL-ADJ"
+color = 8
+linetype = "CONTINUOUS"
+description = "Neighbouring tax parcels in the extent (assessor lines)."
+
+[layers.parcel_adj_label]
+name = "SITE-PARCEL-ADJ-LABEL"
+color = 8
+linetype = "CONTINUOUS"
+description = "Neighbour parcel ID, owner of record, deed / plat reference where published."
+
+[layers.road_cl]
+name = "SITE-ROAD-CL"
+color = 9
+linetype = "CENTER"
+description = "Road centerlines (U.S. Census TIGER)."
+
+[layers.road_label]
+name = "SITE-ROAD-LABEL"
+color = 9
+linetype = "CONTINUOUS"
+description = "Road names."
+
+[layers.row]
+name = "SITE-ROW-APPROX"
+color = 253
+linetype = "CONTINUOUS"
+description = "Approximate right-of-way: area between tax parcels that a road runs through. Derived, not recorded."
+
+[layers.soils]
+name = "SITE-SOILS"
+color = 42
+linetype = "CONTINUOUS"
+description = "NRCS SSURGO soil map unit boundaries."
+
+[layers.soils_label]
+name = "SITE-SOILS-LABEL"
+color = 42
+linetype = "CONTINUOUS"
+description = "Soil map unit symbols."
+
+[layers.flood]
+name = "SITE-FLOOD"
+color = 5          # blue
+linetype = "CONTINUOUS"
+description = "FEMA NFHL flood hazard zones (boundary + hatch)."
+
+[layers.flood_label]
+name = "SITE-FLOOD-LABEL"
+color = 5
+linetype = "CONTINUOUS"
+description = "FEMA zone labels."
+
+[layers.wetland]
+name = "SITE-WETLAND"
+color = 3          # green
+linetype = "CONTINUOUS"
+description = "USFWS National Wetlands Inventory polygons (boundary + hatch)."
+
+[layers.wetland_label]
+name = "SITE-WETLAND-LABEL"
+color = 3
+linetype = "CONTINUOUS"
+description = "NWI wetland codes."
+
+[layers.slope]
+name = "SITE-SLOPE"
+color = 30
+linetype = "CONTINUOUS"
+description = "Slope band polygons; one sub-layer per band (SITE-SLOPE-<lo>-<hi>)."
+
+[layers.aerial]
+name = "SITE-AERIAL"
+color = 7
+linetype = "CONTINUOUS"
+description = "Orthophoto raster underlay (aerial.png, referenced next to the DXF)."
+
+[layers.basepoint]
+name = "SITE-BASEPOINT"
+color = 6          # magenta
+linetype = "CONTINUOUS"
+description = "Shared base point. site.dxf has it at its State Plane coordinates; site-local.dxf has it at 0,0."
+
+[layers.notes]
+name = "SITE-NOTES"
+color = 7
+linetype = "CONTINUOUS"
+description = "Title block text, data sources, and the planning-level disclaimer."
+
+[slope]
+# Percent-slope band edges. Bands are [0,5), [5,15), [15,25), [25,+).
+breaks = [0, 5, 15, 25]
+# ACI colours per band, low to high.
+colors = [3, 2, 30, 1]
+
+[contours]
+# Every Nth contour is a major. 1 ft -> 5 ft majors, 2 ft -> 10, 5 ft -> 25.
+major_every = 5
+# How contour polylines are written: "lwpolyline" (2D polyline with its
+# elevation property set; what Civil 3D and most CAD users expect) or
+# "polyline3d" (true 3D polyline, every vertex has Z).
+entity = "lwpolyline"
+
+# --- Test fit (walk-up apartments). Option layers get the option number:
+# TESTFIT-1-BLDG, TESTFIT-2-BLDG ... so options can be frozen/thawed.
+[layers.tf_buildable]
+name = "TESTFIT-BUILDABLE"
+color = 4          # cyan
+linetype = "DASHED"
+description = "Building envelope: parcel minus setbacks, landscape and critical-area buffers."
+
+[layers.tf_constraint]
+name = "TESTFIT-CONSTRAINT"
+color = 30
+linetype = "CONTINUOUS"
+description = "Areas removed from the envelope (setbacks, buffers, critical areas), hatched."
+
+[layers.tf_bldg]
+name = "TESTFIT-{n}-BLDG"
+color = 6
+linetype = "CONTINUOUS"
+description = "Building footprints for option {n}."
+
+[layers.tf_parking]
+name = "TESTFIT-{n}-PARKING"
+color = 8
+linetype = "CONTINUOUS"
+description = "Paved parking + drive aisle outline for option {n}."
+
+[layers.tf_stall]
+name = "TESTFIT-{n}-STALL"
+color = 9
+linetype = "CONTINUOUS"
+description = "Individual parking stalls for option {n}."
+
+[layers.tf_drive]
+name = "TESTFIT-{n}-DRIVE"
+color = 8
+linetype = "CONTINUOUS"
+description = "Access drive from the street for option {n}."
+
+[layers.tf_label]
+name = "TESTFIT-{n}-LABEL"
+color = 7
+linetype = "CONTINUOUS"
+description = "Building labels (stories, units) for option {n}."

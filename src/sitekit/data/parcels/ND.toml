@@ -1,0 +1,20 @@
+state = "ND"
+name = "NDGISHUB Parcels (North Dakota Statewide Parcel Program)"
+publisher = "North Dakota GIS Hub (NDIT)"
+url = "https://services1.arcgis.com/GOcSXpzwBHyk2nog/arcgis/rest/services/NDGISHUB_Parcels/FeatureServer/0"
+apn_fields = ["GISID", "UniqueGISID"]
+situs_field = ""
+city_field = ""
+county_field = "CountyFIPS"
+county_values = "fips"
+coverage = "All 53 counties (741,989 parcels); program focus is rural parcels, so some city parcels may be missing"
+vintage = "Updated per county, monthly to yearly; tax roll TaxRollYear 2026 in tested records"
+max_record_count = 2000
+terms = "Public; State of North Dakota disclaimer (not for navigation, not a survey); authority rests with counties"
+notes = "Polygon layer has no address fields. Situs address (PropertyAddress, PropertyCity), owner and values are in the related table at FeatureServer/1 (Parcels_TaxRoll), one-to-many on UniqueGISID. GISID matched the tax roll ParcelID in tested records. CountyFIPS is 5-digit (38015); CountyName holds the name. UniqueGISID = CountyFIPS + '-' + GISID."
+
+[verified]
+date = "2026-10-19"
+point = [-100.7837, 46.8083]
+point_result = "GISID 1-102-001 (UniqueGISID 38015-1-102-001), Burleigh; tax roll: 514 E THAYER AVE, Bismarck. Also Fargo (-96.78740, 46.87545) -> GISID 1-8920-00200-000, Cass; tax roll: 15 BROADWAY N, FARGO"
+apn_test = "GISID = '1-102-001' returned 1 polygon; UniqueGISID = '38017-1-8920-00200-000' returned 1 polygon"

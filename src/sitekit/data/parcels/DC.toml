@@ -1,0 +1,24 @@
+state = "DC"
+name = "Owner Polygons (Common Ownership Layer)"
+publisher = "DC Office of the Chief Technology Officer (DC GIS)"
+url = "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Property_and_Land_WebMercator/MapServer/40"
+apn_fields = ["SSL"]
+situs_field = "PREMISEADD"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "Entire District (all land outside right-of-way)"
+vintage = "OTR extract up to 2026-10-16 (EXTRACTDAT)"
+max_record_count = 2000
+terms = "Public; attribution: District of Columbia (DC GIS / OCTO)"
+notes = "SSL (Square-Suffix-Lot) is fixed-width with padding spaces: 4-char square, 4-char suffix, 4-char lot, e.g. '0255    0800'; normalise user input before matching. Built from record, tax, parcel, reservation and air-rights lots. Tax Lots alone are layer 39."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNERNAME"
+deed_book_field = "BOOK_NUM"
+deed_page_field = "PAGE_NUM"
+[verified]
+date = "2026-10-19"
+point = [-77.0310, 38.8951]
+point_result = "SSL '0255    0800' at 1350 E ST NW (John A. Wilson Building), 1 polygon"
+apn_test = "SSL = '0255    0800' returned 1 polygon"

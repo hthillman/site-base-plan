@@ -1,0 +1,22 @@
+state = "GA"
+county = "Fulton"
+name = "Fulton County Tax Parcels (current digest)"
+publisher = "Fulton County Department of Information Technology, GIS Division (Fulton_County_GIS)"
+url = "https://services1.arcgis.com/AQDHTHDrZzfsFsB5/arcgis/rest/services/Tax_Parcels/FeatureServer/0"
+apn_fields = ["ParcelID"]
+situs_field = "Address"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Fulton County, incl. City of Atlanta and other cities"
+vintage = "2026 tax digest (TaxYear 2026; service updated 2026-09). Per-year snapshots exist as Tax_Parcels_2025 etc."
+max_record_count = 1000
+terms = "Public; compiled by Fulton County DIT GIS Division using Board of Assessors data"
+owner_field = "Owner"
+notes = "ParcelID has a space after the 2-digit district, e.g. '14 007700061068'. Address is situs street only ('141 PRYOR ST SW'), no city; TaxDist is a tax-district code, not a city name. Owner has trailing spaces. No deed or plat book fields. maxRecordCount is 1000."
+
+[verified]
+date = "2026-10-19"
+point = [-84.39198, 33.75139]
+point_result = "ParcelID '14 007700061068' at 141 PRYOR ST SW, Atlanta (Fulton County Government Center), owner FULTON COUNTY, TaxYear 2026"
+apn_test = "ParcelID = '14 007700061068' returned 1 polygon"

@@ -1,0 +1,20 @@
+state = "DE"
+name = "Delaware State Parcels 2.0"
+publisher = "Delaware FirstMap (Delaware Department of Technology and Information)"
+url = "https://enterprise.firstmap.delaware.gov/arcgis/rest/services/PlanningCadastre/DE_StateParcels/FeatureServer/0"
+apn_fields = ["PIN"]
+situs_field = ""
+city_field = ""
+county_field = "COUNTY"
+county_values = "name"
+coverage = "All 3 counties (New Castle, Kent, Sussex)"
+vintage = "Updated 2026-10-01 (UPDATED field)"
+max_record_count = 2000
+terms = "Public; attribution: Delaware FirstMap and county governments"
+notes = "Geometry, PIN, acres and county only. PIN format differs by county: New Castle 10 digits (2603520039), Kent dashed (2-05-07709-04-3400-00001), Sussex its own format. Layer 1 of the service is parcel centroids. Owner/situs live in the county services."
+
+[verified]
+date = "2026-10-19"
+point = [-75.5480, 39.7459]
+point_result = "PIN 2603520039, New Castle (Wilmington), 1 polygon; also Dover (-75.5267, 39.1574) returned Kent PIN 2-05-07709-04-3400-00001"
+apn_test = "PIN = '2603520039' returned 1 polygon"

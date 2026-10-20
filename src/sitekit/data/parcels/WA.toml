@@ -1,0 +1,20 @@
+state = "WA"
+name = "Current Parcels (Washington State Parcels Project)"
+publisher = "WaTech Geospatial Program Office (WA Geospatial Portal)"
+url = "https://services.arcgis.com/jsIt88o09Q0r1j8h/arcgis/rest/services/Current_Parcels/FeatureServer/0"
+apn_fields = ["ORIG_PARCEL_ID", "PARCEL_ID_NR"]
+situs_field = "SITUS_ADDRESS"
+city_field = "SITUS_CITY_NM"
+county_field = "COUNTY_NM"
+county_values = "fips"
+coverage = "All 39 counties"
+vintage = "Current annual compilation (WA Parcels Project)"
+max_record_count = 2000
+terms = "Public; WaTech and contributing counties"
+notes = "King County assessor GIS is used as a fallback when this layer misses."
+
+[verified]
+date = "2026-10-16"
+point = [-121.8255, 47.5266]
+point_result = "ORIG_PARCEL_ID 7849202480, 38625 SE RIVER ST, SNOQUALMIE"
+apn_test = "ORIG_PARCEL_ID = '09590003000' returned 1 polygon (Thurston)"

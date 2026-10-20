@@ -1,0 +1,26 @@
+state = "GA"
+county = "Bibb"
+name = "Macon-Bibb Parcel CAMA (Current 2025)"
+publisher = "Macon-Bibb County Government GIS (ArcGIS Online org MaconBibb)"
+url = "https://services2.arcgis.com/zPFLSOZ5HzUzzTQb/arcgis/rest/services/ParcelCAMA_Current_2025/FeatureServer/0"
+apn_fields = ["MAP_ROUTE", "PARCEL_NO_1", "NWPARID"]
+situs_field = "SITEADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Macon-Bibb County (about 71,500 polygons); ~3,150 polygons have no CAMA join (blank address/owner/PARCEL_NO_1)"
+vintage = "2025 parcel/CAMA join (layer name ParcelCAMA_Current_20250106); data last edited 2026-08-19"
+max_record_count = 2000
+terms = "Public; Macon-Bibb County Government"
+owner_field = "LASTNAME"
+deed_book_field = "DEEDPAGE"
+deed_page_field = "DEEDPAGE"
+plat_book_field = "PLOTPAGE"
+plat_page_field = "PLOTPAGE"
+notes = "Joined layer with messy names: the field literally named 'parcel_no' is BLANK on every record; use MAP_ROUTE (dashed, always populated, e.g. 'Q074-0469') or PARCEL_NO_1 / NWPARID (no dash, 'Q0740469'). SITEADDRESS is street only, trailing space ('718 POPLAR ST '). LASTNAME is the full owner name, space-padded. DEEDPAGE and PLOTPAGE are each ONE combined fixed-width 'BOOK PAGE' string (e.g. '11538  247', '   94  142'; old books can be letters, '    Q   85'): split on whitespace. CITY/ADDRESS1 are the owner's mailing address. Macon-Bibb republishes a new service each year (ParcelCAMA2023, ParcelCAMA2024, ...); check for a newer one. The older 'ParcelsCAMA' service has cleaner names but one-year-older values."
+
+[verified]
+date = "2026-10-19"
+point = [-83.63225, 32.836]
+point_result = "MAP_ROUTE 'Q074-0469' (PARCEL_NO_1 Q0740469) at 718 POPLAR ST, Macon (Macon-Bibb government center block), owner MACON-BIBB COUNTY"
+apn_test = "MAP_ROUTE = 'Q074-0469' returned 1 polygon; PARCEL_NO_1 = 'Q0740469' returned 1"

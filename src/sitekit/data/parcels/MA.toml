@@ -1,0 +1,24 @@
+state = "MA"
+name = "Massachusetts Property Tax Parcels (MassGIS Level 3)"
+publisher = "MassGIS (Commonwealth of Massachusetts Bureau of Geographic Information)"
+url = "https://services1.arcgis.com/hGdibHYSPO59RG1h/arcgis/rest/services/Massachusetts_Property_Tax_Parcels/FeatureServer/0"
+apn_fields = ["MAP_PAR_ID", "LOC_ID", "PROP_ID"]
+situs_field = "SITE_ADDR"
+city_field = "CITY"
+county_field = ""
+county_values = "none"
+coverage = "All 351 cities and towns (351 distinct TOWN_ID values)"
+vintage = "Assessor FY2018-FY2027 depending on town; layer edited 2026"
+max_record_count = 2000
+terms = "Public; attribution: MassGIS (Bureau of Geographic Information)"
+notes = "MAP_PAR_ID is only unique within a town; combine with TOWN_ID (MassGIS numeric town id) or CITY. LOC_ID is statewide-unique. Condo/multi-record parcels can return more than one polygon (POLY_TYPE)."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNER1"
+deed_book_field = "LS_BOOK"
+deed_page_field = "LS_PAGE"
+[verified]
+date = "2026-10-19"
+point = [-71.8023, 42.2626]
+point_result = "MAP_PAR_ID 02-024-00001 (TOWN_ID 348) at 455 MAIN ST, WORCESTER (City Hall), 1 polygon"
+apn_test = "MAP_PAR_ID = '02-024-00001' AND TOWN_ID = 348 returned 1 polygon"

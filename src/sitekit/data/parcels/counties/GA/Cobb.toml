@@ -1,0 +1,22 @@
+state = "GA"
+county = "Cobb"
+name = "Cobb County Parcels (Tax Assessors daily)"
+publisher = "Cobb County Government GIS (gis.cobbcounty.gov)"
+url = "https://gis.cobbcounty.gov/gisserver/rest/services/tax/taxassessorsdaily/MapServer/0"
+apn_fields = ["PIN", "PARID"]
+situs_field = "SITUS_ADDR"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Cobb County (about 280,000 parcels)"
+vintage = "Tax Assessor parcel layer refreshed daily"
+max_record_count = 1000
+terms = "Copyright Cobb County. All rights reserved. Publicly accessible, no token."
+owner_field = "OWNER_NAM1"
+notes = "MapServer layer. PIN is an 11-digit string with no separators, e.g. '16121820070' (PARID is identical). SITUS_ADDR is space-padded between parts ('100   CHEROKEE  ST '), so normalize whitespace or use LIKE '100 %CHEROKEE%' when matching; ST_NUMBER holds the house number. No situs city (OWNER_CITY is the mailing city). No deed or plat book fields. Same server also answers at gis.cobbcounty.org."
+
+[verified]
+date = "2026-10-19"
+point = [-84.54848, 33.95422]
+point_result = "PIN '16121820070' at 100 CHEROKEE ST, Marietta (Cobb County government building), owner COBB COUNTY, 0.97 ac"
+apn_test = "PIN = '16121820070' returned 1 polygon"

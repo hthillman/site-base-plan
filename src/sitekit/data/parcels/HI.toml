@@ -1,0 +1,20 @@
+state = "HI"
+name = "Parcels - Hawaii Statewide (Statewide TMKs)"
+publisher = "Hawaii Statewide GIS Program (Office of Planning and Sustainable Development)"
+url = "https://geodata.hawaii.gov/arcgis/rest/services/ParcelsZoning/MapServer/25"
+apn_fields = ["tmk_txt", "cty_tmk", "tmk"]
+situs_field = ""
+city_field = ""
+county_field = "county"
+county_values = "name"
+coverage = "All 4 counties (Hawaii, Honolulu, Kauai, Maui)"
+vintage = "May 2026 (county sources dated Apr-May 2026)"
+max_record_count = 1000
+terms = "Public; attribution: Counties of Hawaii, Honolulu, Kauai and Maui; Hawaii Statewide GIS Program"
+notes = "tmk_txt is the 9-digit TMK with leading island/division digit (division+zone+section+plat3+parcel3, e.g. 324024105); cty_tmk drops the division digit (8 digits); tmk is numeric. County 12-digit TMKs append 4 CPR digits (qpub_link KeyValue). No situs address or owner fields. Point on a street returns 0 features."
+
+[verified]
+date = "2026-10-19"
+point = [-157.8300, 21.3000]
+point_result = "tmk_txt 128013110, Honolulu (Oahu), 1 polygon; Hilo point -155.0868,19.707 returned tmk_txt 324024105 (Hawaii County)"
+apn_test = "tmk_txt = '324024105' returned 1 polygon; cty_tmk = '24024105' returned 1 polygon"

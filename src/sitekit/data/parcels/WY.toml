@@ -1,0 +1,23 @@
+state = "WY"
+name = "Wyoming Parcels for 2026"
+publisher = "Wyoming Department of Revenue, Property Tax Division"
+url = "https://services3.arcgis.com/r0iJ85SKZ4zAzz3P/arcgis/rest/services/Wyoming_Parcels_for_2026/FeatureServer/0"
+apn_fields = ["parcelnb", "accountno"]
+situs_field = "locationad"
+city_field = ""
+county_field = "jurisdicti"
+county_values = "name"
+coverage = "All 23 counties"
+vintage = "Tax year 2026 (annual service; prior year is Wyoming_Parcels_for_2025)"
+max_record_count = 2000
+terms = "Public; no license text on the item; attribution: Wyoming Department of Revenue / county assessors"
+notes = "Service name is year-specific - a new Wyoming_Parcels_for_<year> service appears each year under the same org (r0iJ85SKZ4zAzz3P), so check for a newer one annually. jurisdicti is the upper-case county name without spaces (LARAMIE, HOTSPRINGS, BIGHORN). accountno is NOT unique statewide (R0022885 matched 5 counties); filter by jurisdicti. locationad may contain double spaces ('2023  SEYMOUR AVE'); no situs city field (mailcity is owner mailing city)."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "ownername1"
+legal_field = "legal"
+[verified]
+date = "2026-10-19"
+point = [-104.8100, 41.1400]
+point_result = "parcelnb 14663114300400, 2023 SEYMOUR AVE, Cheyenne (LARAMIE), taxyear 2026, 1 polygon; Laramie point -105.59,41.31 returned 16733332200500 at 320 S 6TH ST (ALBANY)"
+apn_test = "parcelnb = '14663114300400' returned 1 polygon; accountno = 'R0022885' returned 5 (1 with jurisdicti = 'LARAMIE')"

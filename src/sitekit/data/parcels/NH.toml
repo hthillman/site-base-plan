@@ -1,0 +1,20 @@
+state = "NH"
+name = "New Hampshire Parcel Mosaic"
+publisher = "NH GRANIT (UNH Earth Systems Research Center, state GIS clearinghouse)"
+url = "https://nhgeodata.unh.edu/hosting/rest/services/Hosted/CAD_ParcelMosaic/FeatureServer/1"
+apn_fields = ["pid", "displayid", "nh_gis_id", "u_id"]
+situs_field = "streetaddress"
+city_field = "town"
+county_field = "countyid"
+county_values = "code"
+coverage = "236 town values incl. UNINCORPORATED (statewide mosaic); per-town completeness not independently checked"
+vintage = "Mosaic of town submissions; dates not exposed in the layer"
+max_record_count = 2000
+terms = "Public; attribution: NH GRANIT and contributing municipalities"
+notes = "Field names are lowercase. pid/displayid are town-local; nh_gis_id ('<county 2><townid>-<pid>') and u_id ('<townid>-<pid>') are statewide. town values are mixed case (CONCORD vs Keene): compare case-insensitively. No owner/assessment attributes. Layer 0 = parcel points, layer 2 = additional lines."
+
+[verified]
+date = "2026-10-19"
+point = [-71.5376, 43.2070]
+point_result = "pid 3013 / nh_gis_id 074046-3013 at 107 N MAIN ST, CONCORD (State House), 1 polygon"
+apn_test = "nh_gis_id = '074046-3013' returned 1 polygon"

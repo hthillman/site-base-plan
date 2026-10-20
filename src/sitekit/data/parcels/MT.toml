@@ -1,0 +1,24 @@
+state = "MT"
+name = "Montana Cadastral Framework - Montana Parcels"
+publisher = "Montana State Library (MSDI Cadastral), data from Montana Department of Revenue ORION"
+url = "https://gisservice.mt.gov/arcgis/rest/services/msdi_cadastral_map_v1/MapServer/1"
+apn_fields = ["PARCELID", "AssessmentCode", "PropertyID"]
+situs_field = "AddressLine1"
+city_field = "CityStateZip"
+county_field = "CountyName"
+county_values = "name"
+coverage = "All 56 counties (Revenue-maintained; Ravalli, Silver Bow, Missoula, Flathead, Yellowstone county-maintained, integrated by MSL)"
+vintage = "TaxYear 2026; updated monthly"
+max_record_count = 2000
+terms = "Public; attribution: Montana State Library, Department of Revenue"
+notes = "PARCELID is the 17-digit geocode stored without dashes (users often write it as 06-0798-12-4-42-17-0000; strip dashes before querying). CityStateZip is combined, e.g. 'BOZEMAN, MT 59715'. Unparceled polygons (roads/ROW/water) come back with null PARCELID; treat as no parcel. Same data also at services.arcgis.com/qnjIrwR8z5Izc0ij/.../Montana_Cadastral_Framework/FeatureServer/1 (maxRecordCount 1000)."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OwnerName"
+legal_field = "LegalDescriptionShort"
+subdivision_field = "Subdivision"
+[verified]
+date = "2026-10-19"
+point = [-111.0450, 45.6760]
+point_result = "PARCELID 06079812442170000, 308 S 6TH AVE, Bozeman (Gallatin), TaxYear 2026, 1 polygon"
+apn_test = "PARCELID = '06079812442170000' returned 1 polygon; AssessmentCode = '000RGG4787' returned 1 polygon"

@@ -1,0 +1,21 @@
+state = "GA"
+county = "Fayette"
+name = "Fayette County Parcels (Parcels_Data_SAGES)"
+publisher = "Fayette County, Georgia GIS (ArcGIS Online user admin_fayettecounty)"
+url = "https://services5.arcgis.com/Hg5aLg4LtSINzVWa/arcgis/rest/services/Parcels_Data_SAGES/FeatureServer/0"
+apn_fields = ["PARCEL_NO", "PARCEL_KEY"]
+situs_field = "single_line_address"
+city_field = "City"
+county_field = ""
+county_values = "none"
+coverage = "All of Fayette County (about 49,000 polygons, incl. Peachtree City, Fayetteville, Tyrone)"
+vintage = "Live county editing layer; last data edit 2026-10"
+max_record_count = 2000
+terms = "Public; Fayette County, Georgia"
+notes = "PARCEL_NO formats vary: 9 digits ('052303007') or space-padded ('0523  091'); PARCEL_KEY is a dashed form ('5-23-3-7'). single_line_address is the full one-line address incl. city/zip; parcels with several addresses hold a ';'-separated list (City too). Some PARCEL_NOs are split across 2+ polygon features (e.g. '0523  091'), so an APN query can return multiple polygons; union them. ~180 polygons have null PARCEL_NO. No owner, deed or plat fields. Do NOT use the older TaxParcels_public or 'Parcels-Deprecated' services in the same org (stale since 2019/2022)."
+
+[verified]
+date = "2026-10-19"
+point = [-84.45565, 33.4474]
+point_result = "PARCEL_NO '052303007' (PARCEL_KEY 5-23-3-7) at 140 W STONEWALL AVE, FAYETTEVILLE, GA 30214 (Fayette County Administrative Complex)"
+apn_test = "PARCEL_NO = '052303007' returned 1 polygon"

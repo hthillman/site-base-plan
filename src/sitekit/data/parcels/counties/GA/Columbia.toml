@@ -1,0 +1,26 @@
+state = "GA"
+county = "Columbia"
+name = "Columbia County Parcels with Tax (LandData)"
+publisher = "Columbia County, Georgia GIS (gis.columbiacountyga.gov)"
+url = "https://gis.columbiacountyga.gov/host/rest/services/PublicAccess/LandData/MapServer/1003"
+apn_fields = ["ParcelNum"]
+situs_field = "Tax_Physical_Address"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Columbia County (about 69,000 parcels, incl. Grovetown, Harlem, Evans, Martinez)"
+vintage = "Parcels joined to tax data; Tax_Last_Updated as recent as 2026-10"
+max_record_count = 2000
+terms = "Public; Columbia County, Georgia"
+owner_field = "Tax_OwnerName1"
+deed_book_field = "Tax_Deed_Book"
+deed_page_field = "Tax_Deed_Page"
+plat_book_field = "Tax_Plat_Book"
+plat_page_field = "Tax_Plat_Page"
+notes = "MapServer layer id 1003. ParcelNum has a space, e.g. '072 045B'. Tax_Physical_Address is street only with trailing space ('630 RONALD REAGAN DR '). Deed/plat values are raw strings and can be placeholders ('00'/'000') or cabinet refs ('PC A' / '268#4'). Address points are layer 1054 of the same service. The 'Parcels - GA - Columbia' URL at mapsonline.columbiacountyga.gov no longer resolves; the AGOL 'Parcels_Columbia_County_GA' copy has PIN only and was last updated 2024."
+
+[verified]
+date = "2026-10-19"
+point = [-82.13405, 33.54526]
+point_result = "ParcelNum '072 045B' at 630 RONALD REAGAN DR, Evans (Columbia County Government Center), owner COLUMBIA COUNTY BOARD OF, plat PC A / 268#4"
+apn_test = "ParcelNum = '072 045B' returned 1 polygon"

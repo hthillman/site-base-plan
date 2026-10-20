@@ -1,0 +1,23 @@
+state = "WV"
+name = "WV Parcels"
+publisher = "WV GIS Technical Center (WVU), with WV Property Tax Division and county assessors"
+url = "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer/0"
+apn_fields = ["GISPID", "CleanParcelID", "Label"]
+situs_field = "FullPhysicalAddress"
+city_field = ""
+county_field = "COUNTY"
+county_values = "code"
+coverage = "All 55 counties"
+vintage = "Tax Year 2023"
+max_record_count = 2000
+terms = "Public, as-is; attribution: WV County Assessors, WV Property Tax Division, WVDHSEM, WVGISTC"
+notes = "COUNTY/CountyID is the 2-digit WV state county number (alphabetical 01 Barbour .. 55 Wyoming; 20 Kanawha, 31 Monongalia), not FIPS. GISPID = 'CC-DD-MMMM-PPPP-SSSS' (county-district-map-parcel-suffix); CleanParcelID is the same without dashes. Label ('26A-113') is only unique within a county district."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "FullOwnerName"
+legal_field = "FullLegalDescription"
+[verified]
+date = "2026-10-19"
+point = [-79.9545, 39.6302]
+point_result = "GISPID 31-11-026A-0113-0000 at 373 SPRUCE ST, Morgantown (Monongalia), 1 polygon; Charleston (-81.6305, 38.3505) returned GISPID 20-11-0010-0021-0000"
+apn_test = "GISPID = '31-11-026A-0113-0000' returned 1 polygon; CleanParcelID = '3111026A011300000000' returned 1"

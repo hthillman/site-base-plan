@@ -1,0 +1,24 @@
+state = "MN"
+name = "Parcels, Compiled from Opt-In Open Data Counties, Minnesota"
+publisher = "Minnesota IT Services / MnGeo (Minnesota Geospatial Commons)"
+url = "https://enterprise.gisdata.mn.gov/aghost/rest/services/us_mn_state_mngeo/plan_parcels_open/FeatureServer/1"
+apn_fields = ["county_pin", "state_pin"]
+situs_field = ""
+city_field = "postcomm"
+county_field = "co_code"
+county_values = "fips"
+coverage = "59 of 87 counties (opt-in only, 2,710,201 parcels). Missing: Beltrami, Blue Earth, Brown, Cottonwood, Dodge, Faribault, Freeborn, Goodhue, Hubbard, Kanabec, Kandiyohi, Kittson, Le Sueur, Lincoln, Mahnomen, Martin, Meeker, Nicollet, Nobles, Pine, Redwood, Rock, Roseau, Sibley, Swift, Todd, Wadena, Watonwan"
+vintage = "Compiled 2026-08-06 / 2026-09-01; county acquisition dates vary (see layer 0)"
+max_record_count = 2000
+terms = "Free open data from counties that opted in to open distribution; attribution: MnGeo and the contributing counties"
+notes = "No single situs field: address is split into anumber, st_pre_dir, st_name, st_pos_typ, st_pos_dir, sub_type1/sub_id1, zip. ctu_name is the city/township (can be null), postcomm the postal community. co_code is 5-digit FIPS (27053); co_name is the county name. state_pin = co_code + '-' + county_pin. Layer 0 (Plan Parcels Open Metadata) lists every county with gac_open_approval and acquisition dates."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "owner_name"
+legal_field = "abb_legal"
+subdivision_field = "plat_name"
+[verified]
+date = "2026-10-19"
+point = [-93.26520, 44.97705]
+point_result = "county_pin 2302924330044 at 315 4th Street, Minneapolis, Hennepin (27053); also Rochester (-92.4669, 44.0225) -> county_pin 743543089500, 100 2 Avenue, Olmsted"
+apn_test = "county_pin = '2302924330044' returned 1 polygon; state_pin = '27109-743543089500' returned 1 polygon"

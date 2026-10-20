@@ -1,0 +1,20 @@
+state = "OH"
+name = "Ohio Statewide Parcels Public View"
+publisher = "Ohio Geographically Referenced Information Program (OGRIP), Ohio Department of Administrative Services"
+url = "https://services2.arcgis.com/MlJ0G8iWUyC7jAmu/arcgis/rest/services/OhioStatewidePacels_full_view/FeatureServer/0"
+apn_fields = ["LocalParcelID", "StateParcelID"]
+situs_field = "SitusAddressAll"
+city_field = ""
+county_field = "County"
+county_values = "name"
+coverage = "All 88 counties (6,313,610 parcels)"
+vintage = "Compiled from county records; item last modified 2025-09-12; per-record CurrentTo dates seen from 2023, often null"
+max_record_count = 2000
+terms = "Public, as-is; State of Ohio geospatial data disclaimer"
+notes = "No separate situs city field; SitusAddressAll sometimes includes city and ZIP (Cuyahoga) and sometimes not (Franklin), with trailing spaces. StateParcelID = 5-digit county FIPS + '-' + LocalParcelID. County is the title-case name ('Franklin'). CAMADataSite links to the county auditor record. Statistics queries are disabled on this view."
+
+[verified]
+date = "2026-10-19"
+point = [-82.9988, 39.9612]
+point_result = "LocalParcelID 010-067008 (StateParcelID 39049-010-067008) at 0 S HIGH ST, Franklin, 610: Exm-Ohio (Statehouse). Also Cleveland (-81.69350, 41.50525) -> 10103005, 601 LAKESIDE AVE CLEVELAND 44114, Cuyahoga"
+apn_test = "LocalParcelID = '010-067008' returned 1 polygon; StateParcelID = '39049-010-067008' returned the same polygon"

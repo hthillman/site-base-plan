@@ -1,0 +1,22 @@
+state = "GA"
+county = "Douglas"
+name = "Douglas County Parcels (CountyLayers)"
+publisher = "Douglas County GIS (maps.douglascountyga.gov)"
+url = "https://maps.douglascountyga.gov/arcgis/rest/services/CountyLayers/Parcels/MapServer/15"
+apn_fields = ["ParcelNo"]
+situs_field = "PropertyAddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Douglas County (about 55,000 parcels, incl. Douglasville, Villa Rica and Austell portions)"
+vintage = "County-maintained parcel layer joined to assessor data"
+max_record_count = 2000
+terms = "Public; Douglas County, Georgia GIS"
+owner_field = "Owner"
+notes = "MapServer layer id is 15 (not 0). ParcelNo is 11 digits, no separators ('00500150059') = LL_DIST_SEC (7) + PARCEL (4). PropertyAddress is street only ('8700 HOSPITAL DR'). No deed or plat book fields. The same data at Layers/MapServer/13 (the one listed in public catalogs) returns 'Failed to execute query' on every query, so do not use it."
+
+[verified]
+date = "2026-10-19"
+point = [-84.73029, 33.7435]
+point_result = "ParcelNo '00500150059' at 8700 HOSPITAL DR, Douglasville (Douglas County Courthouse), owner DOUGLAS COUNTY, GEORGIA, 24.57 ac"
+apn_test = "ParcelNo = '00500150059' returned 1 polygon"

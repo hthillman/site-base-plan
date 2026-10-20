@@ -1,0 +1,23 @@
+state = "NY"
+name = "NYS Tax Parcels Public"
+publisher = "NYS Office of Information Technology Services, Geospatial Services (NYS GIS Program Office)"
+url = "https://services6.arcgis.com/EbVsqZ18sv1kVJ3k/arcgis/rest/services/NYS_Tax_Parcels_Public/FeatureServer/1"
+apn_fields = ["PRINT_KEY", "SBL", "SWIS_PRINT_KEY_ID", "SWIS_SBL_ID"]
+situs_field = "PARCEL_ADDR"
+city_field = "CITYTOWN_NAME"
+county_field = "COUNTY_NAME"
+county_values = "name"
+coverage = "38 of 62 counties. Missing: Allegany, Cattaraugus, Chemung, Chenango, Clinton, Columbia, Delaware, Dutchess, Essex, Franklin, Fulton, Herkimer, Jefferson, Madison, Monroe, Nassau, Niagara, Orleans, Saratoga, Schenectady, Schoharie, Seneca, Washington, Yates"
+vintage = "2025 assessment roll, published May 2026 (updated annually)"
+max_record_count = 1000
+terms = "Public; attribution: contributing counties, NYS ITS Geospatial Services, NYS DTF ORPTS"
+notes = "Layer 0 of the same service is a coverage footprint, not parcels. PRINT_KEY is only unique within a SWIS (municipality); pair with SWIS or use SWIS_PRINT_KEY_ID. COUNTY_NAME values have no spaces (e.g. 'NewYork', 'StLawrence'). NYC boroughs come from MapPLUTO (SBL = BBL, no PRINT_KEY). Geometry not edge-matched between counties."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+deed_book_field = "BOOK"
+deed_page_field = "PAGE"
+[verified]
+date = "2026-10-19"
+point = [-73.7795, 42.6600]
+point_result = "PRINT_KEY 65.69-2-44 (SWIS 010100) at 255 Quail St, Albany, 1 polygon; also Manhattan (-73.9857, 40.7484) returned BBL 1008350041, 338 5 AVENUE"
+apn_test = "PRINT_KEY = '65.69-2-44' AND SWIS = '010100' returned 1 polygon"

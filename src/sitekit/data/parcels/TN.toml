@@ -1,0 +1,23 @@
+state = "TN"
+name = "Tennessee Property Boundaries Public Use"
+publisher = "TN Comptroller of the Treasury, Division of Property Assessments (published on TNMap by STS/OIR)"
+url = "https://services1.arcgis.com/YuVBSS7Y1of2Qud1/arcgis/rest/services/Tennessee_Property_Boundaries_Public_Use/FeatureServer/0"
+apn_fields = ["GISLINK", "PARCELID", "PARCEL"]
+situs_field = "ADDRESS"
+city_field = ""
+county_field = "COUNTY_NAME"
+county_values = "name"
+coverage = "86 of 95 counties. Missing: Chester, Davidson, Hamilton, Hickman, Knox, Montgomery, Rutherford, Shelby, Williamson (Nashville, Memphis, Knoxville, Chattanooga, Clarksville, Murfreesboro, Franklin not covered)"
+vintage = "Updated monthly from the state assessment system"
+max_record_count = 2000
+terms = "Public; not intended for commercial use (Comptroller recommends the bulk download for commercial purposes). Graphical reference only, not legal boundaries."
+notes = "ADDRESS is street-name-first with the house number last (e.g. 'E MAIN ST 455'), so normalise before matching. GISLINK = 3-digit county id + control map + group + parcel (e.g. '057078P F 00400'); PARCELID adds special-interest and tax year ('057 078P F 00400 000 2026'). PARCEL alone (e.g. '004.00') is not unique; combine with CMAP/GP/COUNTY_NAME. COUNTY_ID is an alphabetical state index (57 = Madison), not FIPS."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNER"
+subdivision_field = "SUBDIV"
+[verified]
+date = "2026-10-19"
+point = [-88.8139, 35.6145]
+point_result = "GISLINK 057078P F 00400 (PARCELID 057 078P F 00400 000 2026) at E MAIN ST 455, Jackson, Madison County"
+apn_test = "GISLINK = '057078P F 00400' returned 1 polygon; PARCELID = '057 078P F 00400 000 2026' returned the same parcel"

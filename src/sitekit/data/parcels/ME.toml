@@ -1,0 +1,20 @@
+state = "ME"
+name = "Maine Parcels Organized Towns"
+publisher = "Maine GeoLibrary / Maine Office of GIS (MaineIT)"
+url = "https://services1.arcgis.com/RbMX0mRVOFNTdLzd/arcgis/rest/services/Maine_Parcels_Organized_Towns/FeatureServer/10"
+apn_fields = ["MAP_BK_LOT", "STATE_ID"]
+situs_field = "PROP_LOC"
+city_field = "TOWN"
+county_field = "COUNTY"
+county_values = "name"
+coverage = "325 organized towns that voluntarily submitted data; excludes the Unorganized Territory (separate Maine Revenue Services layer) and non-participating towns"
+vintage = "Town submissions of varying age (FMUPDAT, e.g. 2011 for Portland); layer republished 2026"
+max_record_count = 2000
+terms = "Public; attribution: Maine GeoLibrary and contributing municipalities"
+notes = "Native SR is UTM 19N (26919); inSR=4326 queries work. PROP_LOC house numbers are zero-padded ('00423 CONGRESS ST'). MAP_BK_LOT is town-local and may contain double spaces ('027  B005'); STATE_ID = '<GEOCODE>_<MAP_BK_LOT>'. No owner/assessment attributes. Some COUNTY values are blank."
+
+[verified]
+date = "2026-10-19"
+point = [-70.25825, 43.65852]
+point_result = "STATE_ID '05170_027  B005' at 00423 CONGRESS ST, Portland, 1 polygon"
+apn_test = "STATE_ID = '05170_027  B005' returned 1 polygon"

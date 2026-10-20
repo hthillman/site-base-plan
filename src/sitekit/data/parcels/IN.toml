@@ -1,0 +1,20 @@
+state = "IN"
+name = "Parcel Boundaries of Indiana Current"
+publisher = "Indiana Geographic Information Office (IndianaMap / GIS Data Harvest Program)"
+url = "https://gisdata.in.gov/server/rest/services/Hosted/Parcel_Boundaries_of_Indiana_Current/FeatureServer/0"
+apn_fields = ["parcel_id", "state_parcel_id", "local_id"]
+situs_field = "prop_add"
+city_field = "prop_city"
+county_field = "county_fips"
+county_values = "fips"
+coverage = "All 92 counties (3,682,675 parcels)"
+vintage = "Annual data harvest; loaddate 2025-07-31 to 2025-10-27"
+max_record_count = 2000
+terms = "Public; citation requested (not required): Indiana GIS Data Harvest Program, parcels maintained by Indiana counties"
+notes = "parcel_id is the dashed 18-digit state format (49-11-02-251-104.000-101); state_parcel_id is the same without punctuation; local_id is the county's own key. county_fips is 5-digit (18097); county_id is the 2-digit Indiana county number."
+
+[verified]
+date = "2026-10-19"
+point = [-86.1623, 39.7684]
+point_result = "parcel_id 49-11-02-251-104.000-101 at 200 W WASHINGTON ST, INDIANAPOLIS (Statehouse), county_fips 18097"
+apn_test = "parcel_id = '49-11-02-251-104.000-101' returned 1 polygon; state_parcel_id = '491102251104000101' returned the same polygon"

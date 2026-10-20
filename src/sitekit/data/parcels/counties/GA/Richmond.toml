@@ -1,0 +1,26 @@
+state = "GA"
+county = "Richmond"
+name = "Augusta-Richmond County Parcels (ParcelWeb)"
+publisher = "Augusta, GA Government GIS Division (gismap.augustaga.gov)"
+url = "https://gismap.augustaga.gov/arcgis/rest/services/AGOL/AGSGeneralFeatures/MapServer/32"
+apn_fields = ["pin", "parcel_no"]
+situs_field = "siteaddress"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Augusta-Richmond County (about 85,000 parcels; consolidated city-county, incl. Hephzibah/Blythe tax districts)"
+vintage = "Current parcels joined to 2026 tax bill data (Tax_bill_year / EFF_TAX_YEAR 2026)"
+max_record_count = 100000
+terms = "Public; Augusta Richmond County, GA Government"
+owner_field = "own1"
+deed_book_field = "deedpage"
+deed_page_field = "deedpage"
+plat_book_field = "platpage"
+plat_page_field = "platpage"
+notes = "MapServer layer. pin is dashed ('047-1-265-00-0'); parcel_no is the same digits without dashes ('0471265000'). siteaddress is street only, mixed case, sometimes with unit/building ('535 Telfair St Bldg 3000'); site_citystzip holds 'Augusta, GA 30901'. deedpage and platpage are each ONE combined string 'BOOK  PAGE' (e.g. '155  978', '209  1185'): split on whitespace, first token = book, second = page; often blank. Prefer this layer over layer 9 ('Parcels'), which has no address/owner and keeps retired parcels."
+
+[verified]
+date = "2026-10-19"
+point = [-81.96057, 33.47034]
+point_result = "pin '047-1-265-00-0' (parcel_no 0471265000) at 535 TELFAIR ST 4000, Augusta GA 30901 (Augusta Municipal Building complex), owner AUGUSTA GEORGIA, deedpage '155  978'"
+apn_test = "pin = '047-1-265-00-0' returned 1 polygon; parcel_no = '0471265000' returned 1"

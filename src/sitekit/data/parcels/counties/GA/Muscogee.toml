@@ -1,0 +1,21 @@
+state = "GA"
+county = "Muscogee"
+name = "Columbus-Muscogee Tax Parcels"
+publisher = "Columbus Consolidated Government GIS (ArcGIS Online org Columbus Consolidated Government)"
+url = "https://services2.arcgis.com/hKwZvjnqryeqGRIt/arcgis/rest/services/Tax_Parcels/FeatureServer/302"
+apn_fields = ["TaxPIN"]
+situs_field = ""
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Columbus-Muscogee County (about 71,900 polygons; consolidated city-county)"
+vintage = "Layer 'TaxParcels_2027' (working fabric for the next digest), last edited 2026-08"
+max_record_count = 2000
+terms = "Public; Columbus Consolidated Government"
+notes = "TaxPIN is space-separated, e.g. '032 019 006' (some source tables carry a trailing space; trim). ParcelType distinguishes 'Tax' (~70k), 'Tax (Condo)', 'Tax (Utilities)', 'Other'; 19 features carry a ParcelRetireDate, so filter ParcelRetireDate IS NULL for live parcels. No situs, owner, deed or plat fields. Layer id 302 and the '2027' name suggest it is replaced per digest year; the official 'CurrentYear' service (.../CurrentYear/FeatureServer/20, 2025 snapshot, same TaxPIN format) is the fallback and passed the same checks. The county's own gis.columbusga.org server timed out when tested."
+
+[verified]
+date = "2026-10-19"
+point = [-84.97262, 32.5114]
+point_result = "CCG's own geocoded point for '4819 13TH AVE, Columbus' (USER_Parcel 032 019 006 in the CCG Muscogee_County_Prop layer) falls in TaxPIN '032 019 006'; 8 of 8 such address/PIN pairs matched"
+apn_test = "TaxPIN = '032 019 006' returned 1 polygon"

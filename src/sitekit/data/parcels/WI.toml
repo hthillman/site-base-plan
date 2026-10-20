@@ -1,0 +1,22 @@
+state = "WI"
+name = "Wisconsin Statewide Parcel Map Database (V12)"
+publisher = "Wisconsin State Cartographer's Office / Wisconsin Land Information Program, Dept. of Administration"
+url = "https://services3.arcgis.com/n6uYoouQZW75n5WI/arcgis/rest/services/Wisconsin_Statewide_Parcels_DB/FeatureServer/0"
+apn_fields = ["PARCELID", "TAXPARCELID", "STATEID"]
+situs_field = "SITEADRESS"
+city_field = "PLACENAME"
+county_field = "CONAME"
+county_values = "name"
+coverage = "All 72 counties (3,574,646 parcels)"
+vintage = "V12 (2026 release); TAXROLLYEAR mostly 2025, updated annually"
+max_record_count = 2000
+terms = "Public; attribution: Wisconsin Statewide Parcel Map Database Project (V12), State Cartographer's Office / WLIP at DOA"
+notes = "CONAME is uppercase county name (e.g. 'DANE', 'ST CROIX'); PARCELFIPS holds the 3-digit county FIPS. PLACENAME is the municipality ('CITY OF MADISON'). STATEID = county FIPS + PARCELID. TAXPARCELID is often null. One stray CONAME value 'MENOMONIE' exists alongside 'MENOMINEE'."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNERNME1"
+[verified]
+date = "2026-10-19"
+point = [-89.3840, 43.0747]
+point_result = "PARCELID 070924205010 at 2 E MAIN ST, CITY OF MADISON, DANE (State Capitol); also Milwaukee (-87.9097, 43.0418) -> PARCELID 3921261000, 200 E WELLS ST"
+apn_test = "PARCELID = '070924205010' returned 1 polygon"

@@ -1,0 +1,22 @@
+state = "GA"
+county = "Clarke"
+name = "Athens-Clarke County Parcels (ACC_Parcels)"
+publisher = "Unified Government of Athens-Clarke County GIS (enigma.accgov.com)"
+url = "https://enigma.accgov.com/server/rest/services/ACC_Parcels/FeatureServer/0"
+apn_fields = ["PARCEL_NO", "REALKEY"]
+situs_field = "PAR_ADD"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Athens-Clarke County (about 43,600 parcels, incl. Bogart/Winterville portions)"
+vintage = "Live county layer; most recent edit 2026-10-15"
+max_record_count = 2000
+terms = "Public; Athens-Clarke County Unified Government (tagged Open Data)"
+owner_field = "OWNER_NAME"
+notes = "PARCEL_NO has a space, e.g. '171B1 H002'. PAR_ADD is situs street only ('301 COLLEGE AVE'). CITY/STATE/ZIP and OWNER_ADD are the OWNER'S mailing address, not the situs, so city_field is left blank; text fields are space-padded. No deed or plat book fields. The older AGOL copy (services2.arcgis.com/xSEULKvB31odt3XQ/.../Parcel) stopped updating in 2018; do not use it."
+
+[verified]
+date = "2026-10-19"
+point = [-83.37661, 33.9596]
+point_result = "PARCEL_NO '171B1 H002' at 301 COLLEGE AVE, Athens (Athens-Clarke City Hall), owner ATHENS-CLARKE COUNTY UNIFIED GOVERNMENT"
+apn_test = "PARCEL_NO = '171B1 H002' returned 1 polygon"

@@ -1,0 +1,24 @@
+state = "MD"
+name = "Maryland Parcel Boundaries"
+publisher = "MD iMAP / Maryland Department of Planning, with SDAT assessments"
+url = "https://mdgeodata.md.gov/imap/rest/services/PlanningCadastre/MD_ParcelBoundaries/MapServer/0"
+apn_fields = ["ACCTID", "PARCEL"]
+situs_field = "ADDRESS"
+city_field = "CITY"
+county_field = "JURSCODE"
+county_values = "code"
+coverage = "All 23 counties + Baltimore City (24 JURSCODE values)"
+vintage = "SDAT assessments May 2026 (SDATDATE '2026MAY')"
+max_record_count = 1000
+terms = "Public; attribution: MD iMAP, Maryland Department of Planning, SDAT"
+notes = "ACCTID is the SDAT account id (statewide unique, county prefix). PARCEL is only unique within a county MAP/GRID. JURSCODE is a 4-letter code (ANNE, BACI = Baltimore City, BACO = Baltimore County, MONT, PRIN, ...). Also reachable at geodata.md.gov."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+plat_ref_field = "PLAT"
+legal_field = "LEGAL1"
+subdivision_field = "SUBDIVSN"
+[verified]
+date = "2026-10-19"
+point = [-76.4922, 38.9784]
+point_result = "ACCTID 020600000137200 at 18 CHURCH CIR, ANNAPOLIS (ANNE), 1 polygon"
+apn_test = "ACCTID = '020600000137200' returned 1 polygon"

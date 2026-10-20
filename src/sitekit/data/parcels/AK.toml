@@ -1,0 +1,22 @@
+state = "AK"
+name = "Alaska Statewide Parcels (AK_Parcels)"
+publisher = "Alaska Division of Forestry & Fire Protection, Alaska Department of Natural Resources"
+url = "https://services1.arcgis.com/7HDiw78fcUiM2BWn/arcgis/rest/services/AK_Parcels/FeatureServer/0"
+apn_fields = ["parcel_id"]
+situs_field = ""
+city_field = ""
+county_field = "local_gov"
+county_values = "name"
+coverage = "20 local sources only: Anchorage Municipality, Bristol Bay Borough, City of Dillingham, City of Nome, City of Unalaska, City of Valdez, Coastal Villages Region Fund (CVRF), Denali Borough, Fairbanks North Star Borough, Haines Borough, Juneau City & Borough, Kenai Peninsula Borough, Ketchikan Borough, Kodiak Island Borough, Matanuska-Susitna Borough, North Slope Borough, Petersburg Borough, Sitka City & Borough, Wrangell City & Borough, Yakutat City & Borough. Unorganized Borough and other areas largely missing."
+vintage = "Rebuilt from source services continuously (datetime_processed Oct 2026)"
+max_record_count = 2000
+terms = "Public; explicitly NOT authoritative - a DFFP compilation of local government data; attribution/licensing per originating source (listed in the item description)"
+notes = "No situs address or city fields. parcel_id is whatever the source supplied, may be null or not unique statewide; filter by local_gov. Fairbanks NSB road polygons carry parcel_id '9999999.0' and property_type 'Roadway' - treat as no parcel. feature_id is internal, not an APN. Item description lists each authoritative source service URL."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "owner"
+[verified]
+date = "2026-10-19"
+point = [-149.8800, 61.2000]
+point_result = "parcel_id 00220528000, Anchorage Municipality, RESIDENTIAL 1 family, 1 polygon; Juneau point -134.41,58.30 returned 1C070B0E0020"
+apn_test = "parcel_id = '00220528000' returned 1 polygon"

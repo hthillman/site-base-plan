@@ -1,0 +1,23 @@
+state = "CT"
+name = "Connecticut CAMA and Parcel Layer"
+publisher = "Connecticut Office of Policy and Management, CT GIS Office"
+url = "https://services3.arcgis.com/3FL1kr7L4LvwA2Kb/arcgis/rest/services/Connecticut_CAMA_and_Parcel_Layer/FeatureServer/0"
+apn_fields = ["Parcel_ID", "CAMA_Link", "Link"]
+situs_field = "Location"
+city_field = "Town_Name"
+county_field = ""
+county_values = "none"
+coverage = "All 169 towns"
+vintage = "2026 parcel + CAMA collection (Parcel_Collection_Year 2026)"
+max_record_count = 2000
+terms = "Public; attribution: CT GIS Office / OPM and contributing municipalities"
+notes = "Parcel_ID is only unique within a town; pair with Town_Name. CAMA_Link = '<town code>-<Parcel_ID>'. Location_1 is the CAMA situs string if Location is blank. CT has no county government; FIPS field is a 11-digit county-subdivision code and COG holds the planning region. Unversioned layer is the current year; prior years exist as *_2023/_2024/_2025 services."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "Owner"
+deed_ref_field = "Prior_Book_Page"
+[verified]
+date = "2026-10-19"
+point = [-72.6823, 41.7637]
+point_result = "Parcel_ID 224431013 at 168 CAPITOL AVE, Hartford (State Capitol), 1 polygon"
+apn_test = "Parcel_ID = '224431013' AND Town_Name = 'Hartford' returned 1 polygon"

@@ -1,0 +1,22 @@
+state = "GA"
+county = "Hall"
+name = "Hall County Parcel Boundary (GIS Viewer GeneralTab)"
+publisher = "Hall County GIS (hallgis.hallcounty.org; partnership of Hall County, Gainesville, Flowery Branch, Oakwood)"
+url = "https://hallgis.hallcounty.org/arcgis/rest/services/GeneralTab/MapServer/1"
+apn_fields = ["PIN", "REALKEY"]
+situs_field = "SITE_LOCATION"
+city_field = "SITE_CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Hall County (about 92,500 polygons, incl. Gainesville, Flowery Branch, Oakwood)"
+vintage = "Live county layer behind the Hall County GIS Viewer; most recent EDITED_DT 2026-10"
+max_record_count = 2000
+terms = "Public map service; Hall County publishes a GIS License Agreement and fee schedule for data downloads (hallcounty.org/235/GIS), so check terms before bulk extraction"
+owner_field = "OWNER"
+notes = "MapServer layer 1 ('Parcel Boundary') of GeneralTab; layer 2 is the same data unlabeled. PIN has a space, e.g. '08015 005028Q'. SITE_LOCATION spells out suffix/direction ('2875 BROWNS BRIDGE ROAD SOUTHWEST'), so normalize before matching. OWNER can have trailing comma/spaces ('HALL COUNTY,  '). ~3,700 polygons have null STATUS (others 'P'). No deed or plat fields. The 'Parcels - GA - Hall' URL in public catalogs (webmap.hallcounty.org) fails TLS; this host is the one the county's own viewer uses."
+
+[verified]
+date = "2026-10-19"
+point = [-83.87582, 34.2783]
+point_result = "PIN '08015 005028Q' at 2875 BROWNS BRIDGE ROAD SOUTHWEST, GAINESVILLE (Hall County Government Center), owner HALL COUNTY"
+apn_test = "PIN = '08015 005028Q' returned 1 polygon"

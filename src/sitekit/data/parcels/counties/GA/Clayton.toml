@@ -1,0 +1,26 @@
+state = "GA"
+county = "Clayton"
+name = "Clayton County Tax Parcels (Tax Assessor)"
+publisher = "Clayton County, Georgia GIS (gis.claytoncountyga.gov)"
+url = "https://gis.claytoncountyga.gov/server/rest/services/TaxAssessor/Parcels/MapServer/0"
+apn_fields = ["PARCELID", "PIN2"]
+situs_field = "SITEADDRES"
+city_field = "SITECITY"
+county_field = ""
+county_values = "none"
+coverage = "All of Clayton County (about 92,000 parcels, incl. Jonesboro, Forest Park, Morrow, Riverdale, College Park portion)"
+vintage = "Tax Assessor parcel layer joined to iasWorld CAMA (live county server)"
+max_record_count = 2000
+terms = "Public; Clayton County, Georgia"
+owner_field = "OWNERNME"
+deed_book_field = "CURRENTDEEDBOOK"
+deed_page_field = "CURRENTDEEDPAGE"
+plat_book_field = "PLATBOOK"
+plat_page_field = "PLATPAGE"
+notes = "MapServer layer. PARCELID has a space, e.g. '05239 240004'; PIN2 is often null. SITEADDRES is street only ('9151 TARA BLVD'), SITECITY the situs city. Owner name has trailing spaces. PLATBOOK/PLATPAGE are blank strings on ~10% of parcels (populated on ~82,500). The 'Parcels - GA - Clayton' URL in public catalogs (weba.co.clayton.ga.us:5443) times out; this gis.claytoncountyga.gov host serves the same TaxAssessor/Parcels service."
+
+[verified]
+date = "2026-10-19"
+point = [-84.36084, 33.50371]
+point_result = "PARCELID '05239 240004' at 9151 TARA BLVD, JONESBORO (Harold R. Banke Justice Center), owner CLAYTON CO GEORGIA, deed book 3553 / page 154"
+apn_test = "PARCELID = '05239 240004' returned 1 polygon"

@@ -1,0 +1,5 @@
+out/
+.venv/
+.github/
+*.md
+!README.md

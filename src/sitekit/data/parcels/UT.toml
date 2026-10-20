@@ -1,0 +1,20 @@
+state = "UT"
+name = "Utah Statewide Parcels (Basic Parcels)"
+publisher = "Utah Geospatial Resource Center (UGRC, formerly AGRC)"
+url = "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/UtahStatewideParcels/FeatureServer/0"
+apn_fields = ["PARCEL_ID", "ACCOUNT_NUM"]
+situs_field = "PARCEL_ADD"
+city_field = "PARCEL_CITY"
+county_field = "County"
+county_values = "name"
+coverage = "All 29 counties"
+vintage = "Per-county snapshots (ParcelsCur field); most counties 2026, Daggett/San Juan mid-2025, Millard Dec 2025, Sanpete reports 2015"
+max_record_count = 2000
+terms = "Public, provided as-is; attribution: Utah Geospatial Resource Center and county recorders/assessors"
+notes = "County values are names without spaces (SaltLake, BoxElder, SanJuan). PARCEL_ID formats differ by county (Salt Lake 14 digits, Utah County 9). Roads/ROW are not parceled, so a point on a street returns 0 features. Attributes are basic only (no owner name); per-county LIR layers under the same org carry more."
+
+[verified]
+date = "2026-10-19"
+point = [-111.8700, 40.7500]
+point_result = "PARCEL_ID 16081520340000, 731 E 900 S, Salt Lake City 84105 (SaltLake), 1 polygon; also Provo point -111.65,40.245 returned PARCEL_ID 357000010"
+apn_test = "PARCEL_ID = '16081520340000' returned 1 polygon; PARCEL_ID = '357000010' returned 1 polygon"

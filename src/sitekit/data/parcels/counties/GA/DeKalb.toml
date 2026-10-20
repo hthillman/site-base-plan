@@ -1,0 +1,24 @@
+state = "GA"
+county = "DeKalb"
+name = "DeKalb County Tax Parcels"
+publisher = "DeKalb County GIS (dcgis.dekalbcountyga.gov)"
+url = "https://dcgis.dekalbcountyga.gov/hosted/rest/services/Tax_Parcels/FeatureServer/0"
+apn_fields = ["PARCELID", "LOWPARCELID"]
+situs_field = "SITEADDRESS"
+city_field = "CITY"
+county_field = ""
+county_values = "none"
+coverage = "All of DeKalb County (about 246,000 parcels, incl. cities)"
+vintage = "County-hosted live layer; records last edited 2026"
+max_record_count = 2000
+terms = "Public; DeKalb County GIS"
+owner_field = "OWNERNME1"
+plat_book_field = "PLAT_BOOK_NUMBER"
+plat_page_field = "PLAT_PAGE_NUMBER"
+notes = "PARCELID uses spaces, e.g. '15 246 03 001' (district, land lot, block, parcel). SITEADDRESS is the full one-line address incl. city/zip ('1300 Commerce Drive Decatur, GA 30030'); ADDRESS_NUMBER + FULL_STREET_NAME are split fields. Plat book/page populated on ~54k of ~246k parcels. No deed book/page field. Condo units have stacked (redundant) geometry. Census-geocoded street points can land in the right-of-way; test with a point inside the lot."
+
+[verified]
+date = "2026-10-19"
+point = [-84.2996, 33.77419]
+point_result = "PARCELID '15 246 03 001' at 1300 Commerce Drive Decatur, GA 30030 (DeKalb County Maloof admin building), owner DEKALB COUNTY"
+apn_test = "PARCELID = '15 246 03 001' returned 1 polygon"

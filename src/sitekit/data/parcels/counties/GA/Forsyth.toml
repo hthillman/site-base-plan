@@ -1,0 +1,21 @@
+state = "GA"
+county = "Forsyth"
+name = "Forsyth County Tax Parcel"
+publisher = "Forsyth County GIS Department / Tax Assessment Department (geo.forsythco.com)"
+url = "https://geo.forsythco.com/gis/rest/services/Public/Tax_Parcel/FeatureServer/0"
+apn_fields = ["PARCELID"]
+situs_field = "SITEADDRESS"
+city_field = ""
+county_field = ""
+county_values = "none"
+coverage = "All of Forsyth County, incl. City of Cumming"
+vintage = "2026 tax year (TAXYEAR '2026')"
+max_record_count = 15000
+terms = "Public; GIS Department and Tax Assessment Department, Forsyth County Georgia"
+notes = "PARCELID is space-padded, e.g. 'C16   038' (three spaces); match exactly or normalize whitespace. SITEADDRESS is street only ('110 E MAIN ST'). The public layer has NO owner name field (PSTLADDRESS/PSTLCITY are the owner mailing address only). No deed or plat book fields; Link/TaxBillLink give assessor and tax-bill URLs. Condo units have stacked geometry."
+
+[verified]
+date = "2026-10-19"
+point = [-84.13856, 34.20773]
+point_result = "PARCELID 'C16   038' at 110 E MAIN ST, Cumming (Forsyth County Administration Building), class Exempt 1, TAXYEAR 2026"
+apn_test = "PARCELID = 'C16   038' returned 1 polygon"

@@ -1,0 +1,22 @@
+state = "VT"
+name = "VT Statewide Standardized Parcel Data - parcel polygons"
+publisher = "Vermont Center for Geographic Information (VCGI)"
+url = "https://services1.arcgis.com/BkFxaEFNwHqX3tAw/arcgis/rest/services/FS_VCGI_OPENDATA_Cadastral_VTPARCELS_poly_standardized_parcels_SP_v1/FeatureServer/0"
+apn_fields = ["SPAN", "PARCID", "MAPID", "GLIST_SPAN"]
+situs_field = "E911ADDR"
+city_field = "TNAME"
+county_field = ""
+county_values = "none"
+coverage = "Statewide parcel program; 256 distinct TOWN values"
+vintage = "Grand List 2025-2026 by town (YEAR field); layer updated 2026"
+max_record_count = 2000
+terms = "Public; attribution: VCGI and Vermont municipalities"
+notes = "SPAN (School Property Account Number, 'TTT-CCC-NNNNN') is the statewide-unique id. Polygons with PROPTYPE other than 'PARCEL' (e.g. ROW_ROAD, WATER) are rights-of-way etc. with no grand list data; filter PROPTYPE = 'PARCEL' when a point lands on a road."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "OWNER1"
+[verified]
+date = "2026-10-19"
+point = [-73.2133, 44.4766]
+point_result = "SPAN 114-035-17409 at 149 CHURCH ST, Burlington (City Hall), 1 polygon"
+apn_test = "SPAN = '114-035-17409' returned 1 polygon"

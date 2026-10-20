@@ -1,0 +1,23 @@
+state = "AR"
+name = "Parcel Polygon - County Assessor Mapping Program (CAMP)"
+publisher = "Arkansas GIS Office (AGISO)"
+url = "https://gis.arkansas.gov/arcgis/rest/services/FEATURESERVICES/Planning_Cadastre/FeatureServer/6"
+apn_fields = ["parcelid"]
+situs_field = "adrlabel"
+city_field = "adrcity"
+county_field = "countyfips"
+county_values = "fips"
+coverage = "All 75 counties"
+vintage = "County CAMA snapshots, scheduled semi-annual updates (pubdate 2026-10-01 on test record)"
+max_record_count = 200
+terms = "Public; approximate parcel locations, not a legal boundary. Source: Arkansas county assessors via AGISO."
+notes = "maxRecordCount is only 200, so page with resultOffset for area queries. countyfips is the 3-digit county FIPS as a string (119 = Pulaski); county holds the name. camakey (numeric) is the CAMA link, not a user-facing parcel number. adrlabel can contain double spaces."
+
+# Attribute fields shown on labels (owner of record, deed / plat refs)
+owner_field = "ownername"
+subdivision_field = "subdivision"
+[verified]
+date = "2026-10-19"
+point = [-92.2890, 34.7470]
+point_result = "parcelid 34L-032.00-011.00 at 1 CAPITOL MALL, LITTLE ROCK, Pulaski County"
+apn_test = "parcelid = '34L-032.00-011.00' returned 1 polygon"
