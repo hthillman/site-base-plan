@@ -14,7 +14,7 @@ from .plugins import testfit_available
 SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
 TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>' if TIP_URL else ""
-FIRMS_FOOTER = ' · <a href="/pro">Basesheet Pro, coming soon</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
+FIRMS_FOOTER = ' · <a href="/firms">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
 CSS = """
 :root{--bg:#fbfaf7;--ink:#1c1c1a;--muted:#6a6963;--faint:#9a988f;--line:#e4e1d8;--field:#fff;--accent:#2f5d50;--accent-ink:#fff;
@@ -115,7 +115,6 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
-.soon{display:inline-block;vertical-align:middle;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin-left:6px}
 .rsec{margin-top:26px}.rsec h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
 .flag.plain{grid-template-columns:1fr;color:var(--ink)}
 .zone{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--field);margin-bottom:8px}
@@ -123,7 +122,7 @@ ul{padding-left:20px}li{margin:5px 0}
 .zone ul{margin:6px 0 4px;padding-left:18px;font-size:14.5px}.zone li{margin:2px 0}
 .zone .src{font-size:12.5px;color:var(--faint);margin:6px 0 0}
 details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-bottom:8px}
-.pro{margin:22px 0 0;padding:10px 14px;border-left:2px solid var(--accent);background:var(--field)}
+.firmline{margin:18px 0 0}
 .vote{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:14px}.vote .chips{margin-top:8px}
 .vote .chip{font-size:13px;padding:5px 11px}
 .answer{font-size:17px;line-height:1.6;margin:0 0 8px}
@@ -144,8 +143,7 @@ GITHUB_ICON = (f'<a class="gh" href="{REPO_URL}" target="_blank" rel="noopener" 
                '0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 '
                '3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>')
 
-NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/privacy", "Privacy")] + (
-    [("/pro", "Pro")] if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else [])
+NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/privacy", "Privacy")]
 
 
 SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # canonical origin, e.g. https://basesheet.site
@@ -205,7 +203,7 @@ def index(parcel_states: list[str], needs_code: bool) -> str:
     county_txt = "".join(f" + {len(v)} {k} counties" for k, v in sorted(county_sources().items()))
     actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
     if FIRMS_PAGE:
-        actions.append('<a href="/pro">Basesheet Pro, coming soon</a>')
+        actions.append('<a href="/firms">Using this at a firm?</a>')
     if TIP_URL:
         actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>')
     body = f"""
@@ -336,7 +334,6 @@ function render(j){
  (TIP_URL?'<p class="note tip">Saved you some time? <a href="'+TIP_URL+'" target="_blank" rel="noopener">Chip in for hosting</a>.</p>':'')+
  '<div class="rsec"><h4>About this site</h4><ul class="flags">'+flags+'</ul></div>'+
  zoningBox(j.zoning)+
- (PRO?'<p class="note pro">Coming soon in <a href="/pro">Basesheet Pro</a>: test fits for the places you work, your title block and CAD standards, and batch runs. <a href="/pro">Get early access</a></p>':'')+
  '<details class="files rsec"><summary>What\\'s in the zip and how to open it</summary><ul class="contents">'+
  '<li><b>AutoCAD / Civil 3D</b> · site.dxf (open it directly), surface.xml (LandXML surface)</li>'+
  '<li><b>SketchUp</b> · File › Import › terrain.dae for textured 3D ground; site-local.dxf for linework (SketchUp Pro)</li>'+
@@ -344,7 +341,8 @@ function render(j){
  '<li><b>GIS</b> · gis/*.geojson, dem.tif</li>'+
  '<li><b>Google Earth</b> · site.kml</li>'+
  '<li><b>Everyone</b> · site-summary.pdf, provenance.md (sources and dates), and HOW-TO-OPEN.txt</li></ul></details>'+
- nextRow(j.zoning)+'</div>';
+ nextRow(j.zoning)+
+ (PRO?'<p class="note firmline">Using this at a firm? I\\'m working with a few offices on test fits, title blocks and batch runs. <a href="/firms">Tell me what you need</a>.</p>':'')+'</div>';
  wireNext(j.state);}
 const TIP_URL="__TIP_URL__";
 const PRO=__PRO__;
@@ -550,8 +548,8 @@ def privacy() -> str:
 <h2>"What should it do next?"</h2>
 <p>After a run you can click an option to say what you'd like built next. That records the option, anything you type in the box,
 and the run's state. Nothing that identifies you.</p>
-<h2>Basesheet Pro early access</h2>
-<p>If you join the Pro early access list, your firm, role, answers and email are stored privately and used only to follow up
+<h2>Firms</h2>
+<p>If you tell me about your firm on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
 about it. Never shared or sold; ask to have them deleted any time.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
@@ -568,9 +566,9 @@ FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hoste
 
 def firms() -> str:
     body = f"""
-<h1>Basesheet Pro <span class="soon">Coming soon</span></h1>
-<p class="lede">Basesheet stays free and <a href="{REPO_URL}">open source</a>. Pro is for offices that run regular site studies,
-and it's being built with a small group of early firms.</p>
+<h1>For firms</h1>
+<p class="lede">Basesheet is free and <a href="{REPO_URL}">open source</a>, and it stays that way. A few offices that run regular
+site studies have asked for more, so I'm building some firm features together with them.</p>
 
 <h2>Free, and staying free</h2>
 <ul>
@@ -579,7 +577,7 @@ and it's being built with a small group of early firms.</p>
 <li>Multi-parcel sites, your own CAD layer names, and the zoning lookup where it's available.</li>
 </ul>
 
-<h2>Coming in Pro</h2>
+<h2>What I'm working on with firms</h2>
 <ul>
 <li><b>Test fits for the places you work:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking layout you can open in CAD, from zoning rules checked for your jurisdictions.</li>
 <li><b>Your office standards on every output:</b> your title block and logo on the PDF, your CAD layer standard set up once for the whole office.</li>
@@ -587,8 +585,8 @@ and it's being built with a small group of early firms.</p>
 <li><b>Parcel lines where you work,</b> including counties the free tool doesn't cover yet.</li>
 </ul>
 
-<h2>Early access</h2>
-<p>Early firms decide what gets built first, for their own jurisdictions, and get it first. Nothing to pay now.</p>
+<h2>Tell me what your office needs</h2>
+<p>If any of this would help, a few details go a long way. The places and problems firms tell me about are what I build next.</p>
 <form id="ff">
 <div class="grid2">
 <label>Firm<input name="firm" maxlength="120" required></label>
@@ -607,8 +605,8 @@ and it's being built with a small group of early firms.</p>
 <label>Anything else? (optional)<textarea name="notes" maxlength="2000"></textarea></label>
 <label>Email<input name="email" type="email" required maxlength="254"></label>
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-<div><button>Join early access</button> <span class="fine" id="ffmsg"></span></div>
-<p class="fine">I'll only use this to follow up about Pro. See <a href="/privacy">Privacy</a>.</p>
+<div><button>Send</button> <span class="fine" id="ffmsg"></span></div>
+<p class="fine">I'll only use this to reply to you. See <a href="/privacy">Privacy</a>.</p>
 </form>
 """
     script = """<script>
@@ -618,5 +616,5 @@ document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.ta
  const j=await r.json().catch(()=>({}));
  if(r.ok){f.innerHTML='<p class="ok"><b>Thanks, got it.</b> I\\'ll be in touch by email.</p>'}else{m.textContent=j.error||'Something went wrong.';m.className='fine err'}};
 </script>"""
-    return layout("Basesheet Pro (coming soon): test fits, office standards, batch runs", "/pro", body, script,
-                  description="Basesheet stays free. Pro, coming soon for firms: zoning test fits for your jurisdictions, your title block and CAD standards on every output, and batch runs. Join early access.")
+    return layout("For firms · Basesheet", "/firms", body, script,
+                  description="Basesheet is free and stays free. For offices that run regular site studies: test fits for your jurisdictions, your title block and CAD standards, and batch runs, built with early firms.")

@@ -268,7 +268,7 @@ def interest():
 
 
 FIRM_WANTS = {"zoning", "batch", "standards", "coverage", "massing"}
-NOTIFY_URL = os.environ.get("NOTIFY_URL", "")  # optional: ntfy.sh topic, Slack or Discord webhook, pinged on Pro signups
+NOTIFY_URL = os.environ.get("NOTIFY_URL", "")  # optional: ntfy.sh topic, Slack or Discord webhook, pinged on firm signups
 
 
 def notify(text: str) -> None:
@@ -290,7 +290,7 @@ def notify(text: str) -> None:
 
 @app.post("/api/firms")
 def firm_interest():
-    """Pro early-access signup (stored privately)."""
+    """Firm interest from the For firms page (stored privately)."""
     from datetime import datetime, timezone
 
     from .pages import FIRMS_PAGE
@@ -310,7 +310,7 @@ def firm_interest():
     private_put("firms", {"firm": firm, "role": str(d.get("role") or "").strip()[:80], "sites": str(d.get("sites") or "")[:10],
                           "want": want, "places": str(d.get("places") or "").strip()[:300], "notes": str(d.get("notes") or "").strip()[:2000],
                           "email": email, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-    notify(f"New Pro early-access signup: {firm} ({str(d.get('role') or '')[:80]}), {str(d.get('sites') or '?')[:10]} sites/mo, "
+    notify(f"New firm on the For firms page: {firm} ({str(d.get('role') or '')[:80]}), {str(d.get('sites') or '?')[:10]} sites/mo, "
            f"wants {', '.join(want) or 'nothing picked'}; works in {str(d.get('places') or '-')[:120]}")
     return jsonify(ok=True)
 
@@ -376,14 +376,14 @@ def sources():
     return page()
 
 
-@app.get("/firms")
-def firms_redirect():
+@app.get("/pro")
+def pro_redirect():
     from flask import redirect
 
-    return redirect("/pro", code=301)
+    return redirect("/firms", code=301)
 
 
-@app.get("/pro")
+@app.get("/firms")
 def firms_page():
     from .pages import FIRMS_PAGE, firms
 
@@ -469,7 +469,7 @@ def sitemap():
     base = _site_url()
     from .guides import all_paths
 
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/pro"] if FIRMS_PAGE else []) + all_paths()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/firms"] if FIRMS_PAGE else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")
