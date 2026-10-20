@@ -14,6 +14,7 @@ from .plugins import testfit_available
 SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
 TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>' if TIP_URL else ""
+FIRMS_FOOTER = ' · <a href="/firms">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
 CSS = """
 :root{--bg:#fbfaf7;--ink:#1c1c1a;--muted:#6a6963;--faint:#9a988f;--line:#e4e1d8;--field:#fff;--accent:#2f5d50;--accent-ink:#fff;
@@ -74,6 +75,16 @@ footer .inline{display:flex;gap:8px}footer .inline input{flex:1;min-width:0}
 footer textarea{min-height:80px;resize:vertical}
 footer .fine{color:var(--faint);font-size:12.5px}
 .ok{color:var(--accent)}
+#ff{display:grid;gap:14px;max-width:580px}
+#ff label{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+#ff input:not([type=checkbox]),#ff select,#ff textarea{width:100%}
+#ff textarea{min-height:80px;resize:vertical}
+#ff button{padding:11px 18px}
+#ff fieldset.checks label{display:flex;flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-size:14.5px}
+fieldset.checks{border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0}
+fieldset.checks legend{font-size:13px;color:var(--muted);padding:0 4px}
+fieldset.checks label{display:flex;flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-size:14.5px}
+fieldset.checks input{width:auto}
 .linkbtn{background:none;border:0;color:var(--accent);padding:6px 0 0;font-weight:500;font-size:14px;cursor:pointer}
 #also .search{margin-top:8px}#also input{font-size:15px;padding:10px 12px}
 #also button{background:transparent;color:var(--muted);border:1px solid var(--line);padding:0 12px}
@@ -117,7 +128,7 @@ def layout(title: str, active: str, body: str, script: str = "") -> str:
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Site Base Plan</a><nav>{links}{GITHUB_ICON}</nav></div></header>
-<main><div class="wrap">{body}{"" if active == "/" or not TIP_URL else f'<footer><p class="fine">Free, no account. <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -189,7 +200,7 @@ Parcel lines are available in <a href="/about#coverage">{n} states{county_txt}</
 <span class="fine" id="fbmsg"></span>
 </form></details>
 
-<p class="fine">No cookies, no account. Files are deleted after 2 days. <a href="/privacy">Privacy</a> · <a href="/sources">Data sources</a> · <a href="https://github.com/hthillman/site-base-plan" target="_blank" rel="noopener">Open source</a>{TIP_FOOTER}</p>
+<p class="fine">No cookies, no account. Files are deleted after 2 days. <a href="/privacy">Privacy</a> · <a href="/sources">Data sources</a> · <a href="https://github.com/hthillman/site-base-plan" target="_blank" rel="noopener">Open source</a>{TIP_FOOTER}{FIRMS_FOOTER}</p>
 </footer>
 """
     script = """<script>
@@ -312,7 +323,7 @@ data came from. It's built for landscape architects, civil engineers, architects
 
 <h2>What you get</h2>
 <ul>
-<li><b>Base plan</b> in State Plane feet: parcel line, neighbouring parcels (ID, and owner and deed/plat reference where the county publishes them), road centerlines and names, approximate right-of-way, contours (LiDAR where available), slope bands, soils, FEMA flood zones, NWI wetlands, aerial underlay.</li>
+<li><b>Base plan</b> in State Plane feet: parcel line, neighboring parcels (ID, and owner and deed/plat reference where the county publishes them), road centerlines and names, approximate right-of-way, contours (LiDAR where available), slope bands, soils, FEMA flood zones, NWI wetlands, aerial underlay.</li>
 <li><b>Files:</b> DXF (true coordinates, and a copy moved near 0,0 for SketchUp), textured 3D terrain (COLLADA for SketchUp, OBJ for Rhino/Blender), LandXML surface for Civil 3D, GeoJSON layers and a GeoTIFF elevation model for GIS, KML for Google Earth.</li>
 <li><b>PDF summary:</b> scaled sheets with north arrow, scale bar and legend, plus a findings sheet that flags floodplain, wetlands, steep slopes and problem soils in plain language.</li>
 <li><b>Provenance log:</b> every layer's source, date, resolution and known limits. Layers that fail to load are marked as missing, never silently dropped.</li>
@@ -392,6 +403,9 @@ def privacy() -> str:
 <h2>"What should it do next?"</h2>
 <p>After a run you can click an option to say what you'd like built next. That records the option, anything you type in the box,
 and the run's state. Nothing that identifies you.</p>
+<h2>Early access for firms</h2>
+<p>If you request early access on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
+about it. Never shared or sold; ask to have them deleted any time.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
 Never shared or sold. Ask through the feedback form to have it deleted.</p>
@@ -399,3 +413,60 @@ Never shared or sold. Ask through the feedback form to have it deleted.</p>
 <p>Outputs are planning-level. Verify conditions in the field and with a licensed surveyor before relying on them.</p>
 """
     return layout("Privacy · Site Base Plan", "/privacy", body)
+
+
+FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hosted site only
+
+
+def firms() -> str:
+    body = """
+<h1>Using this at a firm?</h1>
+<p class="lede">The base plan stays free, with no account, for everyone. I'm exploring a few things for offices that run
+site studies regularly, and I'd like to build them with a handful of firms rather than guess.</p>
+
+<h2>Free, and staying free</h2>
+<ul>
+<li>Base plans from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
+<li>Every export: DXF, SketchUp terrain, LandXML, GIS, KML and the PDF summary.</li>
+<li>Multi-parcel sites and your own CAD layer names.</li>
+</ul>
+
+<h2>What I'm exploring for firms</h2>
+<ul>
+<li><b>Zoning test fits for your jurisdictions:</b> setbacks, buffers and maximum units with a building and parking layout, using zoning rules reviewed for the cities you work in.</li>
+<li><b>Batch runs:</b> many sites at once, for feasibility studies and site selection.</li>
+<li><b>Your office standards on every output:</b> your title block and logo on the PDF, your CAD layer standard set up once for the whole office.</li>
+</ul>
+<p class="note">Early access is a small pilot: you tell me what you need, I build it for your jurisdictions or workflow, you tell me
+what works. Nothing to buy here, and nothing changes for the free tool.</p>
+
+<h2>Early access</h2>
+<form id="ff">
+<div class="grid2">
+<label>Firm<input name="firm" maxlength="120" required></label>
+<label>Your role<input name="role" maxlength="80" placeholder="e.g. landscape architect, principal" required></label>
+</div>
+<label>Roughly how many sites do you look at a month?
+<select name="sites" required><option value="">Choose</option><option>1-2</option><option>3-10</option><option>11-30</option><option>30+</option></select></label>
+<fieldset class="checks"><legend>What would matter to you? (pick any)</legend>
+<label><input type="checkbox" name="want" value="zoning"> Zoning test fits</label>
+<label><input type="checkbox" name="want" value="batch"> Batch runs</label>
+<label><input type="checkbox" name="want" value="standards"> Title block and CAD standards</label>
+<label><input type="checkbox" name="want" value="coverage"> Parcel lines where I work</label>
+</fieldset>
+<label>Which cities or counties do you work in most?<input name="places" maxlength="300" placeholder="e.g. Columbus OH, Franklin County"></label>
+<label>Anything else? (optional)<textarea name="notes" maxlength="2000"></textarea></label>
+<label>Email<input name="email" type="email" required maxlength="254"></label>
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<div><button>Request early access</button> <span class="fine" id="ffmsg"></span></div>
+<p class="fine">I'll only use this to follow up about early access. See <a href="/privacy">Privacy</a>.</p>
+</form>
+"""
+    script = """<script>
+document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.target,m=document.getElementById('ffmsg');
+ const d=Object.fromEntries(new FormData(f));d.want=[...f.querySelectorAll('input[name=want]:checked')].map(x=>x.value);
+ const r=await fetch('/api/firms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+ const j=await r.json().catch(()=>({}));
+ if(r.ok){f.innerHTML='<p class="ok"><b>Thanks, got it.</b> I\\'ll be in touch by email.</p>'}else{m.textContent=j.error||'Something went wrong.';m.className='fine err'}};
+</script>"""
+    return layout("For firms · Site Base Plan", "/firms", body, script)

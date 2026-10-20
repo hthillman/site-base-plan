@@ -251,6 +251,34 @@ def interest():
     return jsonify(ok=True)
 
 
+FIRM_WANTS = {"zoning", "batch", "standards", "coverage"}
+
+
+@app.post("/api/firms")
+def firm_interest():
+    """Early-access request from the For firms page (stored privately)."""
+    from datetime import datetime, timezone
+
+    from .pages import FIRMS_PAGE
+
+    if not FIRMS_PAGE:
+        abort(404)
+    d = request.get_json(force=True, silent=True) or {}
+    if d.get("website"):
+        return jsonify(ok=True)
+    email = str(d.get("email") or "").strip()[:254]
+    firm = str(d.get("firm") or "").strip()[:120]
+    if not EMAIL_RE.match(email):
+        return jsonify(error="That doesn't look like an email address."), 400
+    if not firm:
+        return jsonify(error="Add your firm's name."), 400
+    want = [w for w in (d.get("want") or []) if w in FIRM_WANTS]
+    private_put("firms", {"firm": firm, "role": str(d.get("role") or "").strip()[:80], "sites": str(d.get("sites") or "")[:10],
+                          "want": want, "places": str(d.get("places") or "").strip()[:300], "notes": str(d.get("notes") or "").strip()[:2000],
+                          "email": email, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    return jsonify(ok=True)
+
+
 @app.post("/api/feedback")
 def feedback():
     from datetime import datetime, timezone
@@ -310,6 +338,15 @@ def sources():
     from .pages import sources as page
 
     return page()
+
+
+@app.get("/firms")
+def firms_page():
+    from .pages import FIRMS_PAGE, firms
+
+    if not FIRMS_PAGE:
+        abort(404)
+    return firms()
 
 
 @app.get("/privacy")
