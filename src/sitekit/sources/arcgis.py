@@ -63,6 +63,7 @@ def query_features(
     max_offset: float | None = None,
     page_size: int | None = None,
     return_geometry: bool = True,
+    timeout: float = 45,
 ) -> list[Feature]:
     params: dict[str, Any] = {
         "where": where,
@@ -96,7 +97,7 @@ def query_features(
             if page_size:
                 p["resultRecordCount"] = page_size
         # Long polygon geometries blow past URL limits; POST is always safe.
-        r = session().post(f"{layer_url}/query", data=p, timeout=45)
+        r = session().post(f"{layer_url}/query", data=p, timeout=timeout)
         r.raise_for_status()
         data = r.json()
         if "error" in data:

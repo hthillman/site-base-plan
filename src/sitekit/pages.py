@@ -209,7 +209,7 @@ Free, no account.</p>
 
 <form id="f">
 <div class="search">
-<input name="query" placeholder="Street address or parcel number" required autofocus aria-label="Street address or parcel number" autocomplete="street-address">
+<input name="query" placeholder="Street address, parcel number or coordinates" required autofocus aria-label="Street address, parcel number or coordinates" autocomplete="street-address">
 <button id="go">Build base plan</button>
 </div>
 <div id="also"></div>
@@ -304,11 +304,13 @@ f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
   for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
    let i;while((i=buf.indexOf('\\n'))>=0){const ev=JSON.parse(buf.slice(0,i));buf=buf.slice(i+1);handle(ev)}}
- }catch(err){out.innerHTML='<div class="result"><p class="err"><b>Couldn\\'t build this site.</b> '+esc(err.message)+'</p></div>'}
+ }catch(err){out.innerHTML='<div class="result"><p class="err"><b>Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
+  ((err.suggestions||[]).length?'<div class="chips">'+err.suggestions.map(s=>'<button type="button" class="chip sugg">'+esc(s)+'</button>').join('')+'</div>':'')+'</div>';
+  out.querySelectorAll('.sugg').forEach(b=>b.onclick=()=>{f.query.value=b.textContent;f.requestSubmit()})}
  go.disabled=false;go.textContent='Build base plan';
  function handle(ev){
   if(ev.log){lines.push(ev.log);log.textContent=lines.join('\\n')}
-  if(ev.error){throw new Error(ev.error)}
+  if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];throw e}
   if(ev.result)render(ev.result)}
 };
 function render(j){
@@ -325,10 +327,23 @@ function render(j){
  '<li><b>GIS</b> · gis/*.geojson, dem.tif</li>'+
  '<li><b>Google Earth</b> · site.kml</li>'+
  '<li><b>Everyone</b> · site-summary.pdf, provenance.md (sources and dates), and HOW-TO-OPEN.txt</li></ul>'+
- nextRow()+
+ tfBox(j.zoning)+nextRow()+
  '<ul class="flags">'+flags+'</ul></div>';
- wireNext(j.state);}
+ wireNext(j.state);wireTf(j.zoning);}
 const TIP_URL="__TIP_URL__";
+const TF_PRICE="__TF_PRICE__";
+function tfBox(z){if(!z||!z.covered||!(z.zones||[]).length)return '';
+ return '<div class="next" id="tfbox"><b>Want a test fit for this site?</b><span class="note">How many units fit, the buildable area after setbacks and buffers, '+
+ 'parking, and a layout you can open in CAD, worked from this site\\'s zoning (below)'+(TF_PRICE?'. '+esc(TF_PRICE)+' per site':'')+'. Done within two business days.</span>'+
+ '<form id="tff" class="nextdetail" style="flex-wrap:wrap;max-width:560px"><input name="email" type="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
+ '<input name="units" maxlength="60" placeholder="What you have in mind (e.g. walk-up apartments)" aria-label="What you have in mind">'+
+ '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Request</button></form><span class="fine" id="tfmsg"></span></div>';}
+function wireTf(z){const f=document.getElementById('tff');if(!f)return;
+ f.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('tfmsg');
+  const r=await fetch('/api/testfit-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:f.email.value,units:f.units.value,website:f.website.value,site:document.querySelector('#f [name=query]').value,zones:z.zones})});
+  const j=await r.json().catch(()=>({}));
+  if(r.ok){f.hidden=true;m.className='fine ok';m.innerHTML=j.pay_url?'Got it. <a href="'+esc(j.pay_url)+'" target="_blank" rel="noopener">Pay here to confirm</a> and I\\'ll start on it.':'Got it. I\\'ll email you to confirm before starting.'}
+  else{m.className='fine err';m.textContent=j.error||'Something went wrong.'}};}
 const NEXT=[["zoning","Zoning test fit (setbacks, max units, parking layout)"],["county","Parcel lines for my county"],["batch","Run many sites at once"],
  ["titleblock","My firm's title block and CAD standards"],["massing","3D building massing for SketchUp"],["other","Something else"]];
 const ASK={zoning:"Which city or county?",county:"Which county and state?",batch:"Roughly how many sites, how often?",titleblock:"Anything specific? (optional)",massing:"What would you use it for? (optional)",other:"What should it do?"};
@@ -346,7 +361,7 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
-</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL))
+</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__TF_PRICE__", escape(os.environ.get("TESTFIT_PRICE", "")))
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -526,6 +541,9 @@ and the run's state. Nothing that identifies you.</p>
 <h2>Early access for firms</h2>
 <p>If you request early access on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
 about it. Never shared or sold; ask to have them deleted any time.</p>
+<h2>Test fit requests</h2>
+<p>If you request a test fit, the site address, what you have in mind and your email are stored privately and used only to do the
+work and reply. Never shared or sold; ask to have them deleted any time.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
 Never shared or sold. Ask through the feedback form to have it deleted.</p>

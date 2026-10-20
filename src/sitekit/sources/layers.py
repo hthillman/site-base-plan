@@ -16,11 +16,16 @@ from shapely.validation import make_valid
 
 from ..config import US_FT_PER_M
 from ..crs import reproject
-from ..http import session
+from ..http import get_json, session
 from ..model import Feature, LayerResult, now_iso
 from .arcgis import query_features
 
 NFHL_URL = "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer"
+# Esri Living Atlas copy of the NFHL. Used when FEMA's own server times out or resets connections,
+# which it does often under load. It drops minimal-hazard Zone X areas, so "empty" means something different.
+NFHL_MIRROR_URL = ("https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/"
+                   "USA_Flood_Hazard_Reduced_Set_gdb/FeatureServer/0")
+FEMA_TIMEOUT_S = 20
 NWI_URL = "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0"
 SDA_URL = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest"
 DEM_URL = "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer"
@@ -92,11 +97,14 @@ def fetch_flood(clip: BaseGeometry, epsg: int) -> LayerResult:
             "Zone boundaries are drawn on older base maps and may not match LiDAR terrain.",
         ],
     )
+    fields = "FLD_ZONE,ZONE_SUBTY,SFHA_TF,STATIC_BFE,DFIRM_ID"
     try:
-        feats = query_features(
-            f"{NFHL_URL}/28", geometry=clip, in_sr=epsg, out_sr=epsg,
-            out_fields="FLD_ZONE,ZONE_SUBTY,SFHA_TF,STATIC_BFE,DFIRM_ID", max_offset=0.5,
-        )
+        try:
+            feats = query_features(f"{NFHL_URL}/28", geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields,
+                                   max_offset=0.5, timeout=FEMA_TIMEOUT_S)
+        except Exception as primary:  # noqa: BLE001
+            feats = query_features(NFHL_MIRROR_URL, geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields, max_offset=0.5)
+            return _flood_from_mirror(r, feats, clip, primary)
         r.features = _clip(feats, clip)
         try:
             panels = query_features(f"{NFHL_URL}/3", geometry=clip, in_sr=epsg, out_sr=epsg, out_fields="FIRM_PAN,EFF_DATE,PANEL_TYP")
@@ -113,6 +121,27 @@ def fetch_flood(clip: BaseGeometry, epsg: int) -> LayerResult:
             r.notes.append("No NFHL flood zone polygons intersect the extent.")
     except Exception as e:  # noqa: BLE001
         return _fail(r, e)
+    r.retrieved_at = now_iso()
+    return r
+
+
+def _flood_from_mirror(r: LayerResult, feats: list, clip: BaseGeometry, primary: Exception) -> LayerResult:
+    r.source = "FEMA National Flood Hazard Layer, via Esri Living Atlas copy (USA Flood Hazard Areas, reduced set)"
+    r.url = NFHL_MIRROR_URL
+    r.extra["fallback"] = True
+    try:
+        info = get_json(f"{NFHL_MIRROR_URL}", {"f": "json"}, timeout=10)
+        ms = (info.get("editingInfo") or {}).get("dataLastEditDate")
+        if ms:
+            r.vintage = f"Copy of FEMA NFHL as of {_ms_date(ms)}"
+    except Exception:  # noqa: BLE001
+        pass
+    r.notes.append(f"FEMA's own flood service didn't respond ({type(primary).__name__}), so this uses Esri's public copy of the same map.")
+    r.notes.append("The copy leaves out minimal-hazard Zone X and has no FIRM panel dates. Check the effective map at msc.fema.gov.")
+    r.features = _clip(feats, clip)
+    r.status = "ok" if r.features else "empty"
+    if not r.features:
+        r.notes.append("No 1% or 0.2% annual chance flood zone intersects the extent in the copy.")
     r.retrieved_at = now_iso()
     return r
 

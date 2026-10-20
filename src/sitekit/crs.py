@@ -107,6 +107,9 @@ def _match(lon: float, lat: float, state: str | None) -> dict | None:
     if not hits:  # just outside a simplified coastline: nearest zone within ~1 km
         near = sorted(((geom.distance(pt), props) for geom, props in _zones()), key=lambda t: t[0])
         hits = [p for d, p in near[:3] if d < 0.01]
+    if not hits and state:  # offshore island (Sanibel, Maine islands): nearest zone of the same state within ~40 km
+        near = sorted(((geom.distance(pt), props) for geom, props in _zones() if props["state"] == state), key=lambda t: t[0])
+        hits = [p for d, p in near[:1] if d < 0.4]
     if state:
         same = [h for h in hits if h["state"] == state]
         hits = same or hits

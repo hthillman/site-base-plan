@@ -131,8 +131,15 @@ def county_sources() -> dict[str, dict[str, ParcelSource]]:
     return out
 
 
+# Consolidated city-county governments that geocoders name differently from the county.
+COUNTY_ALIASES = {"athens-clarke": "clarke", "augusta-richmond": "richmond", "macon-bibb": "bibb",
+                  "columbus": "muscogee", "columbus-muscogee": "muscogee"}
+
+
 def _county_key(name: str | None) -> str:
-    return re.sub(r"\s+(county|parish|borough)$", "", (name or "").strip().lower())
+    key = re.sub(r"\s+(county|parish|borough)$", "", (name or "").strip().lower())
+    key = re.sub(r"\s+(unified government|consolidated government)$", "", key)
+    return COUNTY_ALIASES.get(key, key)
 
 
 def source_for(state: str | None, county: str | None = None) -> ParcelSource | None:

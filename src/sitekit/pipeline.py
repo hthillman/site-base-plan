@@ -56,6 +56,7 @@ class RunResult:
     files: dict[str, str] = field(default_factory=dict)
     timings: dict[str, float] = field(default_factory=dict)
     testfit: object = None
+    zoning: dict | None = None  # free zoning lookup summary, where covered
 
 
 def _slug(s: str) -> str:
@@ -329,6 +330,8 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
             zones = sorted({f.props.get("FLD_ZONE") for f in fl.features if f.geom.intersects(area_ref)})
             if zones:
                 add("info", f"No mapped Special Flood Hazard Area on the {where} (FEMA Zone {', '.join(z for z in zones if z)}).")
+            elif fl.extra.get("fallback"):
+                add("info", f"No mapped 1% or 0.2% annual chance flood zone on the {where}, per Esri's copy of FEMA's map (FEMA's own service didn't respond). Confirm at msc.fema.gov.")
             else:
                 add("caution", "FEMA has no digital flood zone polygons here. Unmapped is not the same as no flood risk.")
 
@@ -502,7 +505,8 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     flags += [{"level": "caution", "text": w} for w in layer_warnings]
 
     tf = None
-    from .plugins import testfit_available
+    zoning = None
+    from .plugins import testfit_available, zoning_summary
 
     if opts.testfit and testfit_available():
         from .testfit.export import flags as tf_flags
@@ -519,11 +523,16 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
             layers["zoning"] = tf.zoning_layer
         flags = tf_flags(tf) + flags
         timings["testfit"] = time.time() - t4
+    else:
+        t4 = time.time()
+        zflags, zoning = zoning_summary(site)
+        flags = zflags + flags
+        timings["zoning"] = time.time() - t4
 
     stamp = date.today().isoformat()
     out = Path(opts.out_dir) / f"{_slug(site.matched_address)}-{stamp}"
     out.mkdir(parents=True, exist_ok=True)
-    res = RunResult(site, layers, flags, out, timings=timings, testfit=tf)
+    res = RunResult(site, layers, flags, out, timings=timings, testfit=tf, zoning=zoning)
 
     from .export_dxf import write_dxf
     from .export_pdf import write_pdf

@@ -179,12 +179,14 @@ def start():
                 "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
             })
-            events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state}})
+            events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
+                                   "zoning": res.zoning}})
         except Exception as e:  # noqa: BLE001
             record_usage({"outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
+                          "hint": getattr(e, "hint", ""),
                           "seconds": round(time.time() - t0, 1)})
-            events.put({"error": str(e)})
+            events.put({"error": str(e), "suggestions": getattr(e, "suggestions", [])})
         events.put(None)
 
     threading.Thread(target=worker, daemon=True).start()
@@ -291,6 +293,34 @@ def firm_interest():
                           "want": want, "places": str(d.get("places") or "").strip()[:300], "notes": str(d.get("notes") or "").strip()[:2000],
                           "email": email, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
     return jsonify(ok=True)
+
+
+TESTFIT_PRICE = os.environ.get("TESTFIT_PRICE", "")      # e.g. "$40", shown on the request box; blank = quote by email
+TESTFIT_PAY_URL = os.environ.get("TESTFIT_PAY_URL", "")  # Stripe payment link shown after a request, if set
+
+
+@app.post("/api/testfit-request")
+def testfit_request():
+    """Paid test-fit request for a site in a covered jurisdiction (stored privately, done by hand for now)."""
+    from datetime import datetime, timezone
+
+    from .plugins import testfit_available
+
+    if not testfit_available():
+        abort(404)
+    d = request.get_json(force=True, silent=True) or {}
+    if d.get("website"):
+        return jsonify(ok=True)
+    email = str(d.get("email") or "").strip()[:254]
+    site = str(d.get("site") or "").strip()[:200]
+    if not EMAIL_RE.match(email):
+        return jsonify(error="That doesn't look like an email address."), 400
+    if not site:
+        return jsonify(error="Missing the site address."), 400
+    private_put("testfit", {"site": site, "zones": [str(z)[:80] for z in (d.get("zones") or [])][:3],
+                            "units": str(d.get("units") or "").strip()[:60], "notes": str(d.get("notes") or "").strip()[:2000],
+                            "email": email, "price": TESTFIT_PRICE, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    return jsonify(ok=True, pay_url=TESTFIT_PAY_URL)
 
 
 @app.post("/api/feedback")
