@@ -206,9 +206,10 @@ def start():
         except Exception as e:  # noqa: BLE001
             record_usage({**live, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
-                          "hint": getattr(e, "hint", ""),
+                          "hint": getattr(e, "hint", ""), "shape": query_shape(q) if type(e).__name__ == "GeocodeError" else None,
                           "seconds": round(time.time() - t0, 1)})
-            events.put({"error": str(e), "suggestions": getattr(e, "suggestions", [])})
+            events.put({"error": str(e), "suggestions": getattr(e, "suggestions", []), "near": getattr(e, "near", None),
+                        "pick": type(e).__name__ == "GeocodeError"})
         events.put(None)
 
     threading.Thread(target=worker, daemon=True).start()
@@ -231,6 +232,17 @@ def parse_layer_map(text: str) -> dict[str, str]:
         if old and new and old != new:
             out[old[:255]] = new[:255]
     return out
+
+
+def query_shape(q: str) -> dict:
+    """What a failed query looked like, without keeping it: enough to see why lookups miss."""
+    import re
+
+    t = q.strip()
+    return {"words": len(t.split()), "has_number": bool(re.search(r"\d", t)), "starts_with_number": bool(re.match(r"\d", t)),
+            "has_zip": bool(re.search(r"\b\d{5}(-\d{4})?\b", t)), "has_comma": "," in t,
+            "has_unit": bool(re.search(r"(?i)\b(apt|unit|suite|ste|#|lot|bldg)\b|#", t)),
+            "has_state": bool(re.search(r"\b[A-Z]{2}\b", t)), "looks_like_apn": looks_like_apn(t)}
 
 
 def record_usage(rec: dict) -> None:
@@ -295,7 +307,7 @@ def interest():
 
 
 EVENT_NAMES = {"run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
-               "tip_click", "firms_click", "vote", "vote_email"}
+               "tip_click", "firms_click", "vote", "vote_email", "map_pick"}
 
 
 @app.post("/api/event")

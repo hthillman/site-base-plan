@@ -66,6 +66,30 @@ def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")[:60] or "site"
 
 
+def _apn_miss_message(q: str, state: str, county: str | None, defaulted: bool, errs: list[str]) -> str:
+    """A parcel number that didn't match: say where we looked, what numbers there look like, and what to try instead."""
+    import re as _re
+
+    from .geocode import STATES
+    from .parcel import county_coverage, source_for
+
+    name = STATES.get(state, state)
+    src = source_for(state, county)
+    parts = [f"Parcel number {q} wasn't found in {name}" + (f" ({county} County)" if county else "") + "."]
+    if defaulted:
+        parts.append("Parcel numbers are searched in Washington unless you pick a state under Change.")
+    elif src is None and county_coverage(state) and not county:
+        parts.append(f"{name} parcels come from county layers, so add the county under Change.")
+    elif src is None:
+        parts.append(f"There's no free parcel layer for {name} yet, so search by street address instead.")
+    if src is not None:
+        ex = _re.findall(r"'([^']{3,40})'", (src.verified or {}).get("apn_test", "") or "")
+        if ex:
+            parts.append(f"Numbers there look like {ex[0]}.")
+    parts.append("Or search the street address, or pick the site on the map below.")
+    return " ".join(parts)
+
+
 def resolve_site(query: str, opts: Options, log: Log) -> Site:
     from .parcel import county_at, source_for
 
@@ -82,11 +106,12 @@ def resolve_site(query: str, opts: Options, log: Log) -> Site:
     work_sr = 4326  # query parcels in lon/lat until the zone is known
 
     if looks_like_apn(q):
+        defaulted = not state
         state = state or "WA"
         log(f"Looking up parcel number {q} in {state}")
         feats, parcel_source, errs = parcel_by_apn(q, work_sr, state, county)
         if not feats:
-            raise GeocodeError(f"Parcel number {q} not found in {state}. " + "; ".join(errs))
+            raise GeocodeError(_apn_miss_message(q, state, county, defaulted, errs), hint="apn_not_found")
         counties = {f.props.get("_COUNTY") for f in feats} - {"", None}
         if len(counties) > 1 and not county:
             raise GeocodeError(f"Parcel number {q} exists in several {state} counties ({', '.join(sorted(counties))}); pick the county.")

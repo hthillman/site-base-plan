@@ -124,6 +124,12 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
+.errline{margin:0 0 4px}
+.picker{margin-top:16px;display:grid;gap:8px}.picker .note{margin:0}
+#pickmap{height:340px;border-radius:8px;border:1px solid var(--line);overflow:hidden}
+.pickbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.pickbar button{padding:10px 16px}.pickbar button:disabled{opacity:.5}
+@media(max-width:560px){#pickmap{height:300px}}
 .tipline{margin:0;font-size:14px;color:var(--muted)}.tipline a{font-weight:600}
 .rhead{display:grid;gap:2px}.rhead h3{font-size:20px;margin:0}
 .rtop{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;margin-top:14px;align-items:start}
@@ -375,13 +381,16 @@ f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
   for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
    let i;while((i=buf.indexOf('\\n'))>=0){const ev=JSON.parse(buf.slice(0,i));buf=buf.slice(i+1);handle(ev)}}
- }catch(err){track('run_error');out.innerHTML='<div class="result"><p class="err"><b>Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
-  ((err.suggestions||[]).length?'<div class="chips">'+err.suggestions.map(s=>'<button type="button" class="chip sugg">'+esc(s)+'</button>').join('')+'</div>':'')+'</div>';
-  out.querySelectorAll('.sugg').forEach(b=>b.onclick=()=>{f.query.value=b.textContent;f.requestSubmit()})}
+ }catch(err){track('run_error');out.innerHTML='<div class="result"><p class="errline"><b class="err">Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
+  ((err.suggestions||[]).length?'<div class="chips">'+err.suggestions.map(s=>'<button type="button" class="chip sugg">'+esc(s)+'</button>').join('')+'</div>':'')+
+  (err.pick?'<div class="picker"><p class="note"><b>Can’t find it?</b> Click the site on the map, then build.</p><div id="pickmap" role="application" aria-label="Map: click to choose the site"></div>'+
+   '<div class="pickbar"><span id="pickll" class="note">No point chosen yet.</span><button type="button" id="pickgo" disabled>Build base plan here</button></div></div>':'')+'</div>';
+  out.querySelectorAll('.sugg').forEach(b=>b.onclick=()=>{f.query.value=b.textContent;f.requestSubmit()});
+  if(err.pick)openPicker(err.near)}
  go.disabled=false;go.textContent='Build base plan';
  function handle(ev){
   if(ev.log){lines.push(ev.log);log.textContent=lines.join('\\n')}
-  if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];throw e}
+  if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];e.near=ev.near||null;e.pick=!!ev.pick;throw e}
   if(ev.result)render(ev.result)}
 };
 function render(j){
@@ -424,6 +433,21 @@ function render(j){
  wireNext(j.state);wireSave(j);
  try{out.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}catch(e){}}
 const TIP_URL="__TIP_URL__";
+function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,bad)=>{
+ const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(c);
+ const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';s.onload=ok;s.onerror=bad;document.head.appendChild(s)})}
+async function openPicker(near){
+ try{await loadLeaflet()}catch(e){document.getElementById('pickll').textContent='The map didn’t load. Paste coordinates (lat, lon) from any map instead.';return}
+ const m=L.map('pickmap',{scrollWheelZoom:true}).setView(near?[near.lat,near.lon]:[39.5,-98.35],near?Math.min(near.zoom,18):4);
+ const E='https://server.arcgisonline.com/ArcGIS/rest/services/';
+ L.tileLayer(E+'World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imagery: Esri, Vantor, Earthstar Geographics'}).addTo(m);
+ L.tileLayer(E+'Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(m);
+ L.tileLayer(E+'Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(m);
+ let mk=null,pt=null;const go=document.getElementById('pickgo'),ll=document.getElementById('pickll');
+ m.on('click',e=>{pt=e.latlng;if(mk)mk.setLatLng(pt);else mk=L.circleMarker(pt,{radius:8,color:'#fff',weight:2,fillColor:'#d6262a',fillOpacity:1}).addTo(m);
+  ll.textContent=pt.lat.toFixed(5)+', '+pt.lng.toFixed(5);go.disabled=false});
+ go.onclick=()=>{if(!pt)return;track('map_pick');f.query.value=pt.lat.toFixed(6)+', '+pt.lng.toFixed(6);f.requestSubmit()};
+ setTimeout(()=>m.invalidateSize(),50)}
 let RUN_STATE='';
 function track(name,extra){const data={state:RUN_STATE,...(extra||{})};
  try{window.va&&window.va('event',{name,data})}catch(e){}

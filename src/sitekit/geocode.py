@@ -44,10 +44,27 @@ def census_county(c: dict | None) -> str | None:
 
 
 class GeocodeError(RuntimeError):
-    def __init__(self, msg: str, suggestions: list[str] | None = None, hint: str = ""):
+    def __init__(self, msg: str, suggestions: list[str] | None = None, hint: str = "", near: dict | None = None):
         super().__init__(msg)
         self.suggestions = suggestions or []
         self.hint = hint  # coarse failure kind for anonymous usage stats; never the address
+        self.near = near  # {lon, lat, zoom}: where to open the map picker (the town or street the geocoder did recognise)
+
+
+NEAR_ZOOM = {"PointAddress": 18, "Subaddress": 18, "StreetAddress": 18, "StreetAddressExt": 18, "StreetInt": 18, "StreetName": 17,
+             "PostalExt": 16, "POI": 16, "Neighborhood": 15, "District": 14, "Locality": 13, "City": 13, "Postal": 13,
+             "PostalLoc": 13, "Subregion": 10, "Region": 7}
+UNIT_RE = re.compile(r"(?i)(?:,\s*|\s+)(?:apt|apartment|unit|suite|ste|bldg|building|lot|trlr|trailer|space|spc|fl|floor|rm|room|#)\.?\s*#?\s*[\w-]+(?=,|$)")
+
+
+def clean_address(addr: str) -> str:
+    """Common reasons a real address doesn't match: unit numbers, ', USA', ZIP+4, stray punctuation."""
+    a = UNIT_RE.sub("", addr)
+    a = re.sub(r"(?i),?\s*(usa|u\.s\.a\.|united states( of america)?)\s*$", "", a)
+    a = re.sub(r"\b(\d{5})-\d{4}\b", r"\1", a)
+    a = re.sub(r"\s*,\s*,+", ",", a)
+    a = re.sub(r"[;|]+", ",", a)
+    return re.sub(r"\s{2,}", " ", a).strip(" ,.")
 
 
 ADDRESS_TYPES = ("PointAddress", "Subaddress", "StreetAddress", "StreetAddressExt", "Parcel", "StreetInt")
@@ -101,7 +118,7 @@ def _census(addr: str, want: str | None) -> GeocodeHit | None:
     return None
 
 
-def _esri(addr: str, want: str | None, suggestions: list[str] | None = None) -> GeocodeHit | None:
+def _esri(addr: str, want: str | None, suggestions: list[str] | None = None, near: list | None = None) -> GeocodeHit | None:
     params = {"SingleLine": addr, "f": "json", "maxLocations": 5, "outFields": "Score,Addr_type,Subregion,RegionAbbr", "countryCode": "USA"}
     key = os.environ.get("ESRI_API_KEY")
     d = None
@@ -118,6 +135,8 @@ def _esri(addr: str, want: str | None, suggestions: list[str] | None = None) -> 
         a = c.get("attributes", {})
         if not _ok(a.get("RegionAbbr"), want):
             continue
+        if near is not None and not near and c.get("score", 0) >= 60 and c.get("location"):
+            near.append({"lon": c["location"]["x"], "lat": c["location"]["y"], "zoom": NEAR_ZOOM.get(a.get("Addr_type"), 12)})
         if a.get("Addr_type") not in ADDRESS_TYPES:
             continue
         if c.get("score", 0) < 85:
@@ -162,22 +181,26 @@ def geocode(addr: str, state: str | None = None) -> tuple[GeocodeHit, list[str]]
         raise GeocodeError("Those coordinates aren't inside a US state" + (f" ({STATES.get(state, state)})" if state else "")
                            + ". Use latitude, longitude, e.g. 47.0379, -122.9007.", hint="coords")
     suggestions: list[str] = []
-    for fn in GEOCODERS:
-        try:
-            hit = fn(addr, state, suggestions) if fn is _esri else fn(addr, state)
-            if hit:
-                return hit, errors
-            errors.append(f"{fn.__name__.strip('_')}: no confident US match" + (f" in {state}" if state else ""))
-        except Exception as e:  # noqa: BLE001 - try the next one
-            errors.append(f"{fn.__name__.strip('_')}: {e}")
+    near: list = []
+    tries = [addr]
+    cleaned = clean_address(addr)
+    if cleaned and cleaned.lower() != addr.strip().lower():
+        tries.append(cleaned)  # unit numbers, ', USA', ZIP+4 and stray punctuation are common reasons for a miss
+    for attempt in tries:
+        for fn in GEOCODERS:
+            try:
+                hit = fn(attempt, state, suggestions, near) if fn is _esri else fn(attempt, state)
+                if hit:
+                    return hit, errors
+                errors.append(f"{fn.__name__.strip('_')}: no confident US match" + (f" in {state}" if state else ""))
+            except Exception as e:  # noqa: BLE001 - try the next one
+                errors.append(f"{fn.__name__.strip('_')}: {e}")
     print("geocode miss: " + "; ".join(errors), flush=True)
     where = f" in {STATES.get(state, state)}" if state else ""
+    pin = " Or pick the site on the map below."
     if not re.search(r"\d", addr):
-        raise GeocodeError(f"That looks like a place name, not a street address{where}. Enter a street address (123 Main St, Town, ST), "
-                           "a parcel number (pick the state under Change), or coordinates (47.0379, -122.9007).",
-                           suggestions[:3], hint="no_number")
+        raise GeocodeError(f"That looks like a place name, not a street address{where}. Enter a street address (123 Main St, Town, ST) "
+                           "or a parcel number." + pin, suggestions[:3], hint="no_number", near=near[0] if near else None)
     msg = f"Couldn't find that address{where}."
-    msg += " Did you mean one of these?" if suggestions else (
-        " Check the spelling and include the city and state. For rural or new addresses, paste coordinates "
-        "from a map instead (47.0379, -122.9007).")
-    raise GeocodeError(msg, suggestions[:3], hint="suggested" if suggestions else "no_match")
+    msg += (" Did you mean one of these?" if suggestions else " Check the spelling and include the city and state.") + pin
+    raise GeocodeError(msg, suggestions[:3], hint="suggested" if suggestions else "no_match", near=near[0] if near else None)
