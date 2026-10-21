@@ -99,8 +99,10 @@ def enabled() -> bool:
 
 
 def can_sign_up() -> bool:
-    """New sign-ins are possible: email can be sent, or we're on a dev server."""
-    return enabled() and (bool(RESEND_API_KEY) or local_dev())
+    """New sign-ins are possible: switched on (ACCOUNTS_LIVE=1) with email set up, or a dev server."""
+    if local_dev():
+        return True
+    return enabled() and bool(RESEND_API_KEY) and os.environ.get("ACCOUNTS_LIVE") == "1"
 
 
 def current_user() -> dict | None:
