@@ -319,8 +319,6 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
     if parcel is not None:
         add("info", f"Parcel area {parcel.area:,.0f} sq ft ({parcel.area / 43560:.2f} ac) per assessor GIS geometry.")
         flags.fact("parcel", "Parcel", f"{parcel.area / 43560:.2f} ac", f"{parcel.area:,.0f} sq ft · assessor lines", "info")
-    else:
-        flags.fact("parcel", "Parcel", "No parcel line", "Plan drawn around the address", "warn")
         pp = site.parcel.props
         rec = [x for x in (f"owner of record {pp['_OWNER']}" if pp.get("_OWNER") else "", pp.get("_DEED"), f"plat {pp['_PLAT']}" if pp.get("_PLAT") else "",
                            f"subdivision {pp['_SUBDIV']}" if pp.get("_SUBDIV") else "") if x]
@@ -329,6 +327,8 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
         note = f" Not published in this parcel data: {', '.join(missing)}." if missing else ""
         if rec or note:
             add("info", ("Assessor record: " + "; ".join(rec) + "." if rec else "Assessor record:") + note)
+    else:
+        flags.fact("parcel", "Parcel", "No parcel line", "Plan drawn around the address", "warn")
 
     fl = layers.get("flood")
     if fl and fl.status in ("ok", "empty"):
