@@ -296,6 +296,7 @@ def run_request(d: dict, batch: bool = False):
         except Exception as e:  # noqa: BLE001
             record_usage({**base, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
+                          "where": crash_site(e),
                           "hint": getattr(e, "hint", ""), "shape": query_shape(q) if type(e).__name__ == "GeocodeError" else None,
                           "seconds": round(time.time() - t0, 1)})
             events.put({"error": str(e), "suggestions": getattr(e, "suggestions", []), "near": getattr(e, "near", None),
@@ -335,6 +336,17 @@ def parse_layer_map(text: str) -> dict[str, str]:
         if old and new and old != new:
             out[old[:255]] = new[:255]
     return out
+
+
+def crash_site(e: BaseException) -> str:
+    """'pipeline.py:348 in compute_flags' for the deepest sitekit frame, so a usage record says where a run broke."""
+    import traceback
+
+    frames = [f for f in traceback.extract_tb(e.__traceback__) if "sitekit" in f.filename]
+    if not frames or type(e).__name__ == "GeocodeError":
+        return ""
+    f = frames[-1]
+    return f"{Path(f.filename).name}:{f.lineno} in {f.name}"
 
 
 def query_shape(q: str) -> dict:

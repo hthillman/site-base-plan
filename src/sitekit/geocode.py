@@ -67,6 +67,7 @@ def clean_address(addr: str) -> str:
     return re.sub(r"\s{2,}", " ", a).strip(" ,.")
 
 
+PLACE_MIN_SCORE = 95
 ADDRESS_TYPES = ("PointAddress", "Subaddress", "StreetAddress", "StreetAddressExt", "Parcel", "StreetInt")
 COORD_RE = re.compile(r"^\s*\(?\s*(-?\d{1,3}(?:\.\d+)?)\s*[°]?\s*[NS]?\s*[, ]\s*(-?\d{1,3}(?:\.\d+)?)\s*[°]?\s*[EW]?\s*\)?\s*$", re.I)
 
@@ -119,7 +120,7 @@ def _census(addr: str, want: str | None) -> GeocodeHit | None:
 
 
 def _esri(addr: str, want: str | None, suggestions: list[str] | None = None, near: list | None = None) -> GeocodeHit | None:
-    params = {"SingleLine": addr, "f": "json", "maxLocations": 5, "outFields": "Score,Addr_type,Subregion,RegionAbbr", "countryCode": "USA"}
+    params = {"SingleLine": addr, "f": "json", "maxLocations": 5, "outFields": "Score,Addr_type,Subregion,RegionAbbr,City", "countryCode": "USA"}
     key = os.environ.get("ESRI_API_KEY")
     d = None
     if key:
@@ -131,12 +132,17 @@ def _esri(addr: str, want: str | None, suggestions: list[str] | None = None, nea
             print(f"WARN esri key geocode failed: {e}", flush=True)
     if d is None:
         d = get_json("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates", params, timeout=30)
+    places = []  # named places ("Olympia City Hall", "Bellingham High School"): used only when no address matches
+    top_type = None  # a place counts only if Esri's best answer is a place (not a city or street that shares a business's name)
     for c in d.get("candidates", []):
         a = c.get("attributes", {})
         if not _ok(a.get("RegionAbbr"), want):
             continue
+        top_type = top_type or a.get("Addr_type")
         if near is not None and not near and c.get("score", 0) >= 60 and c.get("location"):
             near.append({"lon": c["location"]["x"], "lat": c["location"]["y"], "zoom": NEAR_ZOOM.get(a.get("Addr_type"), 12)})
+        if a.get("Addr_type") == "POI" and c.get("score", 0) >= PLACE_MIN_SCORE and c.get("location"):
+            places.append(c)
         if a.get("Addr_type") not in ADDRESS_TYPES:
             continue
         if c.get("score", 0) < 85:
@@ -146,6 +152,27 @@ def _esri(addr: str, want: str | None, suggestions: list[str] | None = None, nea
         county = (a.get("Subregion") or "").replace(" County", "").replace(" Parish", "") or None
         return GeocodeHit(c["location"]["x"], c["location"]["y"], c["address"], county,
                           f"Esri World Geocoder ({a.get('Addr_type')})", a["RegionAbbr"], c.get("score"))
+    return _place_hit(places, suggestions) if top_type == "POI" else None
+
+
+def _place_label(c: dict) -> str:
+    a = c.get("attributes", {})
+    return ", ".join(x for x in (c.get("address"), a.get("City"), a.get("RegionAbbr")) if x)
+
+
+def _place_hit(places: list[dict], suggestions: list[str] | None) -> GeocodeHit | None:
+    """The named place, if every strong match is the same spot (within ~1 km); otherwise offer them as suggestions."""
+    if not places:
+        return None
+    x0, y0 = places[0]["location"]["x"], places[0]["location"]["y"]
+    if all(abs(c["location"]["x"] - x0) < 0.012 and abs(c["location"]["y"] - y0) < 0.009 for c in places):
+        c, a = places[0], places[0]["attributes"]
+        county = (a.get("Subregion") or "").replace(" County", "").replace(" Parish", "") or None
+        return GeocodeHit(x0, y0, _place_label(c), county, "Esri World Geocoder (place name)", a["RegionAbbr"], c.get("score"))
+    if suggestions is not None:
+        for c in places:
+            if _place_label(c) not in suggestions:
+                suggestions.append(_place_label(c))
     return None
 
 
@@ -158,8 +185,8 @@ def _nominatim(addr: str, want: str | None) -> GeocodeHit | None:
     for h in d or []:
         ad = h.get("address", {})
         st = (ad.get("ISO3166-2-lvl4") or "").replace("US-", "") or NAME_TO_CODE.get((ad.get("state") or "").lower())
-        if not _ok(st, want) or "house_number" not in ad:
-            continue
+        if not _ok(st, want) or "house_number" not in ad or not re.search(rf"\b{re.escape(ad['house_number'])}\b", addr):
+            continue  # a match counts only if its house number is the one typed (not a cafe found for "Starbucks")
         county = (ad.get("county") or "").replace(" County", "") or None
         return GeocodeHit(float(h["lon"]), float(h["lat"]), h["display_name"], county, "OpenStreetMap Nominatim", st)
     return None
@@ -199,8 +226,9 @@ def geocode(addr: str, state: str | None = None) -> tuple[GeocodeHit, list[str]]
     where = f" in {STATES.get(state, state)}" if state else ""
     pin = " Or pick the site on the map below."
     if not re.search(r"\d", addr):
-        raise GeocodeError(f"That looks like a place name, not a street address{where}. Enter a street address (123 Main St, Town, ST) "
-                           "or a parcel number." + pin, suggestions[:3], hint="no_number", near=near[0] if near else None)
+        raise GeocodeError(f"Couldn't pin that to one site{where}." + (" Did you mean one of these?" if suggestions else
+                           " Enter a street address (123 Main St, Town, ST), a named place with its town, or a parcel number.") + pin,
+                           suggestions[:3], hint="no_number", near=near[0] if near else None)
     msg = f"Couldn't find that address{where}."
     msg += (" Did you mean one of these?" if suggestions else " Check the spelling and include the city and state.") + pin
     raise GeocodeError(msg, suggestions[:3], hint="suggested" if suggestions else "no_match", near=near[0] if near else None)

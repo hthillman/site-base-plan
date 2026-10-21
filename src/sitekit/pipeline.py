@@ -148,6 +148,9 @@ def resolve_site(query: str, opts: Options, log: Log) -> Site:
         try:
             hit, errs = geocode(q, state)
             lon, lat, matched, geocoder = hit.lon, hit.lat, hit.matched, hit.source
+            if "place name" in geocoder:
+                typed = re.sub(r"\s+", " ", q).strip()  # not Esri's name: outputs keep what the user typed
+                warnings.append(f"'{typed}' was matched as a place name, not a street address. Check that the parcel shown is the one you meant.")
             if hit.source.startswith("Esri"):
                 # Esri's terms allow free geocoding when results aren't stored, so
                 # saved outputs show the address as entered, not Esri's match.

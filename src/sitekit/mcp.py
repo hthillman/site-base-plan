@@ -151,7 +151,9 @@ def build(args: dict) -> dict:
         urls = publish(run_id, res.out_dir, res.files)
     except Exception as e:  # noqa: BLE001
         geo = isinstance(e, GeocodeError)
-        record_usage({**base, "outcome": "error", "state": state or "", "error_kind": type(e).__name__,
+        from .web import crash_site
+
+        record_usage({**base, "outcome": "error", "state": state or "", "error_kind": type(e).__name__, "where": crash_site(e),
                       "error": "" if geo else str(e)[:160], "shape": query_shape(q) if geo else None, "seconds": round(time.time() - t0, 1)})
         text = str(e)
         if geo:
