@@ -43,6 +43,20 @@ try:  # Pro subscription (hosted site only)
 except ImportError:
     pass
 
+try:  # Pro firm (hosted site only)
+    from .firm import bp as _firm_bp
+
+    app.register_blueprint(_firm_bp)
+except ImportError:
+    pass
+
+try:  # Pro batch (hosted site only)
+    from .batch import bp as _batch_bp
+
+    app.register_blueprint(_batch_bp)
+except ImportError:
+    pass
+
 try:  # one-time setup endpoints (hosted site only; removed after use)
     from .admin_setup import bp as _admin_bp
 
@@ -169,7 +183,11 @@ OPTIONAL_LAYERS = {"aerial", "soils", "flood", "wetland", "massing"}
 
 @app.post("/api/run")
 def start():
-    d = request.get_json(force=True)
+    return run_request(request.get_json(force=True))
+
+
+def run_request(d: dict, batch: bool = False):
+    """Start a run and stream its progress. Shared by /api/run and Pro batch runs (/api/batch/run)."""
     if ACCESS_CODE and not hmac.compare_digest(str(d.get("code") or ""), ACCESS_CODE):
         return jsonify(error="Wrong or missing access code."), 401
     q = (d.get("query") or "").strip()
@@ -191,10 +209,23 @@ def start():
     )
     if opts.testfit and not pro_ok():
         return jsonify(error="The test fit is part of Basesheet Pro. Sign in and subscribe on basesheet.site/pro, or build without it.", pro=True), 402
+    try:  # Pro firm branding: title block and office layer standard (hosted site only)
+        from .accounts import current_user
+        from .firm import apply_to
+
+        apply_to(opts, current_user(), parse_layer_map)
+    except ImportError:
+        pass
+    if opts.firm and d.get("project"):
+        opts.firm["project"] = str(d["project"]).strip()[:80]
     run_id = uuid.uuid4().hex[:10]
     events: queue.Queue = queue.Queue()
     _tok = os.environ.get("ADMIN_TOKEN", "")
     base = {"live_check": True} if _tok and hmac.compare_digest(request.headers.get("X-Live-Check", ""), _tok) else {}
+    if batch:
+        base["batch"] = True
+    if opts.firm:
+        base["firm"] = True
     # Repeat use without an ID: the browser's own count of earlier plans and days since its first.
     def _int(v, hi):
         try:

@@ -46,6 +46,7 @@ class Options:
     layer_preset: str = "default"                       # default | ncs
     layer_custom: dict = field(default_factory=dict)    # {"SITE-PARCEL": "L-PROP-LINE", ...}
     skip: set = field(default_factory=set)              # optional layers left out: aerial, soils, flood, wetland, massing
+    firm: dict | None = None    # title block: {name, lines: [..], prepared_by, project, logo: local image path}
 
 
 @dataclass
@@ -640,6 +641,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     out = Path(opts.out_dir) / f"{_slug(site.matched_address)}-{stamp}"
     out.mkdir(parents=True, exist_ok=True)
     res = RunResult(site, layers, flags, out, timings=timings, testfit=tf, zoning=zoning, envelope=envelope, facts=facts)
+    res.firm = opts.firm
     res.grid = grid  # DEM, for exporters that place 3D massing on the ground
 
     from .export_dxf import write_dxf

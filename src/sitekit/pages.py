@@ -170,6 +170,9 @@ details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-b
 .savef{display:flex;gap:8px;flex-wrap:wrap}.savef input:not(.hp){flex:1 1 220px;font-size:15px}.savef button{padding:9px 14px}
 .plan{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
 .procard{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:18px 0}.procard .price{font-size:22px;font-weight:700;margin:0 0 6px}
+.btab{width:100%;border-collapse:collapse;font-size:13px;display:block;overflow-x:auto;margin-top:8px}.btab th,.btab td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
+.firmf{display:grid;gap:10px;max-width:560px}.firmf label{display:grid;gap:4px;font-size:14px}.firmf input,.firmf textarea,.firmf select{font-size:15px}
+#logoprev{max-height:64px;max-width:200px;display:block;margin-top:4px}
 .probar{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:14px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .plan:first-child{border-top:0}
 .plan .t{font-weight:600}.plan .acts{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:14px}
@@ -739,6 +742,20 @@ def plans() -> str:
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
 <div id="probar" class="probar" hidden></div>
+<section id="office" hidden>
+<h2>Your office</h2>
+<p class="note">Used on every base plan you build while signed in: your title block on each PDF sheet, and your CAD layer names.</p>
+<form id="firmf" class="firmf">
+<label>Firm name <input name="name" maxlength="80"></label>
+<label>Address, phone, website (up to 4 lines) <textarea name="lines" rows="3" maxlength="400"></textarea></label>
+<label>Prepared by <input name="prepared_by" maxlength="80" placeholder="Name or initials"></label>
+<label>Logo (PNG or JPG, under 600 KB) <input type="file" name="logo" accept="image/png,image/jpeg"><img id="logoprev" alt="" hidden></label>
+<label class="check" id="rmlogo-row" hidden><input type="checkbox" name="remove_logo"> Remove logo</label>
+<label>CAD layer names <select name="layer_preset"><option value="default">Default (SITE-*)</option><option value="ncs">NCS-style (V-PROP-LINE…)</option><option value="custom">Custom…</option></select></label>
+<label id="lmrow" hidden>Your layer names, one per line: <code>SITE-PARCEL = L-PROP-LINE</code> <textarea name="layer_map" rows="6" style="font-family:ui-monospace,monospace"></textarea></label>
+<div><button>Save office settings</button> <span id="firmmsg" class="note" aria-live="polite"></span></div>
+</form>
+</section>
 <p class="fine" id="signout-row" hidden><span id="who"></span> · <button type="button" class="linkbtn" id="signout" style="padding:0">Sign out</button></p>
 """
     script = """<script>
@@ -776,13 +793,26 @@ async function proBar(tries){
  if(!s.signed_in||(!s.live&&!s.pro&&!s.has_billing))return;
  const when=s.period_end?new Date(s.period_end*1000).toLocaleDateString():'';
  if(s.pro){bar.innerHTML='<b>Basesheet Pro</b><span class="note">'+(s.cancel_at_period_end?'ends ':'renews ')+esc(when)+'</span>'+
-   '<button type="button" class="linkbtn" id="billing">Manage billing</button>';bar.hidden=false;
+   '<a href="/batch">Batch runs</a><a href="#office">Office settings</a><button type="button" class="linkbtn" id="billing">Manage billing</button>';bar.hidden=false;office();
   document.getElementById('billing').onclick=async()=>{const r=await fetch('/api/billing/portal',{method:'POST'});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Billing isn\\'t reachable right now.')+'</span>'};
-  if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits are on.</span>';return}
+  document.getElementById('plede').textContent='Base plans you\\'ve saved, up to 500 with Pro. Files stay here until you delete them.';
+  if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits, batch runs and office settings are on.</span>';return}
  if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
  if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+'</b><span class="note">Zoning test fits, office standards, batch runs, 500 saved plans.</span>'+
    '<a href="/pro">Details</a><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
   document.getElementById('getpro').onclick=async()=>{const r=await fetch('/api/billing/checkout',{method:'POST'});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
+async function office(){const sec=document.getElementById('office'),ff=document.getElementById('firmf'),fm=document.getElementById('firmmsg');
+ const r=await fetch('/api/firm');if(!r.ok)return;const p=await r.json();sec.hidden=false;
+ ff.name.value=p.name||'';ff.lines.value=(p.lines||[]).join('\\n');ff.prepared_by.value=p.prepared_by||'';ff.layer_preset.value=p.layer_preset||'default';ff.layer_map.value=p.layer_map||'';
+ const prev=document.getElementById('logoprev'),syncLm=()=>{document.getElementById('lmrow').hidden=ff.layer_preset.value!=='custom'};syncLm();ff.layer_preset.onchange=syncLm;
+ if(p.has_logo){prev.src='/api/firm/logo?'+Date.now();prev.hidden=false;document.getElementById('rmlogo-row').hidden=false}
+ let logo=null;ff.logo.onchange=()=>{const f=ff.logo.files[0];if(!f)return;if(f.size>600000){fm.innerHTML='<span class="err">That logo is over 600 KB.</span>';ff.logo.value='';return}
+  const rd=new FileReader();rd.onload=()=>{logo=rd.result;prev.src=logo;prev.hidden=false};rd.readAsDataURL(f)};
+ ff.onsubmit=async e=>{e.preventDefault();fm.textContent='Saving…';
+  const body={name:ff.name.value,lines:ff.lines.value,prepared_by:ff.prepared_by.value,layer_preset:ff.layer_preset.value,layer_map:ff.layer_map.value,remove_logo:ff.remove_logo.checked,...(logo?{logo}:{})};
+  const r=await fetch('/api/firm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const k=await r.json().catch(()=>({}));
+  fm.innerHTML=r.ok?'<span class="ok">Saved. Your next base plan will use it.</span>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';
+  if(r.ok){logo=null;if(!k.has_logo){prev.hidden=true;document.getElementById('rmlogo-row').hidden=true}else document.getElementById('rmlogo-row').hidden=false;ff.remove_logo.checked=false}}}
 proBar(0);
 </script>"""
     return layout("My plans · Basesheet", "/plans", body, script, description="Your saved Basesheet base plans.")
@@ -810,8 +840,8 @@ that take real work to build and keep accurate, and it pays for the zoning resea
 <ul>
 <li><b>Zoning test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking
 layout you can open in CAD. Thurston County, WA today; more jurisdictions are being added every week, and you can ask for yours.</li>
-<li><b>Your office standards:</b> your title block and logo on the PDF, your CAD layer standard saved for every run. Included as it ships.</li>
-<li><b>Batch runs:</b> many sites at once for feasibility studies and site selection. Included as it ships.</li>
+<li><b>Your office standards:</b> your firm name, address and logo in a title block on every PDF sheet, and your CAD layer names on every run.</li>
+<li><b>Batch runs:</b> up to 50 sites at once, with a summary table (parcel size, flood zone, slope, wetlands, soils, zoning) and every plan in one download.</li>
 <li><b>500 saved plans</b> instead of 25.</li>
 </ul>
 <div id="probox"><button type="button" id="subscribe">Get Pro</button></div>

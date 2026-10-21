@@ -113,12 +113,18 @@ def _unpublished(site) -> list[str]:
 def _sidebar(fig, res, title, scale, legend: list[tuple], page_no, pages):
     site = res.site
     X = SIDE_X / PAGE[0]
+    firm = getattr(res, "firm", None) or None
+    floor = 2.75 if firm else 1.6  # lowest the sources list may run before the title block / disclaimer
 
     def t(y, s, **kw):
         fig.text(X, y / PAGE[1], s, **{"fontsize": 8, "color": INK, "va": "top", **kw})
 
     t(10.55, title, fontsize=15, fontweight="bold")
-    t(10.15, "\n".join(textwrap.wrap(site.matched_address, 44)), fontsize=9.5)
+    if firm and firm.get("project"):
+        t(10.15, firm["project"][:60], fontsize=10.5, fontweight="bold")
+        t(9.92, "\n".join(textwrap.wrap(site.matched_address, 44)), fontsize=9)
+    else:
+        t(10.15, "\n".join(textwrap.wrap(site.matched_address, 44)), fontsize=9.5)
     y = 9.55 if len(site.matched_address) <= 44 else 9.38
     meta = [
         f"County: {site.county}",
@@ -130,7 +136,7 @@ def _sidebar(fig, res, title, scale, legend: list[tuple], page_no, pages):
         f"Buffer: {site.buffer_ft:g} ft around parcel",
         f"Coordinates: {site.crs_label}",
         f"Elevations: {site.units}, NAVD88",
-        f"Prepared {date.today().isoformat()} (automated)",
+        f"Prepared {date.today().isoformat()}" + (f" by {firm.get('prepared_by') or firm.get('name')}" if firm else " (automated)"),
     ]
     for m in meta:
         t(y, m, fontsize=7.5, color=MUTED)
@@ -168,8 +174,14 @@ def _sidebar(fig, res, title, scale, legend: list[tuple], page_no, pages):
         col = FLAG_COLORS["missing"] if lr.status == "failed" else INK
         txt = f"{lr.title}{status}: {lr.vintage or 'vintage not reported'}"
         wrapped = textwrap.wrap(txt, 70)[:3]
+        if y - 0.13 * len(wrapped) < floor:
+            t(y, "(more sources in provenance.md)", fontsize=6.3, color=MUTED)
+            break
         t(y, "\n".join(wrapped), fontsize=6.3, color=col)
         y -= 0.13 * len(wrapped) + 0.07
+
+    if firm:
+        _title_block(fig, firm, X, 1.62)
 
     # Disclaimer box pinned to the bottom.
     box_h = 1.05
@@ -177,6 +189,31 @@ def _sidebar(fig, res, title, scale, legend: list[tuple], page_no, pages):
     fig.text(X + 0.08 / PAGE[0], (0.45 + box_h - 0.08) / PAGE[1], "\n".join(textwrap.wrap(DISCLAIMER, 78)), fontsize=6.4, color=INK, va="top")
     if page_no:
         fig.text((SIDE_X + 4.4) / PAGE[0], 0.25 / PAGE[1], f"Sheet {page_no} of {pages}", fontsize=7, color=MUTED, ha="right")
+
+
+def _title_block(fig, firm: dict, X: float, bottom: float, h: float = 1.0) -> None:
+    """Firm title block above the disclaimer: logo on the left, firm name and lines beside it."""
+    w = 4.4
+    fig.patches.append(Rectangle((X, bottom / PAGE[1]), w / PAGE[0], h / PAGE[1], transform=fig.transFigure, facecolor="none", edgecolor=INK, lw=0.8))  # see-through, or it hides the logo axes
+    tx = X + 0.1 / PAGE[0]
+    logo = firm.get("logo")
+    if logo:
+        try:
+            img = plt.imread(logo)
+            ih, iw = img.shape[:2]
+            box_w, box_h = 1.3, h - 0.2
+            s = min(box_w / iw, box_h / ih)
+            lw, lh = iw * s, ih * s
+            ax = fig.add_axes([X + (0.1 + (box_w - lw) / 2) / PAGE[0], (bottom + 0.1 + (box_h - lh) / 2) / PAGE[1], lw / PAGE[0], lh / PAGE[1]])
+            ax.imshow(img)
+            ax.axis("off")
+            tx = X + 1.55 / PAGE[0]
+        except Exception as e:  # noqa: BLE001 - a bad logo must not break the PDF
+            print(f"WARN logo skipped: {e}", flush=True)
+    width = 40 if tx > X + 0.2 / PAGE[0] else 62
+    fig.text(tx, (bottom + h - 0.12) / PAGE[1], (firm.get("name") or "")[:60], fontsize=10, fontweight="bold", color=INK, va="top")
+    lines = [ln for x in (firm.get("lines") or [])[:4] for ln in textwrap.wrap(str(x), width)[:1]]
+    fig.text(tx, (bottom + h - 0.36) / PAGE[1], "\n".join(lines), fontsize=7, color=MUTED, va="top", linespacing=1.35)
 
 
 def _aerial(ax, res, alpha=0.6):
@@ -410,6 +447,10 @@ def _summary_page(fig, res, cfg, opts, pages):
         fig.text(x / W, y / H, s, **{"fontsize": 8.5, "color": INK, "va": "top", **kw})
 
     t(0.6, 10.5, "SITE FINDINGS AND DATA SOURCES", fontsize=16, fontweight="bold")
+    firm = getattr(res, "firm", None)
+    if firm:
+        fig.text((W - 0.6) / W, 10.5 / H, (firm.get("name") or "")[:60] + (f"  |  {firm['project'][:60]}" if firm.get("project") else ""),
+                 fontsize=10, fontweight="bold", color=INK, va="top", ha="right")
     t(0.6, 10.1, f"{site.matched_address}   |   {site.county} County   |   APN {', '.join(site.parcel_ids[:3]) or 'not resolved'}", fontsize=10)
     t(0.6, 9.85, f"Geocoded by: {site.geocoder}.  Parcel from: {site.parcel_source or 'NOT RESOLVED'}.  Coordinates: {site.crs_label} ({wkid_text(site.epsg)}).", fontsize=7.5, color=MUTED)
 
