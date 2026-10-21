@@ -323,6 +323,11 @@ def write_pdf(res, cfg: Config, opts) -> Path:
                            dict(facecolor=matplotlib.colors.to_rgba("#9d9a90", 0.35), edgecolor="#7d7a72")))
         _sidebar(fig, res, "BASE PLAN", scale, legend, 1, pages)
         pdf.savefig(fig)
+        try:  # small preview of the base plan sheet for the results page
+            box = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())  # the map only, not the sidebar
+            fig.savefig(res.out_dir / "preview.png", dpi=110, bbox_inches=box)
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN preview failed: {e}", flush=True)
         plt.close(fig)
 
         # 2. Slope

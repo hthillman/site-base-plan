@@ -103,6 +103,8 @@ def publish(run_id: str, folder: Path, files: dict[str, str]) -> dict[str, str]:
         urls = {"zip": blob_put(path, data, "application/zip")}
         if "pdf" in names:  # separate copy so the PDF opens in the browser
             urls["pdf"] = blob_put(f"{prefix}/{names['pdf']}", (folder / names["pdf"]).read_bytes(), "application/pdf")
+        if "preview" in names:
+            urls["preview"] = blob_put(f"{prefix}/{names['preview']}", (folder / names["preview"]).read_bytes(), "image/png")
         return urls
 
     try:
@@ -200,7 +202,7 @@ def start():
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
             })
             events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
-                                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address}})
+                                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}})
         except Exception as e:  # noqa: BLE001
             record_usage({**live, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",

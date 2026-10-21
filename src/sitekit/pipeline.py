@@ -58,6 +58,7 @@ class RunResult:
     timings: dict[str, float] = field(default_factory=dict)
     testfit: object = None
     zoning: dict | None = None  # free zoning lookup summary, where covered
+    facts: list = field(default_factory=list)  # at-a-glance summary for the results page
     envelope: dict | None = None  # zoning envelope for massing: {geom, height_ft, zone, label}
 
 
@@ -290,9 +291,21 @@ def _parcel_layer(site: Site) -> LayerResult:
     return r
 
 
+class Findings(list):
+    """Plain-language flags, plus `facts`: the at-a-glance summary for the results page
+    ({key, label, value, sub, tone}; tone ok | warn | alert | info | missing)."""
+
+    def __init__(self):
+        super().__init__()
+        self.facts: list[dict] = []
+
+    def fact(self, key: str, label: str, value: str, sub: str = "", tone: str = "info") -> None:
+        self.facts.append({"key": key, "label": label, "value": value, "sub": sub, "tone": tone})
+
+
 def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None, slope: np.ndarray | None, cfg: Config) -> list[dict]:
     """Plain-language findings. level: alert | caution | info | missing."""
-    flags: list[dict] = []
+    flags = Findings()
     parcel = site.parcel.geom if site.parcel else None
     area_ref = parcel if parcel is not None else site.clip
     where = "parcel" if parcel is not None else "assumed site extent"
@@ -305,6 +318,9 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
 
     if parcel is not None:
         add("info", f"Parcel area {parcel.area:,.0f} sq ft ({parcel.area / 43560:.2f} ac) per assessor GIS geometry.")
+        flags.fact("parcel", "Parcel", f"{parcel.area / 43560:.2f} ac", f"{parcel.area:,.0f} sq ft · assessor lines", "info")
+    else:
+        flags.fact("parcel", "Parcel", "No parcel line", "Plan drawn around the address", "warn")
         pp = site.parcel.props
         rec = [x for x in (f"owner of record {pp['_OWNER']}" if pp.get("_OWNER") else "", pp.get("_DEED"), f"plat {pp['_PLAT']}" if pp.get("_PLAT") else "",
                            f"subdivision {pp['_SUBDIV']}" if pp.get("_SUBDIV") else "") if x]
@@ -326,15 +342,20 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
             if bfe:
                 txt += f" Static BFE {', '.join(f'{v:g}' for v in bfe)} ft."
             add("alert", txt)
+            flags.fact("flood", "Flood zone", f"In floodplain", f"Zone {', '.join(zones)} · {a / area_ref.area:.0%} of {where}", "alert")
         elif sf:
+            flags.fact("flood", "Flood zone", "Nearby", f"Zone {', '.join(sorted({f.props.get('FLD_ZONE') for f in sf}))} within {site.buffer_ft:.0f} ft", "warn")
             add("caution", f"Mapped floodplain (Zone {', '.join(sorted({f.props.get('FLD_ZONE') for f in sf}))}) lies within {site.buffer_ft:.0f} ft of the {where}, but not on it.")
         else:
             zones = sorted({f.props.get("FLD_ZONE") for f in fl.features if f.geom.intersects(area_ref)})
             if zones:
                 add("info", f"No mapped Special Flood Hazard Area on the {where} (FEMA Zone {', '.join(z for z in zones if z)}).")
+                flags.fact("flood", "Flood zone", "Not in floodplain", f"FEMA Zone {', '.join(z for z in zones if z)}", "ok")
             elif fl.extra.get("fallback"):
+                flags.fact("flood", "Flood zone", "Not in floodplain", "From a copy of FEMA's map; confirm", "ok")
                 add("info", f"No mapped 1% or 0.2% annual chance flood zone on the {where}, per Esri's copy of FEMA's map (FEMA's own service didn't respond). Confirm at msc.fema.gov.")
             else:
+                flags.fact("flood", "Flood zone", "Not mapped", "Unmapped isn't the same as no risk", "warn")
                 add("caution", "FEMA has no digital flood zone polygons here. Unmapped is not the same as no flood risk.")
 
     wl = layers.get("wetland")
@@ -343,17 +364,21 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
         if hit:
             types = sorted({f.props.get("WETLAND_TYPE") for f in hit if f.props.get("WETLAND_TYPE")})
             a = sum(f.geom.intersection(area_ref).area for f in hit)
+            flags.fact("wetland", "Wetlands", "On the parcel" if parcel is not None else "On the site", f"{', '.join(types)} · about {a:,.0f} sq ft", "alert")
             add("alert", f"{where.capitalize()} intersects NWI-mapped wetland or water ({', '.join(types)}), about {a:,.0f} sq ft. County critical-areas buffers likely apply; a wetland delineation is needed.")
         elif wl.features:
             types = sorted({f.props.get("WETLAND_TYPE") for f in wl.features if f.props.get("WETLAND_TYPE")})
+            flags.fact("wetland", "Wetlands", "Nearby", f"Within {site.buffer_ft:.0f} ft · buffers may reach the {where}", "warn")
             add("caution", f"NWI wetland/water mapped within {site.buffer_ft:.0f} ft ({', '.join(types)}). Regulatory buffers can extend onto the {where}.")
         else:
             add("info", "No NWI wetlands mapped in the extent. NWI misses many small and forested wetlands.")
+            flags.fact("wetland", "Wetlands", "None mapped", "NWI misses small wetlands", "ok")
 
     if grid is not None and slope is not None:
         z = stats_within(grid, area_ref)
         if z.size:
             add("info", f"Elevation on {where}: {z.min():,.1f} to {z.max():,.1f} ft NAVD88 (relief {z.max() - z.min():,.1f} ft).")
+            flags.fact("elev", "Elevation", f"{z.min():,.0f} to {z.max():,.0f} ft", f"{z.max() - z.min():,.1f} ft of relief · NAVD88", "info")
         s = stats_within(grid, area_ref, slope)
         if s.size:
             steep_break = cfg.slope_breaks[-1]
@@ -365,6 +390,9 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
             if mid >= 0.05:
                 add("caution", f"{mid:.0%} of the {where} is {mid_break:g}-{steep_break:g}% slope.")
             add("info", f"Median slope on {where} {np.median(s):.1f}%.")
+            flags.fact("slope", "Slope", f"{np.median(s):.1f}% median",
+                       f"{steep:.0%} over {steep_break:g}%" if steep >= 0.02 else f"Mostly under {mid_break:g}%" if mid_break is not None and mid < 0.05 else f"{mid:.0%} at {mid_break:g}-{steep_break:g}%",
+                       "alert" if steep >= 0.10 else "warn" if steep >= 0.02 or mid >= 0.05 else "ok")
 
     so = layers.get("soils")
     if so and so.ok():
@@ -379,6 +407,9 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
         if on:
             major = max(on, key=lambda f: f.geom.intersection(area_ref).area)
             add("info", f"Dominant soil: {major.props.get('musym')} {major.props.get('muname')} (hydrologic group {major.props.get('hydgrpdcd') or 'n/a'}, {major.props.get('drclassdcd') or 'drainage n/a'}).")
+            name = str(major.props.get("muname") or "").split(",")[0]
+            flags.fact("soil", "Soil", name, f"Hydrologic group {major.props.get('hydgrpdcd') or 'n/a'} · {(major.props.get('drclassdcd') or 'drainage n/a').lower()}",
+                       "warn" if hydric or dgroup else "info")
 
     dem = layers.get("dem")
     if dem and dem.ok():
@@ -515,6 +546,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     timings["terrain"] = time.time() - t2
 
     flags = compute_flags(site, layers, grid, slope, cfg)
+    base_facts = list(flags.facts)  # flags becomes a plain list once zoning/test-fit flags are prepended
     if opts.layer_preset != "default" or opts.layer_custom:
         flags.append({"level": "info", "text": f"CAD layers use {'NCS-style names' if opts.layer_preset == 'ncs' else 'the default names'}"
                       + (" plus your custom mapping" if opts.layer_custom else "") + " (full list in provenance.md)."})
@@ -569,11 +601,20 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
                           "simplified to boxes, and small or tree-covered buildings can be missing. Use them for context, not as measured outlines."})
     if envelope:
         flags.append({"level": "info", "text": f"{envelope['label']}. Shown as a translucent block in the 3D files; a quick volume check, not a design."})
+    facts = base_facts
+    if bl is not None and bl.ok():
+        q = bl.extra.get("quality")
+        facts.append({"key": "buildings", "label": "Buildings", "value": f"{len(bl.features)} in view" + (f", {len(on_site)} on parcel" if site.parcel is not None else ""),
+                      "sub": {"local": "Local outlines", "microsoft": "Approximate outlines", "fema": "Rough outlines"}.get(q, ""), "tone": "info"})
+    if zoning and zoning.get("details"):
+        d0 = zoning["details"][0]
+        h = next((f for f in d0.get("facts", []) if f.startswith("height")), "")
+        facts.append({"key": "zoning", "label": "Zoning", "value": d0["zone"], "sub": f"{d0['jurisdiction']}" + (f" · {h}" if h else ""), "tone": "info"})
 
     stamp = date.today().isoformat()
     out = Path(opts.out_dir) / f"{_slug(site.matched_address)}-{stamp}"
     out.mkdir(parents=True, exist_ok=True)
-    res = RunResult(site, layers, flags, out, timings=timings, testfit=tf, zoning=zoning, envelope=envelope)
+    res = RunResult(site, layers, flags, out, timings=timings, testfit=tf, zoning=zoning, envelope=envelope, facts=facts)
     res.grid = grid  # DEM, for exporters that place 3D massing on the ground
 
     from .export_dxf import write_dxf
@@ -585,6 +626,8 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     res.files.update(write_dxf(res, cfg, opts))
     log("Writing PDF")
     res.files["pdf"] = str(write_pdf(res, cfg, opts))
+    if (out / "preview.png").exists():
+        res.files["preview"] = str(out / "preview.png")
     if grid is not None:
         res.files["dem"] = str(_write_dem(out / "dem.tif", grid, site.epsg))
         res.files["dem_tfw"] = str(out / "dem.tfw")
