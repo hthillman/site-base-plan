@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 from html import escape
@@ -15,6 +16,9 @@ SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
 TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>' if TIP_URL else ""
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # hosted site only; kept out of the open-source code
+TERMS_ON = importlib.util.find_spec("sitekit.terms") is not None and importlib.import_module("sitekit.terms").READY
+TERMS_LINK = ' · <a href="/terms">Terms</a>' if TERMS_ON else ""
+AGREE = lambda verb: f'<p class="fine agree">By {verb} you agree to the <a href="/terms">Terms</a>: everything Basesheet makes must be checked by a licensed surveyor and the jurisdiction before you rely on it.</p>' if TERMS_ON else ""
 CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>' if CONTACT_EMAIL else ""
 FIRMS_FOOTER = ' · <a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
@@ -169,6 +173,7 @@ details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-b
 .dl #savebox:empty{display:none}
 .savef{display:flex;gap:8px;flex-wrap:wrap}.savef input:not(.hp){flex:1 1 220px;font-size:15px}.savef button{padding:9px 14px}
 .plan{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
+.caps{font-size:12.5px;line-height:1.55}.agree{margin:6px 0 0}.agree a{color:inherit}
 .procard{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:18px 0}.procard .price{font-size:22px;font-weight:700;margin:0 0 6px}
 .btab{width:100%;border-collapse:collapse;font-size:13px;display:block;overflow-x:auto;margin-top:8px}.btab th,.btab td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
 .firmf{display:grid;gap:10px;max-width:560px}.firmf label{display:grid;gap:4px;font-size:14px}.firmf input,.firmf textarea,.firmf select{font-size:15px}
@@ -235,7 +240,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -294,6 +299,7 @@ Free, no account.</p>
 <span id="optsum" class="note"></span>
 <button type="button" class="linkbtn" id="optbtn" aria-expanded="false" aria-controls="optpanel">Change</button>
 </div>
+{AGREE("building a base plan")}
 <div id="optpanel" class="panel" hidden>
 <div class="opts">
 <label>Buffer <input name="buffer" type="number" value="100" min="0" max="1000" step="10"> ft</label>
@@ -321,7 +327,7 @@ Free, no account.</p>
 
 <footer>
 <p class="fine">Planning-level public data, not a survey. Parcel lines in <a href="/about#coverage">{n} states{county_txt}</a>.</p>
-<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>{(" · Contact: " + CONTACT_HTML) if CONTACT_HTML else ""}</p>
+<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>{TERMS_LINK}{(" · Contact: " + CONTACT_HTML) if CONTACT_HTML else ""}</p>
 <p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
 <form id="fb" hidden>
 <textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
@@ -741,6 +747,7 @@ def plans() -> str:
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
+__AGREE_SIGNIN__
 <div id="probar" class="probar" hidden></div>
 <section id="office" hidden>
 <h2>Your office</h2>
@@ -799,8 +806,9 @@ async function proBar(tries){
   if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits, batch runs and office settings are on.</span>';return}
  if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
  if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+'</b><span class="note">Zoning test fits, office standards, batch runs, 500 saved plans.</span>'+
-   '<a href="/pro">Details</a><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
-  document.getElementById('getpro').onclick=async()=>{const r=await fetch('/api/billing/checkout',{method:'POST'});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
+   '<a href="/pro">Details</a><label class="check fine"><input type="checkbox" id="agree"> I agree to the <a href="/terms" target="_blank">Terms</a> and will have everything checked by a licensed surveyor and the jurisdiction</label><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
+  document.getElementById('getpro').onclick=async()=>{if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
+   const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:s.terms_version})});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
 async function office(){const sec=document.getElementById('office'),ff=document.getElementById('firmf'),fm=document.getElementById('firmmsg');
  const r=await fetch('/api/firm');if(!r.ok)return;const p=await r.json();sec.hidden=false;
  ff.name.value=p.name||'';ff.lines.value=(p.lines||[]).join('\\n');ff.prepared_by.value=p.prepared_by||'';ff.layer_preset.value=p.layer_preset||'default';ff.layer_map.value=p.layer_map||'';
@@ -815,6 +823,8 @@ async function office(){const sec=document.getElementById('office'),ff=document.
   if(r.ok){logo=null;if(!k.has_logo){prev.hidden=true;document.getElementById('rmlogo-row').hidden=true}else document.getElementById('rmlogo-row').hidden=false;ff.remove_logo.checked=false}}}
 proBar(0);
 </script>"""
+    body = body.replace("__AGREE_SIGNIN__", AGREE("signing in").replace('class="fine agree"', 'class="fine agree" id="agree-signin" hidden'))
+    script = script.replace("signin.hidden=!me.can_sign_up;", "signin.hidden=!me.can_sign_up;const ag=document.getElementById('agree-signin');if(ag)ag.hidden=!me.can_sign_up;")
     return layout("My plans · Basesheet", "/plans", body, script, description="Your saved Basesheet base plans.")
 
 
@@ -844,13 +854,14 @@ layout you can open in CAD. Thurston County, WA today; more jurisdictions are be
 <li><b>Batch runs:</b> up to 50 sites at once, with a summary table (parcel size, flood zone, slope, wetlands, soils, zoning) and every plan in one download.</li>
 <li><b>500 saved plans</b> instead of 25.</li>
 </ul>
-<div id="probox"><button type="button" id="subscribe">Get Pro</button></div>
+<div id="probox"><label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
+<p><button type="button" id="subscribe">Get Pro</button></p></div>
 <p id="promsg" class="note" aria-live="polite"></p>
 </div>
 <h2>Fine print</h2>
 <ul>
 <li>Test fits are planning-level, from rule sheets that cite the zoning code. Each one says whether it's been checked by a professional. Confirm with the jurisdiction before relying on it.</li>
-<li>Payments are handled by Stripe; Basesheet never sees your card. Manage or cancel from My plans.</li>
+<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews monthly; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
 <li>Questions or a firm with several people? {CONTACT_HTML}</li>
 </ul>
 """
@@ -865,9 +876,11 @@ fetch('/api/billing/status').then(r=>r.json()).then(s=>{
   const pin=document.getElementById('pin');pin.onsubmit=async e=>{e.preventDefault();
    const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value})});
    const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'};return}
- document.getElementById('subscribe').onclick=startCheckout});
-async function startCheckout(){msg.textContent='Opening checkout…';
- const r=await fetch('/api/billing/checkout',{method:'POST'});const k=await r.json().catch(()=>({}));
+ TV=s.terms_version;document.getElementById('subscribe').onclick=startCheckout});
+let TV='';
+async function startCheckout(){if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
+ msg.textContent='Opening checkout…';
+ const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:TV})});const k=await r.json().catch(()=>({}));
  if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}
 </script>"""
     return layout("Basesheet Pro", "/pro", body, script,

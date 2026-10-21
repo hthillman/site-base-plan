@@ -5,6 +5,7 @@ because function responses are capped at 4.5 MB and /tmp doesn't persist."""
 from __future__ import annotations
 
 import hmac
+import importlib.util
 import io
 import json
 import time
@@ -25,7 +26,8 @@ ON_VERCEL = bool(os.environ.get("VERCEL"))
 OUT = Path("/tmp/sitekit-out") if ON_VERCEL else REPO_ROOT / "out"
 BLOB_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN")
 ACCESS_CODE = os.environ.get("ACCESS_CODE")  # shared code; unset = open
-PRIVATE_TOKEN = os.environ.get("PRIVATE_READ_WRITE_TOKEN")  # private Blob store: feedback
+PRIVATE_TOKEN = os.environ.get("PRIVATE_READ_WRITE_TOKEN")
+TERMS_ON = importlib.util.find_spec("sitekit.terms") is not None and importlib.import_module("sitekit.terms").READY  # private Blob store: feedback
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "dev-only-secret"
@@ -54,6 +56,13 @@ try:  # Pro batch (hosted site only)
     from .batch import bp as _batch_bp
 
     app.register_blueprint(_batch_bp)
+except ImportError:
+    pass
+
+try:  # Terms of Service (hosted site only)
+    from .terms import bp as _terms_bp
+
+    app.register_blueprint(_terms_bp)
 except ImportError:
     pass
 
@@ -607,7 +616,7 @@ def sitemap():
     base = _site_url()
     from .guides import all_paths
 
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/firms"] if FIRMS_PAGE else []) + all_paths()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/firms"] if FIRMS_PAGE else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")

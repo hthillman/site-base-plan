@@ -16,7 +16,9 @@ DISCLAIMER = (
     "PLANNING-LEVEL DATA ONLY. Compiled from public GIS sources of varying "
     "resolution and vintage. Not a substitute for a boundary or topographic "
     "survey by a land surveyor licensed in the site's state. Parcel lines are assessor "
-    "tax lines, not legal boundaries. Verify all conditions in the field."
+    "tax lines, not legal boundaries. Zoning information is not a zoning determination. "
+    "Provided as is, without warranty: verify everything with a licensed surveyor and "
+    "the jurisdiction before relying on it."
 )
 
 
