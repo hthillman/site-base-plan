@@ -18,7 +18,8 @@ TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" da
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # hosted site only; kept out of the open-source code
 TERMS_ON = importlib.util.find_spec("sitekit.terms") is not None and importlib.import_module("sitekit.terms").READY
 TERMS_LINK = ' · <a href="/terms">Terms</a>' if TERMS_ON else ""
-AGREE = lambda verb: f'<p class="fine agree">By {verb} you agree to the <a href="/terms">Terms</a>: everything Basesheet makes must be checked by a licensed surveyor and the jurisdiction before you rely on it.</p>' if TERMS_ON else ""
+TERMS_VERSION = importlib.import_module("sitekit.terms").TERMS_VERSION if TERMS_ON else ""
+TERMS_GATE_TEXT = 'Basesheet does not provide professional advice. Verify important information with surveyors and your jurisdiction before you rely on it for design, permitting, purchase, financing, construction or any other decision. (<a href="/terms" target="_blank">Terms</a>)'
 CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>' if CONTACT_EMAIL else ""
 FIRMS_FOOTER = ' · <a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
@@ -173,7 +174,8 @@ details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-b
 .dl #savebox:empty{display:none}
 .savef{display:flex;gap:8px;flex-wrap:wrap}.savef input:not(.hp){flex:1 1 220px;font-size:15px}.savef button{padding:9px 14px}
 .plan{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
-.caps{font-size:12.5px;line-height:1.55}.agree{margin:6px 0 0}.agree a{color:inherit}
+.caps{font-size:12.5px;line-height:1.55}
+.tgate{margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}.tgate label{align-items:flex-start;gap:8px}.tgate input{margin-top:3px;flex:none}
 .procard{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:18px 0}.procard .price{font-size:22px;font-weight:700;margin:0 0 6px}
 .btab{width:100%;border-collapse:collapse;font-size:13px;display:block;overflow-x:auto;margin-top:8px}.btab th,.btab td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
 .firmf{display:grid;gap:10px;max-width:560px}.firmf label{display:grid;gap:4px;font-size:14px}.firmf input,.firmf textarea,.firmf select{font-size:15px}
@@ -299,7 +301,7 @@ Free, no account.</p>
 <span id="optsum" class="note"></span>
 <button type="button" class="linkbtn" id="optbtn" aria-expanded="false" aria-controls="optpanel">Change</button>
 </div>
-{AGREE("building a base plan")}
+{('<div id="tgate" class="tgate" hidden><label class="check"><input type="checkbox" id="tgcheck"> ' + TERMS_GATE_TEXT + '</label></div>') if TERMS_ON else ''}
 <div id="optpanel" class="panel" hidden>
 <div class="opts">
 <label>Buffer <input name="buffer" type="number" value="100" min="0" max="1000" step="10"> ft</label>
@@ -385,7 +387,11 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
  (s?tryCode(s):Promise.resolve(false)).then(ok=>{if(ok)unlock(s);else{setStored('');gate.hidden=false;gate.code.focus()}});
  gate.onsubmit=async e=>{e.preventDefault();const c=gate.code.value.trim();
   if(await tryCode(c))unlock(c);else document.getElementById('gateerr').hidden=false}}
-f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working…';
+// First build: a one-time checkbox (remembered per Terms version) before anything runs.
+const TV='__TERMS_VERSION__',tgate=document.getElementById('tgate');let TOK=!TV||LS.get('sitekit-terms')===TV;
+if(tgate)document.getElementById('tgcheck').onchange=e=>{if(!e.target.checked)return;TOK=true;LS.set('sitekit-terms',TV);tgate.hidden=true;f.requestSubmit()};
+f.onsubmit=async e=>{e.preventDefault();if(!TOK){tgate.hidden=false;document.getElementById('tgcheck').focus();return}
+ go.disabled=true;go.textContent='Working…';
  const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();track('run_start');
  const first=LS.get('sitekit-first');body.prior=+(LS.get('sitekit-plans')||0);body.since=first?Math.max(0,Math.round((Date.now()-Date.parse(first))/864e5)):null;
  body.also=[...alsoBox.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
@@ -518,7 +524,7 @@ document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/ap
 const PRELOAD=__PRELOAD__;
 if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
  else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
-</script>""".replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
+</script>""".replace("__TERMS_VERSION__", TERMS_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -758,7 +764,6 @@ def plans() -> str:
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
-__AGREE_SIGNIN__
 <div id="probar" class="probar" hidden></div>
 <section id="office" hidden>
 <h2>Your office</h2>
@@ -834,8 +839,6 @@ async function office(){const sec=document.getElementById('office'),ff=document.
   if(r.ok){logo=null;if(!k.has_logo){prev.hidden=true;document.getElementById('rmlogo-row').hidden=true}else document.getElementById('rmlogo-row').hidden=false;ff.remove_logo.checked=false}}}
 proBar(0);
 </script>"""
-    body = body.replace("__AGREE_SIGNIN__", AGREE("signing in").replace('class="fine agree"', 'class="fine agree" id="agree-signin" hidden'))
-    script = script.replace("signin.hidden=!me.can_sign_up;", "signin.hidden=!me.can_sign_up;const ag=document.getElementById('agree-signin');if(ag)ag.hidden=!me.can_sign_up;")
     return layout("My plans · Basesheet", "/plans", body, script, description="Your saved Basesheet base plans.")
 
 
