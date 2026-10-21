@@ -169,6 +169,8 @@ details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-b
 .dl #savebox:empty{display:none}
 .savef{display:flex;gap:8px;flex-wrap:wrap}.savef input:not(.hp){flex:1 1 220px;font-size:15px}.savef button{padding:9px 14px}
 .plan{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
+.procard{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:18px 0}.procard .price{font-size:22px;font-weight:700;margin:0 0 6px}
+.probar{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:14px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .plan:first-child{border-top:0}
 .plan .t{font-weight:600}.plan .acts{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:14px}
 .plan .acts button{background:none;border:0;padding:0;color:var(--muted);font-weight:500;font-size:14px;cursor:pointer}
@@ -294,7 +296,8 @@ Free, no account.</p>
 <label>Buffer <input name="buffer" type="number" value="100" min="0" max="1000" step="10"> ft</label>
 <label>Contours <select name="interval"><option value="1">1 ft</option><option value="2" selected>2 ft</option><option value="5">5 ft</option></select></label>
 <label>Layers <select name="layers" aria-label="CAD layer names"><option value="default">Default (SITE-*)</option><option value="ncs">NCS-style (V-PROP-LINE…)</option><option value="custom">Custom…</option></select></label>
-<label id="tfwrap" class="check" hidden><input type="checkbox" name="testfit"> Apartment test fit (experimental, Thurston Co. WA)</label>
+<label id="tfwrap" class="check" hidden><input type="checkbox" name="testfit"> Apartment test fit <span id="tftag">(experimental, Thurston Co. WA)</span></label>
+<p id="tfnote" class="note" hidden>Test fits are part of <a href="/pro">Basesheet Pro</a>.</p>
 </div>
 <fieldset class="checks incl"><legend>Include (fewer layers can be faster)</legend>
 <label><input type="checkbox" id="inc-aerial" data-k="aerial" checked> Aerial</label>
@@ -330,7 +333,11 @@ const f=document.getElementById('f'),out=document.getElementById('out'),go=docum
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const NEEDS_CODE=__NEEDS_CODE__;
 const TESTFIT=__TESTFIT__;
-if(TESTFIT&&new URLSearchParams(location.search).has('beta'))document.getElementById('tfwrap').hidden=false;
+const PRO_LIVE=__PROLIVE__;let IS_PRO=false;
+if(TESTFIT&&(PRO_LIVE||new URLSearchParams(location.search).has('beta')))document.getElementById('tfwrap').hidden=false;
+if(TESTFIT&&PRO_LIVE){document.getElementById('tftag').textContent='(Pro · Thurston Co. WA for now)';
+ fetch('/api/billing/status').then(r=>r.json()).then(s=>{IS_PRO=!!s.pro}).catch(()=>{});
+ f.testfit.addEventListener('change',()=>{if(f.testfit.checked&&!IS_PRO){f.testfit.checked=false;document.getElementById('tfnote').hidden=false}})}
 const looksApn=v=>/^[0-9A-Za-z][0-9A-Za-z.\\- ]{4,}$/.test(v)&&!/[A-Za-z]{3,}/.test(v)&&/[0-9]{5}/.test(v.replace(/\\D/g,''));
 const alsoBox=document.getElementById('also');
 document.getElementById('addparcel').onclick=()=>{if(alsoBox.children.length>=4)return;
@@ -499,7 +506,7 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
-</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false")
+</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -731,6 +738,7 @@ def plans() -> str:
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
+<div id="probar" class="probar" hidden></div>
 <p class="fine" id="signout-row" hidden><span id="who"></span> · <button type="button" class="linkbtn" id="signout" style="padding:0">Sign out</button></p>
 """
     script = """<script>
@@ -762,11 +770,78 @@ signin.onsubmit=async e=>{e.preventDefault();
  else{msg.innerHTML='<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}};
 document.getElementById('signout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/plans'};
 load();
+const bar=document.getElementById('probar');
+async function proBar(tries){
+ const s=await (await fetch('/api/billing/status')).json().catch(()=>({}));
+ if(!s.signed_in||(!s.live&&!s.pro&&!s.has_billing))return;
+ const when=s.period_end?new Date(s.period_end*1000).toLocaleDateString():'';
+ if(s.pro){bar.innerHTML='<b>Basesheet Pro</b><span class="note">'+(s.cancel_at_period_end?'ends ':'renews ')+esc(when)+'</span>'+
+   '<button type="button" class="linkbtn" id="billing">Manage billing</button>';bar.hidden=false;
+  document.getElementById('billing').onclick=async()=>{const r=await fetch('/api/billing/portal',{method:'POST'});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Billing isn\\'t reachable right now.')+'</span>'};
+  if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits are on.</span>';return}
+ if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
+ if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+'</b><span class="note">Zoning test fits, office standards, batch runs, 500 saved plans.</span>'+
+   '<a href="/pro">Details</a><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
+  document.getElementById('getpro').onclick=async()=>{const r=await fetch('/api/billing/checkout',{method:'POST'});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
+proBar(0);
 </script>"""
     return layout("My plans · Basesheet", "/plans", body, script, description="Your saved Basesheet base plans.")
 
 
 FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hosted site only
+
+
+def pro_live() -> bool:
+    try:
+        from .billing import live
+    except ImportError:
+        return False
+    return live()
+
+
+def pro(price: dict | None) -> str:
+    label = escape(price["label"]) if price else ""
+    body = f"""
+<h1>Basesheet Pro</h1>
+<p class="lede">Base plans stay free for everyone. Pro is for offices that run regular site studies: it adds the features
+that take real work to build and keep accurate, and it pays for the zoning research behind them.</p>
+<div class="procard">
+<p class="price">{label or "Monthly"}<span class="note"> · cancel any time</span></p>
+<ul>
+<li><b>Zoning test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking
+layout you can open in CAD. Thurston County, WA today; more jurisdictions are being added every week, and you can ask for yours.</li>
+<li><b>Your office standards:</b> your title block and logo on the PDF, your CAD layer standard saved for every run. Included as it ships.</li>
+<li><b>Batch runs:</b> many sites at once for feasibility studies and site selection. Included as it ships.</li>
+<li><b>500 saved plans</b> instead of 25.</li>
+</ul>
+<div id="probox"><button type="button" id="subscribe">Get Pro</button></div>
+<p id="promsg" class="note" aria-live="polite"></p>
+</div>
+<h2>Fine print</h2>
+<ul>
+<li>Test fits are planning-level, from rule sheets that cite the zoning code. Each one says whether it's been checked by a professional. Confirm with the jurisdiction before relying on it.</li>
+<li>Payments are handled by Stripe; Basesheet never sees your card. Manage or cancel from My plans.</li>
+<li>Questions or a firm with several people? {CONTACT_HTML}</li>
+</ul>
+"""
+    script = """<script>
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const box=document.getElementById('probox'),msg=document.getElementById('promsg');
+if(new URLSearchParams(location.search).has('cancelled'))msg.textContent='Checkout cancelled. Nothing was charged.';
+fetch('/api/billing/status').then(r=>r.json()).then(s=>{
+ if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans">My plans and billing</a>';return}
+ if(!s.signed_in){box.innerHTML='<form id="pin" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
+  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
+  const pin=document.getElementById('pin');pin.onsubmit=async e=>{e.preventDefault();
+   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value})});
+   const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'};return}
+ document.getElementById('subscribe').onclick=startCheckout});
+async function startCheckout(){msg.textContent='Opening checkout…';
+ const r=await fetch('/api/billing/checkout',{method:'POST'});const k=await r.json().catch(()=>({}));
+ if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}
+</script>"""
+    return layout("Basesheet Pro", "/pro", body, script,
+                  description="Basesheet Pro: zoning test fits, your office title block and CAD standards, and batch runs, on top of the free base plan tool.")
 
 
 def firms() -> str:

@@ -36,6 +36,13 @@ from .accounts import bp as accounts_bp  # noqa: E402
 
 app.register_blueprint(accounts_bp)
 
+try:  # Pro subscription (hosted site only)
+    from .billing import bp as _billing_bp
+
+    app.register_blueprint(_billing_bp)
+except ImportError:
+    pass
+
 try:  # one-time setup endpoints (hosted site only; removed after use)
     from .admin_setup import bp as _admin_bp
 
@@ -182,6 +189,8 @@ def start():
         layer_custom=parse_layer_map(d.get("layer_map") or "") if d.get("layers") == "custom" else {},
         skip={k for k in (d.get("skip") or []) if k in OPTIONAL_LAYERS},
     )
+    if opts.testfit and not pro_ok():
+        return jsonify(error="The test fit is part of Basesheet Pro. Sign in and subscribe on basesheet.site/pro, or build without it.", pro=True), 402
     run_id = uuid.uuid4().hex[:10]
     events: queue.Queue = queue.Queue()
     _tok = os.environ.get("ADMIN_TOKEN", "")
@@ -227,6 +236,19 @@ def start():
             yield json.dumps(ev) + "\n"
 
     return Response(stream(), mimetype="application/x-ndjson", headers={"X-Accel-Buffering": "no", "Cache-Control": "no-store"})
+
+
+def pro_ok() -> bool:
+    """Pro features allowed for this request: always, until Pro is on sale (and in the open-source build)."""
+    try:
+        from . import billing
+    except ImportError:
+        return True
+    if not billing.live():
+        return True
+    from .accounts import current_user
+
+    return billing.is_pro(current_user())
 
 
 def parse_layer_map(text: str) -> dict[str, str]:
@@ -444,10 +466,18 @@ def sources():
 
 
 @app.get("/pro")
-def pro_redirect():
+def pro_page():
     from flask import redirect
 
-    return redirect("/firms", code=301)
+    try:
+        from . import billing
+    except ImportError:
+        billing = None
+    if billing is None or not billing.live():
+        return redirect("/firms", code=302)
+    from .pages import pro
+
+    return pro(billing.price())
 
 
 @app.get("/firms")

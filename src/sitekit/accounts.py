@@ -30,7 +30,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "Basesheet <hello@basesheet.site>")
 LOGIN_MAX_AGE_S = 30 * 60
-MAX_PLANS = 25  # per free account; firms that need more get in touch (and, later, a paid tier)
+MAX_PLANS = 25  # per free account
+PRO_MAX_PLANS = 500
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[A-Za-z]{2,}$")
 LOCAL_DIR = Path(__file__).resolve().parents[2] / "out" / "_accounts"
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
@@ -238,7 +239,10 @@ def save_plan(user: dict, plan: dict) -> dict:
             if existing["record"].get("run_id") == run_id:
                 return existing["record"]
     have = len(_rest("GET", f"?user_id=eq.{uid}&select=id")) if supabase_on() else len(_priv_list(f"plans/{uid}/"))
-    if have >= MAX_PLANS:
+    cap = PRO_MAX_PLANS if _is_pro(user) else MAX_PLANS
+    if have >= cap:
+        if cap == PRO_MAX_PLANS:
+            raise ValueError(f"You've saved {cap} plans. Delete one in My plans to save this one.")
         raise ValueError(f"You've saved {MAX_PLANS} plans, the most a free account keeps. Delete one in My plans to save this, "
                          "or if you're using Basesheet at a firm and need more, tell us on the For firms page (basesheet.site/firms).")
     plan_id = uuid.uuid4().hex[:12]
@@ -271,6 +275,14 @@ def save_plan(user: dict, plan: dict) -> dict:
     rec = {"id": plan_id, "run_id": run_id, "title": title, "state": state, "files": kept, "saved_at": _now()}
     _priv_put(f"plans/{uid}/{plan_id}", rec)
     return rec
+
+
+def _is_pro(user: dict) -> bool:
+    try:
+        from .billing import is_pro, live
+    except ImportError:
+        return False
+    return live() and is_pro(user)
 
 
 def _shape(row: dict) -> dict:
