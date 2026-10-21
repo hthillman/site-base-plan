@@ -632,7 +632,7 @@ Never shared or sold. Ask through the feedback form to have it deleted.</p>
 def plans() -> str:
     body = """
 <h1>My plans</h1>
-<p class="lede" id="plede">Base plans you've saved. Files stay here until you delete them.</p>
+<p class="lede" id="plede">Base plans you've saved, up to 25. Files stay here until you delete them.</p>
 <div id="pmsg" class="note" aria-live="polite"></div>
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
