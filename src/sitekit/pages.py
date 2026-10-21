@@ -371,6 +371,7 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
   if(await tryCode(c))unlock(c);else document.getElementById('gateerr').hidden=false}}
 f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working…';
  const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();track('run_start');
+ const first=LS.get('sitekit-first');body.prior=+(LS.get('sitekit-plans')||0);body.since=first?Math.max(0,Math.round((Date.now()-Date.parse(first))/864e5)):null;
  body.also=[...alsoBox.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
  out.innerHTML='<div class="result"><pre id="log">Starting…</pre></div>';
  const log=document.getElementById('log');const lines=[];
@@ -391,7 +392,7 @@ f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working
  function handle(ev){
   if(ev.log){lines.push(ev.log);log.textContent=lines.join('\\n')}
   if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];e.near=ev.near||null;e.pick=!!ev.pick;throw e}
-  if(ev.result)render(ev.result)}
+  if(ev.result){LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result)}}
 };
 function render(j){
  const order={missing:0,alert:1,caution:2,info:3};
@@ -694,6 +695,7 @@ def privacy() -> str:
 <li>It's sent to geocoding services (Esri, the U.S. Census Bureau, OpenStreetMap) to find the location, and to public GIS services (USGS, USDA, FEMA, USFWS, state parcel servers) to fetch data around it.</li>
 <li>The finished files are stored at an unlisted web link for <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
 <li>Each run leaves an anonymous usage record (state, whether a parcel was found, run time, which data sources failed) so we can see what's working. It never includes the address or any location finer than the state.</li>
+<li>Your browser keeps a count of the plans you've made and the date of your first one. Each run sends just those two numbers, so we can tell whether people come back. There's no ID and nothing that identifies you or your browser; clearing site data resets the count.</li>
 </ul>
 <h2>Analytics</h2>
 <p>Page views are counted with Vercel Web Analytics, which doesn't use cookies or track you across sites.</p>

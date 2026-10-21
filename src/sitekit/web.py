@@ -185,7 +185,14 @@ def start():
     run_id = uuid.uuid4().hex[:10]
     events: queue.Queue = queue.Queue()
     _tok = os.environ.get("ADMIN_TOKEN", "")
-    live = {"live_check": True} if _tok and hmac.compare_digest(request.headers.get("X-Live-Check", ""), _tok) else {}
+    base = {"live_check": True} if _tok and hmac.compare_digest(request.headers.get("X-Live-Check", ""), _tok) else {}
+    # Repeat use without an ID: the browser's own count of earlier plans and days since its first.
+    def _int(v, hi):
+        try:
+            return max(0, min(hi, int(v)))
+        except (TypeError, ValueError):
+            return None
+    base["prior"], base["since"] = _int(d.get("prior"), 9999) or 0, _int(d.get("since"), 3650)
 
     def worker():
         t0 = time.time()
@@ -194,7 +201,7 @@ def start():
             events.put({"log": "Publishing files"})
             urls = publish(run_id, res.out_dir, res.files)
             record_usage({
-                **live, "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
+                **base, "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
                 "parcels": len(res.site.parcels) or (1 if res.site.parcel is not None else 0), "layers": opts.layer_preset + ("+custom" if opts.layer_custom else ""),
                 "parcel": res.site.parcel is not None, "testfit": getattr(res.testfit, "status", None),
                 "seconds": round(time.time() - t0, 1), "interval": opts.contour_interval,
@@ -204,7 +211,7 @@ def start():
             events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
                                    "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}})
         except Exception as e:  # noqa: BLE001
-            record_usage({**live, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
+            record_usage({**base, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
                           "hint": getattr(e, "hint", ""), "shape": query_shape(q) if type(e).__name__ == "GeocodeError" else None,
                           "seconds": round(time.time() - t0, 1)})
