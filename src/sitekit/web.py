@@ -283,10 +283,36 @@ def interest():
     choice = str(d.get("choice") or "")
     if choice not in INTEREST_CHOICES:
         return jsonify(error="Unknown option."), 400
-    private_put("interest", {"choice": choice, "detail": str(d.get("detail") or "").strip()[:300],
+    email = str(d.get("email") or "").strip()[:254]
+    if email and not EMAIL_RE.match(email):
+        return jsonify(error="That doesn't look like an email address."), 400
+    if email:
+        notify(f"Feature vote with email: {choice}" + (f" ({str(d.get('detail') or '')[:80]})" if d.get("detail") else ""))
+    private_put("interest", {"choice": choice, "detail": str(d.get("detail") or "").strip()[:300], "email": email,
                              "state": str(d.get("state") or "")[:2], "vote_id": str(d.get("vote_id") or "")[:16],
                              "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
     return jsonify(ok=True)
+
+
+EVENT_NAMES = {"run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
+               "tip_click", "firms_click", "vote", "vote_email"}
+
+
+@app.post("/api/event")
+def event():
+    """Anonymous click counter for the funnel (event name + the site's state, nothing else). Never fails loudly."""
+    from datetime import datetime, timezone
+
+    d = request.get_json(force=True, silent=True) or {}
+    name = str(d.get("e") or "")
+    if name not in EVENT_NAMES or request.headers.get("X-Live-Check"):
+        return ("", 204)
+    try:
+        private_put("events", {"e": name, "state": str(d.get("state") or "")[:2], "choice": str(d.get("choice") or "")[:16],
+                               "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN event failed: {e}", flush=True)
+    return ("", 204)
 
 
 FIRM_WANTS = {"zoning", "batch", "standards", "coverage", "massing"}

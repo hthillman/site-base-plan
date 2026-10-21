@@ -13,10 +13,10 @@ from .plugins import testfit_available
 
 SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
-TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>' if TIP_URL else ""
+TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>' if TIP_URL else ""
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # hosted site only; kept out of the open-source code
 CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>' if CONTACT_EMAIL else ""
-FIRMS_FOOTER = ' · <a href="/firms">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
+FIRMS_FOOTER = ' · <a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
 CSS = """
 :root{--bg:#fbfaf7;--ink:#1c1c1a;--muted:#6a6963;--faint:#9a988f;--line:#e4e1d8;--field:#fff;--accent:#2f5d50;--accent-ink:#fff;
@@ -116,7 +116,7 @@ fieldset.checks input{width:auto}
 .chip{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:500;font-size:14px}
 .chip:hover{border-color:var(--accent)}
 .chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.nextdetail{display:flex;gap:8px;margin-top:10px;max-width:520px}.nextdetail input{flex:1;min-width:0;font-size:14px;padding:7px 10px}
+.nextdetail{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;max-width:620px}.nextdetail input{flex:1 1 200px;min-width:0;font-size:14px;padding:7px 10px}
 .nextdetail button{padding:0 14px;font-size:14px}
 table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:8px 10px 8px 0;border-top:1px solid var(--line);vertical-align:top}
 th{color:var(--muted);font-weight:600;font-size:13px}
@@ -124,6 +124,7 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 ul{padding-left:20px}li{margin:5px 0}
 .note{font-size:14px;color:var(--muted)}
 .hp{position:absolute;left:-9999px}
+.tipline{margin:0;font-size:14px;color:var(--muted)}.tipline a{font-weight:600}
 .rhead{display:grid;gap:2px}.rhead h3{font-size:20px;margin:0}
 .rtop{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;margin-top:14px;align-items:start}
 .rtop.nopv{grid-template-columns:1fr}
@@ -223,7 +224,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -252,9 +253,9 @@ def index(parcel_states: list[str], needs_code: bool) -> str:
     county_txt = f" + {sum(len(v) for v in _cs.values())} counties in {len(_cs)} more" if _cs else ""
     actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
     if FIRMS_PAGE:
-        actions.append('<a href="/firms">Using this at a firm?</a>')
+        actions.append('<a href="/firms" data-ev="firms_click">Using this at a firm?</a>')
     if TIP_URL:
-        actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener">Chip in for hosting</a>')
+        actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
 <h1>A site base plan from any US address</h1>
 <p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands, aerial and 3D building massing, ready for AutoCAD, SketchUp, Civil 3D and GIS.
@@ -363,7 +364,7 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
  gate.onsubmit=async e=>{e.preventDefault();const c=gate.code.value.trim();
   if(await tryCode(c))unlock(c);else document.getElementById('gateerr').hidden=false}}
 f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working…';
- const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();
+ const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();track('run_start');
  body.also=[...alsoBox.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
  out.innerHTML='<div class="result"><pre id="log">Starting…</pre></div>';
  const log=document.getElementById('log');const lines=[];
@@ -374,7 +375,7 @@ f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Working
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
   for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
    let i;while((i=buf.indexOf('\\n'))>=0){const ev=JSON.parse(buf.slice(0,i));buf=buf.slice(i+1);handle(ev)}}
- }catch(err){out.innerHTML='<div class="result"><p class="err"><b>Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
+ }catch(err){track('run_error');out.innerHTML='<div class="result"><p class="err"><b>Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
   ((err.suggestions||[]).length?'<div class="chips">'+err.suggestions.map(s=>'<button type="button" class="chip sugg">'+esc(s)+'</button>').join('')+'</div>':'')+'</div>';
   out.querySelectorAll('.sugg').forEach(b=>b.onclick=()=>{f.query.value=b.textContent;f.requestSubmit()})}
  go.disabled=false;go.textContent='Build base plan';
@@ -394,10 +395,11 @@ function render(j){
  out.innerHTML='<div class="result">'+
  '<div class="rhead"><h3>Base plan ready</h3><span class="note">'+esc(j.title||'')+' · built in '+j.seconds+' s</span></div>'+
  '<div class="rtop'+(pv?'':' nopv')+'">'+
-  (pv?'<a class="preview" href="'+esc(pdf||pv)+'" target="_blank" rel="noopener" title="Open the PDF"><img src="'+esc(pv)+'" alt="Preview of the base plan sheet"></a>':'')+
+  (pv?'<a class="preview" href="'+esc(pdf||pv)+'" target="_blank" rel="noopener" title="Open the PDF" data-ev="open_pdf"><img src="'+esc(pv)+'" alt="Preview of the base plan sheet"></a>':'')+
   '<div class="ract">'+
-   '<a class="btnp" href="'+esc(j.files.zip)+'">Download files (.zip)</a>'+
-   (pdf?'<a class="btns" href="'+esc(pdf)+'" target="_blank" rel="noopener">Open the PDF</a>':'')+
+   '<a class="btnp" href="'+esc(j.files.zip)+'" data-ev="download_zip">Download files (.zip)</a>'+
+   (pdf?'<a class="btns" href="'+esc(pdf)+'" target="_blank" rel="noopener" data-ev="open_pdf">Open the PDF</a>':'')+
+   (TIP_URL?'<p class="tipline">Saved you an hour? <a href="'+TIP_URL+'" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a></p>':'')+
    '<p class="note">CAD, SketchUp, Civil 3D, GIS and PDF in one zip. <button type="button" class="linkbtn inl" id="whatsin" aria-expanded="false" aria-controls="contents">What’s inside</button></p>'+
    '<ul class="contents" id="contents" hidden>'+
    '<li><b>AutoCAD / Civil 3D</b> · site.dxf, surface.xml (LandXML)</li>'+
@@ -415,13 +417,18 @@ function render(j){
   info.map(x=>'<li class="flag plain"><span>'+esc(x.text)+'</span></li>').join('')+
   '</ul><p class="note">Every layer’s source, date and limits are in provenance.md inside the zip.</p></details>'+
  '<div class="rfoot">'+nextRow(j.zoning)+
-  (PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms">Tell me what you need</a>.</p>':'')+
-  (TIP_URL?'<p class="note">Saved you some time? <a href="'+TIP_URL+'" target="_blank" rel="noopener">Chip in for hosting</a>.</p>':'')+
+  (PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
+ RUN_STATE=j.state||'';track('run_done');
  wireNext(j.state);wireSave(j);
  try{out.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}catch(e){}}
 const TIP_URL="__TIP_URL__";
+let RUN_STATE='';
+function track(name,extra){const data={state:RUN_STATE,...(extra||{})};
+ try{window.va&&window.va('event',{name,data})}catch(e){}
+ try{const b=JSON.stringify({e:name,...data});navigator.sendBeacon?navigator.sendBeacon('/api/event',new Blob([b],{type:'application/json'})):fetch('/api/event',{method:'POST',headers:{'Content-Type':'application/json'},body:b,keepalive:true})}catch(e){}}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-ev]');if(a)track(a.dataset.ev)},true);
 const PRO=__PRO__;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 async function wireSave(j){const box=document.getElementById('savebox');if(!box||!j.run_id)return;
@@ -429,7 +436,7 @@ async function wireSave(j){const box=document.getElementById('savebox');if(!box|
  if(!me.email&&!me.can_sign_up)return;
  const plan={run_id:j.run_id,title:j.title,files:j.files,state:j.state};
  box.innerHTML='<span>Download links expire in 2 days. Save the plan to keep its files.</span><button type="button" class="quiet" id="savebtn">Save to my plans</button>';
- document.getElementById('savebtn').onclick=async()=>{
+ document.getElementById('savebtn').onclick=async()=>{track('save_click');
   if(me.email){box.textContent='Saving…';
    const r=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan)});const k=await r.json().catch(()=>({}));
    box.innerHTML=r.ok?'<span class="ok">Saved.</span> <a href="/plans">My plans</a>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';return}
@@ -439,7 +446,7 @@ async function wireSave(j){const box=document.getElementById('savebox');if(!box|
   sf.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('sfmsg');
    const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:sf.email.value,website:sf.website.value,save:plan})});
    const k=await r.json().catch(()=>({}));
-   if(r.ok){sf.hidden=true;m.className='fine ok';m.innerHTML='Check your email for the sign-in link. It works for 30 minutes.'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':'')}
+   if(r.ok){track('save_link_sent');sf.hidden=true;m.className='fine ok';m.innerHTML='Check your email for the sign-in link. It works for 30 minutes.'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':'')}
    else{m.className='fine err';m.textContent=k.error||'Something went wrong.'}};};}
 function zoningBox(z){if(!z||!(z.details||[]).length)return '';
  const zs=z.details.map(d=>'<div class="zone"><div><span class="zt">'+esc(d.zone)+' '+esc(d.name||'')+'</span> <span class="zj">· '+esc(d.jurisdiction)+
@@ -453,14 +460,16 @@ const ASK={zoning:"Which city or county?",county:"Which county and state?",batch
 function nextRow(z){const covered=z&&(z.details||[]).some(d=>d.facts.length);
  return '<div class="vote" id="next"><b>What features should we add next?</b><div class="chips">'+
  NEXT.filter(([k])=>!(covered&&k==='zoning')).map(([k,l])=>'<button type="button" class="chip" data-k="'+k+'">'+esc(l)+'</button>').join('')+'</div>'+
- '<form class="nextdetail" id="nextdetail" hidden><input name="detail" maxlength="300"><button>Send</button></form><span class="fine" id="nextmsg"></span></div>';}
+ '<form class="nextdetail" id="nextdetail" hidden><input name="detail" maxlength="300" aria-label="Detail"><input name="email" type="email" maxlength="254" placeholder="Email me when it ships (optional)" aria-label="Email me when it ships (optional)"><button>Send</button></form><span class="fine" id="nextmsg"></span></div>';}
 function wireNext(state){const box=document.getElementById('next');if(!box)return;let cur=null,vid=null;
- const send=(choice,detail)=>fetch('/api/interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({choice,detail,state,vote_id:vid})});
+ const send=(choice,detail,email)=>fetch('/api/interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({choice,detail,email:email||'',state,vote_id:vid})});
  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cur=b.dataset.k;vid=Math.random().toString(36).slice(2,12);
-  b.classList.add('on');send(cur,'');const f=document.getElementById('nextdetail');f.hidden=false;f.detail.value='';f.detail.placeholder=ASK[cur];f.detail.focus();
+  b.classList.add('on');send(cur,'');track('vote',{choice:cur});const f=document.getElementById('nextdetail');f.hidden=false;f.detail.value='';f.detail.placeholder=ASK[cur];f.detail.focus();
   const m=document.getElementById('nextmsg');m.textContent='Thanks, counted. Add a detail if you like.';m.className='fine ok';});
- document.getElementById('nextdetail').onsubmit=e=>{e.preventDefault();const v=e.target.detail.value.trim();if(!v||!cur)return;
-  send(cur,v);e.target.hidden=true;document.getElementById('nextmsg').textContent='Got it, thanks.';};}
+ document.getElementById('nextdetail').onsubmit=async e=>{e.preventDefault();const v=e.target.detail.value.trim(),em=e.target.email.value.trim();if((!v&&!em)||!cur)return;
+  const r=await send(cur,v,em);const k=await r.json().catch(()=>({}));const m=document.getElementById('nextmsg');
+  if(!r.ok){m.textContent=k.error||'Something went wrong.';m.className='fine err';return}
+  if(em)track('vote_email',{choice:cur});e.target.hidden=true;m.className='fine ok';m.textContent=em?'Got it. I’ll email you when it ships.':'Got it, thanks.';};}
 async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form));if(url==='/api/feedback')d.query=f.query.value;
  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
@@ -670,6 +679,9 @@ and the run's state. Nothing that identifies you.</p>
 <h2>Firms</h2>
 <p>If you tell me about your firm on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
 about it. Never shared or sold; ask to have them deleted any time.</p>
+<h2>Feature votes and clicks</h2>
+<p>If you vote for a feature you can leave an email to hear when it ships; it's used only for that, never shared or sold. The site
+also counts clicks on buttons like Download and Save, with the state of the site and nothing else, to see what's useful.</p>
 <h2>Saved plans</h2>
 <p>Saving is optional. If you sign in to save a plan, your email address and the plans you save (address, files and date) are
 stored privately and kept until you delete them. Accounts and saved-plan records are held by Supabase (our database provider)
