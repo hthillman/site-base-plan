@@ -252,7 +252,7 @@ def _samples() -> dict:
         return {}
 
 
-def index(parcel_states: list[str], needs_code: bool) -> str:
+def index(parcel_states: list[str], needs_code: bool, preload: dict | None = None) -> str:
     states_sorted = sorted(STATES.items(), key=lambda kv: kv[1])
     opts = '<option value="">Auto</option>' + "".join(f'<option value="{k}">{escape(v)}</option>' for k, v in states_sorted)
     s = _samples()
@@ -515,7 +515,10 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
-</script>""".replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
+const PRELOAD=__PRELOAD__;
+if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
+ else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
+</script>""".replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -627,6 +630,14 @@ data came from. It's built for landscape architects, civil engineers, architects
 <p>The base plan code and the parcel source list are open source (MIT) at
 <a href="https://github.com/hthillman/site-base-plan">github.com/hthillman/site-base-plan</a>. If your county publishes parcels
 and isn't covered, you can add it: it's one small file. See the contributing guide there.</p>
+
+<h2 id="assistants">Use it from ChatGPT or Claude</h2>
+<p>Basesheet is also an MCP server, so AI assistants can build a base plan for you in the chat and hand you the link to the files.
+The server address is <code>{SITE_URL or ""}/mcp</code>.</p>
+<ul>
+<li><b>Claude:</b> Settings → Connectors → Add custom connector, and paste the address. Then ask something like "Build a base plan for 123 Main St, Springfield, IL".</li>
+<li><b>Other MCP clients</b> (Cursor, VS Code and others): add it as a remote MCP server over HTTP. No sign-in or key needed.</li>
+</ul>
 
 <h2 id="coverage">Coverage</h2>
 <p>Topography, soils, flood zones, wetlands and imagery cover all 50 states. Parcel lines come from free statewide parcel layers, which

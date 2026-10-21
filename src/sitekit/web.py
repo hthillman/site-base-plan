@@ -38,6 +38,10 @@ from .accounts import bp as accounts_bp  # noqa: E402
 
 app.register_blueprint(accounts_bp)
 
+from .mcp import bp as mcp_bp  # noqa: E402  (AI assistants: ChatGPT, Claude)
+
+app.register_blueprint(mcp_bp)
+
 try:  # Pro subscription (hosted site only)
     from .billing import bp as _billing_bp
 
@@ -115,6 +119,34 @@ def blob_put(pathname: str, data: bytes, content_type: str) -> str:
     )
     r.raise_for_status()
     return r.json()["url"]
+
+
+LOCAL_RESULTS: dict[str, dict] = {}
+
+
+def save_result(run_id: str, result: dict) -> None:
+    """Keep a run's result next to its files (same 2-day cleanup) so /r/<run_id> can show it later. Never raises."""
+    try:
+        if not BLOB_TOKEN:
+            LOCAL_RESULTS[run_id] = result
+            return
+        blob_put(f"runs/r-{run_id}/result.json", json.dumps(result).encode(), "application/json")
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN result save failed: {e}", flush=True)
+
+
+def load_result(run_id: str) -> dict | None:
+    if not BLOB_TOKEN:
+        return LOCAL_RESULTS.get(run_id)
+    from .http import session
+
+    d = session().get("https://blob.vercel-storage.com", params={"prefix": f"runs/r-{run_id}/", "limit": 5},
+                      headers={"authorization": f"Bearer {BLOB_TOKEN}", "x-api-version": "7"}, timeout=30).json()
+    b = next((b for b in d.get("blobs", []) if b["pathname"].endswith("/result.json")), None)
+    if not b:
+        return None
+    r = session().get(b["url"], timeout=30)
+    return r.json() if r.ok else None
 
 
 def publish(run_id: str, folder: Path, files: dict[str, str]) -> dict[str, str]:
@@ -257,8 +289,10 @@ def run_request(d: dict, batch: bool = False):
                 "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
             })
-            events.put({"result": {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
-                                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}})
+            rj = {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
+                  "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
+            save_result(run_id, rj)
+            events.put({"result": rj})
         except Exception as e:  # noqa: BLE001
             record_usage({**base, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",
@@ -490,6 +524,22 @@ def index():
     return page(supported_states(), bool(ACCESS_CODE))
 
 
+@app.get("/r/<run_id>")
+def result_page(run_id):
+    """A finished run's result page, shareable for as long as its files are kept (2 days)."""
+    import re
+
+    from .pages import index as page
+    from .parcel import supported_states
+
+    if not re.fullmatch(r"[0-9a-f]{10}", run_id):
+        abort(404)
+    rj = load_result(run_id) or {"expired": True}
+    resp = Response(page(supported_states(), bool(ACCESS_CODE), preload=rj))
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
+
+
 @app.get("/about")
 def about():
     from .pages import about as page
@@ -645,6 +695,7 @@ Built for landscape architects, site designers and civil engineers doing early s
 - [About, coverage and FAQ]({base}/about): what it does, limits, state-by-state parcel coverage, common questions
 - [Data sources]({base}/sources): every public data source, with publisher and resolution
 - [Privacy]({base}/privacy)
+- [MCP server]({base}/mcp): Streamable HTTP endpoint (no auth) with one tool, build_base_plan(site), for ChatGPT, Claude and other MCP clients; returns key facts, a preview map and a result page link
 - [Source code]({REPO_URL}): MIT-licensed Python core and the parcel source registry
 - [Free parcel data by state]({base}/parcels): every verified free statewide parcel layer, with publisher, coverage, vintage, fields and REST endpoint
 
