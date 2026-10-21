@@ -11,7 +11,7 @@ county_values = "none"
 coverage = "All of Philadelphia (consolidated city-county)"
 vintage = "Current PWD stormwater-billing parcel layer, maintained by the City"
 max_record_count = 2000
-terms = "City of Philadelphia open data; provided as is, no warranty, user holds the City harmless. No token."
+terms = "City of Philadelphia open data; provided as is, no warranty, user holds the City harmless. No token. Hold-harmless reviewed 2026-10-21 and kept (Hunter)."
 owner_field = "owner1"
 notes = "brt_id is the 9-digit OPA (Office of Property Assessment) account number most users have, stored as text, e.g. '782273400'. parcel_id is the PWD parcel id as text ('480565'); pin is the numeric DOR PIN (1001295858), no quotes. One polygon can carry several OPA accounts (num_brt > 1); brt_id holds one of them. address is the full situs string ('1400 JOHN F KENNEDY BLVD'); no city field (all Philadelphia). No deed/plat fields. The DOR_Parcel layer in the same org (legal registry parcels) has the same geometry but no OPA number."
 
