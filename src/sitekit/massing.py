@@ -110,3 +110,21 @@ def mesh(block: Block, dx: float = 0.0, dy: float = 0.0) -> tuple[list[tuple[flo
             else:
                 tris += [(a, c, b), (a, d, c)]
     return verts, tris
+
+
+def building_label(res) -> tuple[str, str, str]:
+    """(group name, accuracy word, one-line note) for the buildings in this plan, so every file says how far to trust them."""
+    lr = res.layers.get("buildings")
+    q = (lr.extra.get("quality") if lr is not None else None) or "fema"
+    if q == "local":
+        when = f", {lr.vintage}" if lr.vintage else ""
+        return ("Existing buildings (local outlines)", "local",
+                f"BUILDINGS: outlines from {lr.source} ({lr.extra.get('method') or 'published by the local government'}{when}). "
+                "Heights from the layer where it has them, otherwise matched or assumed (see provenance.md).")
+    if q == "microsoft":
+        return ("Existing buildings (APPROXIMATE outlines)", "approximate",
+                "BUILDINGS: outlines are APPROXIMATE, machine-traced from aerial imagery (Microsoft US Building Footprints). Usually close "
+                "to the roof but can be several feet off, simplified, or missing buildings. Not for design or measurement.")
+    return ("Existing buildings (ROUGH outlines)", "rough",
+            "BUILDINGS: outlines are ROUGH, from FEMA USA Structures (machine-traced from older imagery). Often rotated, mis-sized, "
+            "offset or missing. Context only; do not measure from them.")

@@ -101,7 +101,9 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
         off = len(gv)
         gv += vs
         gt += [(a + off, b + off, c + off) for a, b, c in ts]
-    mats = {"existing": ("buildings", "Existing buildings (massing)", "0.86 0.85 0.81", 1.0),
+    from .massing import building_label
+
+    mats = {"existing": ("buildings", building_label(res)[0].replace("Existing buildings", "Existing buildings massing"), "0.86 0.85 0.81", 1.0),
             "envelope": ("envelope", "Zoning envelope (massing)", "0.30 0.56 0.88", 0.35)}
 
     files = {}
@@ -290,7 +292,10 @@ def write_gis(res, out: Path) -> dict[str, str]:
             layers[key] = [(f.geom, _clean(f.props)) for f in lr.features]
     bl = res.layers.get("buildings")
     if bl is not None and bl.ok():
-        layers["buildings"] = [(f.geom, dict(f.props)) for f in bl.features]
+        from .massing import building_label
+
+        acc = building_label(res)[1]
+        layers["buildings"] = [(f.geom, {**f.props, "outline_source": bl.source, "outline_accuracy": acc}) for f in bl.features]
     env = getattr(res, "envelope", None)
     if env:
         layers["zoning_envelope"] = [(env["geom"], {"height_ft": env["height_ft"], "zone": env["zone"], "note": env["label"]})]
@@ -365,7 +370,9 @@ def write_kml(res, out: Path) -> str:
 
     bl = res.layers.get("buildings")
     if bl is not None and bl.ok():
-        extruded("Existing buildings (3D)", "bldg", [(f.geom, f.props["height_ft"], f"{f.props.get('type') or 'Building'}, {f.props['height_ft']:g} ft") for f in bl.features])
+        from .massing import building_label
+
+        extruded(building_label(res)[0] + " 3D", "bldg", [(f.geom, f.props["height_ft"], f"{f.props.get('type') or 'Building'}, {f.props['height_ft']:g} ft") for f in bl.features])
     env = getattr(res, "envelope", None)
     if env:
         extruded("Zoning envelope (3D)", "envelope", [(env["geom"], env["height_ft"], env["label"])])
@@ -405,6 +412,10 @@ def write_readme(res, files: dict[str, str]) -> str:
                   "  free web plan may not allow imports). It's textured with the aerial, has the parcel line draped on it, in feet.",
                   "  Existing buildings come in as grey 3D blocks (and, where zoning rules exist, the zoning envelope as a",
                   "  translucent blue block). Each is its own group, so you can hide or delete it."]
+        if res.layers.get("buildings") is not None and res.layers["buildings"].ok():
+            from .massing import building_label
+
+            lines += ["  " + building_label(res)[2]]
     lines += [f"  Linework (SketchUp Pro): File > Import site-local.dxf, Options > units Feet. It lines up with terrain.dae:",
               f"  both are moved so the base point (E {bx:,.0f}, N {by:,.0f} in State Plane) sits at 0,0."]
     if "terrain_obj" in have:

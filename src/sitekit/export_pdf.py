@@ -314,6 +314,13 @@ def write_pdf(res, cfg: Config, opts) -> Path:
             ("line", "Road centerline (TIGER)", dict(color=ROAD, lw=0.8, linestyle=(0, (10, 3, 2, 3)))),
             ("fill", "Approx. right-of-way (between parcels)", dict(facecolor=matplotlib.colors.to_rgba("#bdbdb5", 0.3), edgecolor="none", hatch="..")),
         ]
+        if L.get("buildings") is not None and L["buildings"].ok():
+            from .massing import building_label
+
+            acc = building_label(res)[1]
+            legend.append(("fill", {"local": "Existing building (local outline)", "approximate": "Existing building (approx., machine-traced)",
+                                    "rough": "Existing building (rough, FEMA)"}[acc],
+                           dict(facecolor=matplotlib.colors.to_rgba("#9d9a90", 0.35), edgecolor="#7d7a72")))
         _sidebar(fig, res, "BASE PLAN", scale, legend, 1, pages)
         pdf.savefig(fig)
         plt.close(fig)

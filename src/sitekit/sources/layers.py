@@ -794,6 +794,7 @@ def fetch_buildings(clip: BaseGeometry, epsg: int, ft_per_m: float, state: str |
         if r is not None and r.status == "ok":
             r.extra["planimetric"] = False
             r.extra["machine"] = "microsoft"
+            r.extra["quality"] = "microsoft"
             r.resolution = "Machine-traced from aerial imagery by Microsoft; heights matched from FEMA USA Structures where they overlap"
             r.limitations = ["Outlines are machine-traced from aerial imagery (Microsoft), not surveyed: usually close to the roof but "
                              "simplified, sometimes a few feet off, and they can miss buildings or mark tree canopy as a building.",
@@ -861,6 +862,8 @@ def _buildings_from_registry(src, clip: BaseGeometry, epsg: int, ft_per_m: float
         parts.append(f"{assumed} assumed one story ({ASSUMED_HEIGHT_M * ft_per_m:.0f} ft)")
     r.notes.append("Building heights: " + "; ".join(parts) + ".")
     r.extra["planimetric"] = True
+    r.extra["quality"] = "local"
+    r.extra["method"] = src.method
     r.status = "ok"
     r.retrieved_at = now_iso()
     return r
@@ -894,6 +897,7 @@ def _buildings_from_usa_structures(clip: BaseGeometry, epsg: int, ft_per_m: floa
         r.vintage = "Source imagery " + (min(dates) if min(dates) == max(dates) else f"{min(dates)} to {max(dates)}")
     if assumed:
         r.notes.append(f"{assumed} building(s) had no height in the source and are drawn one story ({ASSUMED_HEIGHT_M * ft_per_m:.0f} ft) tall.")
+    r.extra["quality"] = "fema"
     r.status = "ok" if r.features else "empty"
     if not r.features:
         r.notes.append("No structures over 450 sq ft mapped in the extent.")

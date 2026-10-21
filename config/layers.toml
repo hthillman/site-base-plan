@@ -131,7 +131,7 @@ description = "Shared base point. site.dxf has it at its State Plane coordinates
 name = "SITE-BLDG"
 color = 8
 linetype = "CONTINUOUS"
-description = "Existing building footprints, APPROXIMATE: machine-traced from imagery (FEMA USA Structures), often a few feet off."
+description = "Existing building footprints. Where they came from and how accurate they are is stated in SITE-NOTES and provenance.md."
 
 [layers.bldg_mass]
 name = "SITE-BLDG-MASS"

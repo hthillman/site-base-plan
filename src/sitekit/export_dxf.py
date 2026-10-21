@@ -301,6 +301,11 @@ def _notes(msp, res, cfg: Config, txt_h: float):
     for lr in res.layers.values():
         status = "" if lr.status == "ok" else f" [{lr.status.upper()}]"
         lines.append(f"- {lr.title}{status}: {lr.source}{' | ' + lr.vintage if lr.vintage else ''}")
+    bl = res.layers.get("buildings")
+    if bl is not None and bl.ok():
+        from .massing import building_label
+
+        lines += ["", building_label(res)[2]]
     lines += ["", DISCLAIMER]
     mt = msp.add_mtext("\\P".join(l.replace("\\", "/") for l in lines), dxfattribs={"layer": cfg.layer("notes").name, "style": "SITE", "char_height": txt_h})
     mt.dxf.insert = (x1 + txt_h * 6, y1)
