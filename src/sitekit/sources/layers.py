@@ -263,7 +263,7 @@ def _lidar_sources(clip: BaseGeometry, epsg: int) -> list[dict]:
     return sorted(seen.values(), key=lambda s: (-(s["coverage"] or 0), s["collect_end"] or ""), reverse=False) if with_geom else sorted(seen.values(), key=lambda s: s["collect_end"] or "", reverse=True)
 
 
-USGS_DEM_TIMEOUT_S = 20  # then the backup tiles
+USGS_DEM_TIMEOUT_S = 30  # then the backup tiles (USGS can take 40+ s on bad days; 30 s keeps runs under a minute)
 TERRAIN_TILES = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
 TERRAIN_TILES_Z = 15
 BACKUP_DEM_RES_M = 10.0  # mostly USGS NED 1/3 arc-second in the US; treated as 10 m for contour limits
@@ -318,7 +318,7 @@ def backup_dem(x0: float, y0: float, w: int, h: int, cell_ft: float, epsg: int) 
 
 def dem_source_resolution(clip: BaseGeometry, epsg: int) -> list[dict]:
     """Finest 3DEP source dataset under the site (centre + corners), from the
-    ImageServer's catalog. Returns [{res_m, title, end_date}], finest first."""
+    ImageServer's catalog. Returns [centre, corner, corner], each {res_m, title, end_date} or None."""
     from concurrent.futures import ThreadPoolExecutor
 
     ll = reproject(clip, epsg, 4326)
@@ -338,8 +338,7 @@ def dem_source_resolution(clip: BaseGeometry, epsg: int) -> list[dict]:
         return {"res_m": float(top.get("LowPS") or 99), "title": top.get("title") or top.get("Name"), "end_date": str(top.get("EndDate") or "")}
 
     with ThreadPoolExecutor(len(pts)) as ex:
-        best = {str(i): d for i, d in enumerate(ex.map(one, pts)) if d}
-    return sorted(best.values(), key=lambda d: d["res_m"])
+        return list(ex.map(one, pts))  # centre first, then corners; None where the catalog has nothing
 
 
 def fetch_dem(clip: BaseGeometry, epsg: int, cell_ft: float = 3.0, pad_ft: float = 30.0, ft_per_m: float = US_FT_PER_M) -> LayerResult:
@@ -430,15 +429,21 @@ def fetch_dem(clip: BaseGeometry, epsg: int, cell_ft: float = 3.0, pad_ft: float
             r.notes.append(f"Could not read 3DEP source index: {e}")
         # Source resolution decides how fine the contours may be.
         try:
-            res = fut_res.result(timeout=max(1.0, 30 - (time.time() - t_start)))
+            res_by_point = fut_res.result(timeout=max(1.0, 30 - (time.time() - t_start)))
+            res = [d for d in res_by_point if d]
         except Exception as e:  # noqa: BLE001
-            res = []
+            res, res_by_point = [], []
             r.notes.append(f"Could not read DEM source resolution: {e}")
         if res:
-            worst = round(max(d["res_m"] for d in res), 1)
+            # Judge by the centre of the site (first point); coarser data at the extent's corners only gets a note.
+            centre = res_by_point[0] if res_by_point and res_by_point[0] else res[0]
+            worst = round(centre["res_m"], 1)
+            edge = max((d["res_m"] for d in res), default=worst)
+            if edge > worst + 0.5:
+                r.notes.append(f"Part of the extent away from the site is only covered by {edge:g} m elevation data; contours there are less reliable.")
             r.extra["source_res_m"] = worst
             r.extra["min_interval_ft"] = 1.0 if worst <= 2.0 else 2.0 if worst <= 4.0 else 5.0
-            d0 = max(res, key=lambda d: d["res_m"])
+            d0 = centre
             r.resolution = f"Source {worst:g} m ({d0['title']}); resampled to {cell_ft:.1f} ft grid"
             if not r.vintage or "not reported" in r.vintage:
                 r.vintage = f"{d0['title']} (data through {d0['end_date'][:4] or 'n/d'})"
@@ -741,7 +746,8 @@ def fetch_buildings(clip: BaseGeometry, epsg: int, ft_per_m: float) -> LayerResu
         key="buildings", title="Existing buildings", source="FEMA / Oak Ridge National Laboratory USA Structures (via Esri)",
         url=STRUCTURES_URL,
         resolution="Footprints traced from imagery; heights estimated from LiDAR or imagery. Structures under 450 sq ft are not included.",
-        limitations=["Footprints and heights are estimates from imagery and LiDAR, not measured.",
+        limitations=["Footprints are machine-learning traces of aerial imagery (FEMA/ORNL), not surveyed or planimetric outlines: "
+                     "commonly a few feet off, simplified, and missing small or tree-covered buildings. Heights are estimates.",
                      "Buildings built or removed since the source imagery date won't match.",
                      "Massing is a simple flat-roofed block at each building's estimated height."],
     )

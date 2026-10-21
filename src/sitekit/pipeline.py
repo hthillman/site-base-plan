@@ -478,8 +478,9 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     t2 = time.time()
     floor = dem.extra.get("min_interval_ft", 1.0) if dem.ok() else 1.0
     if dem.ok() and dem.extra.get("fallback"):
-        site.warnings.append("USGS's LiDAR elevation service didn't answer, so topography comes from a coarser backup source (about 10 m). "
-                             f"Contours are {max(opts.contour_interval, floor):g} ft and approximate; run this site again later for LiDAR contours.")
+        site.warnings.append("USGS's LiDAR elevation service was too slow to answer just now, so this plan's topography comes from a coarser "
+                             f"backup (about 10 m), with {max(opts.contour_interval, floor):g} ft contours and heavier lines every "
+                             f"{max(opts.contour_interval, floor) * cfg.major_every:g} ft. Build the site again in a few minutes to get LiDAR contours (usually 1 to 2 ft).")
         contour_src = "Derived from backup DEM (AWS Terrain Tiles, about 10 m)"
     else:
         contour_src = "Derived from 3DEP DEM"
@@ -557,7 +558,8 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         msg = f"{len(bl.features)} existing building(s) in the extent are drawn as 3D massing from FEMA USA Structures footprints and heights"
         if site.parcel is not None:
             msg += f" ({len(on_site)} on the parcel)"
-        flags.append({"level": "info", "text": msg + ". Heights are estimates."})
+        flags.append({"level": "info", "text": msg + ". These outlines are traced from aerial imagery by machine learning: often a few feet off, "
+                      "simplified to boxes, and small or tree-covered buildings can be missing. Use them for context, not as measured outlines."})
     if envelope:
         flags.append({"level": "info", "text": f"{envelope['label']}. Shown as a translucent block in the 3D files; a quick volume check, not a design."})
 
