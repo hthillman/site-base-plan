@@ -1,0 +1,18 @@
+state = "NE"
+county = "Douglas"
+name = "Douglas County 2022 Building Footprints"
+publisher = "Douglas County / Omaha GIS (DCGIS)"
+url = "https://dcgis.org/server/rest/services/Hosted/2022_Building_Footprints/FeatureServer/0"
+coverage = "All of Douglas County, including Omaha"
+method = "lidar"
+vintage = "QL1 lidar flown April 2022"
+terms = "Public; Omaha/Douglas County GIS open data portal (no licence text on the item)"
+max_record_count = 2000
+height_field = "buildingheight"
+height_units = "ft"
+notes = "Footprints generated in ArcGIS Pro from classified QL1 lidar; polygons under 64 sq ft removed and commercial/industrial roofs checked for HVAC artifacts. heightunits field reads 'feet'."
+
+[verified]
+date = "2026-10-21"
+point = [-95.9345, 41.2565]
+point_result = "Downtown Omaha: 29 outlines in a ~250 m envelope, EPSG 6880 ft; buildingheight present (e.g. 53 ft)"

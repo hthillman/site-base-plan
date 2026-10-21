@@ -1,0 +1,16 @@
+state = "WA"
+county = "King"
+name = "Seattle Building Outlines 2023"
+publisher = "City of Seattle (Enterprise GIS Data Team)"
+url = "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Building_Outlines_2023/FeatureServer/0"
+coverage = "City of Seattle only (about a third of King County's population); King County publishes no public building layer, so Bellevue, Kent and the rest fall back to USA Structures"
+method = "planimetric"
+vintage = "Hand-drawn from King County 2023 orthoimagery"
+terms = "Public, no token; City of Seattle open data. Item text: no representation or warranty as to accuracy. No license, indemnity or redistribution clause."
+max_record_count = 2000
+notes = "Hand-drawn outlines from 2023 King County orthos (EagleView imagery). No height field; heights matched from USA Structures. PIN is the King County parcel number. Earlier vintages (1993-2015) are separate services in the same org. Native SR EPSG 2926 (WA North ftUS HARN)."
+
+[verified]
+date = "2026-10-21"
+point = [-122.3350, 47.6080]
+point_result = "Downtown Seattle outlines returned in EPSG 2285 feet; no height field"

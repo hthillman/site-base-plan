@@ -1,0 +1,16 @@
+state = "TX"
+county = "Harris"
+name = "Building Footprint 2018 (lidar-derived)"
+publisher = "City of Houston (data from Houston-Galveston Area Council)"
+url = "https://geohwp.houstontx.gov/arcgis/rest/services/02_BaseData_Boundaries/Other/FeatureServer/4"
+coverage = "All of Harris County"
+method = "lidar"
+vintage = "2018 H-GAC/TNRIS/USGS lidar, delivered 2019-06-24; layer updated 2022-01"
+terms = "Public; disclaimer says informational only, and use or reproduction must acknowledge the Houston-Galveston Area Council as the source"
+max_record_count = 2000
+notes = "Derived from 2018 lidar classifications, so some erroneous buildings exist from misclassified points (per publisher). No height field; heights matched from USA Structures. Carries PARCEL_ID (HCAD). Credit: Houston-Galveston Area Council."
+
+[verified]
+date = "2026-10-21"
+point = [-95.3698, 29.7590]
+point_result = "14 outlines within 500 ft in downtown Houston; no layer heights (12 matched from USA Structures)"

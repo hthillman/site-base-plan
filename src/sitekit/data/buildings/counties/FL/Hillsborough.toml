@@ -1,0 +1,17 @@
+state = "FL"
+county = "Hillsborough"
+name = "Building Footprints (Zoning Info Sheet layer)"
+publisher = "Hillsborough County (data from the City of Tampa / county building footprint program)"
+url = "https://maps.hillsboroughcounty.org/arcgis/rest/services/Zoning_Info_Sheet/Zoning_Info_Sheet_Layers/MapServer/10"
+coverage = "All of Hillsborough County (about 472,000 buildings), including Tampa, Brandon and unincorporated areas"
+method = "planimetric"
+vintage = "Edited through 2023 (LASTUPDATE per feature)"
+terms = "Public; county GIS service, no license or restriction stated. The City of Tampa's own copy is CC0."
+max_record_count = 1000
+stories_field = "FLOORCOUNT"
+notes = "Parcel-linked footprints (STRAP/FOLIO) carrying property appraiser attributes. The service description says the data came from the City of Tampa (2018) but the layer covers the whole county; the capture method is not stated by the publisher. BLDGHEIGHT, EAVEHEIGHT and BASEELEV exist but are empty, so FLOORCOUNT (filled on most buildings) gives an estimated height."
+
+[verified]
+date = "2026-10-21"
+point = [-82.4572, 27.9506]
+point_result = "39 footprints in a 0.003-degree box in downtown Tampa (EPSG 2882, feet); FLOORCOUNT on 36; 33 in Brandon"

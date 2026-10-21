@@ -1,0 +1,20 @@
+state = "NY"
+county = "Westchester"
+name = "Westchester County Buildings (planimetrics)"
+publisher = "Westchester County GIS"
+url = "https://giswww.westchestergov.com/arcgis/rest/services/DataHub_BasemapPlanimetrics/MapServer/5"
+coverage = "All of Westchester County"
+method = "planimetric"
+vintage = "Photogrammetrically compiled from April 2023 imagery (1\" = 100' scale), updated in 3D"
+terms = "Public; Westchester County GIS data hub, provided as is, county disclaims liability"
+max_record_count = 1000
+height_field = "ACTUAL_HEIGHT"
+height_units = "ft"
+top_elev_field = "APPROX_ROOF_ELEVATION"
+base_elev_field = "BASE_ELEVATION"
+notes = "ACTUAL_HEIGHT = APPROX_ROOF_ELEVATION - BASE_ELEVATION, in feet (populated on all 278,000 buildings). This layer holds buildings only; the Structures layer (id 14) in the same service adds tanks, towers and platforms."
+
+[verified]
+date = "2026-10-21"
+point = [-73.7629, 41.0340]
+point_result = "13 outlines in a ~200 x 180 m box in downtown White Plains, EPSG 2263 feet; ACTUAL_HEIGHT on all"

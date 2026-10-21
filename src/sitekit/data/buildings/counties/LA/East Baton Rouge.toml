@@ -1,0 +1,21 @@
+state = "LA"
+county = "East Baton Rouge"
+name = "Building Footprint"
+publisher = "City of Baton Rouge / Parish of East Baton Rouge, Department of Information Services (EBRGIS)"
+url = "https://maps.brla.gov/gis/rest/services/Cadastral/Building_Footprint/MapServer/0"
+coverage = "All of East Baton Rouge Parish"
+method = "planimetric"
+vintage = "Digitized from the most current high-resolution orthoimagery (1:4800 source scale); maintained as needed"
+terms = "Public Domain (EBR Open Data, data.brla.gov); FGDC metadata lists access constraint 'copyright'"
+max_record_count = 2000
+height_field = "HEIGHT_FEET"
+height_units = "ft"
+top_elev_field = "ROOFTOP_ELEVATION_FT"
+base_elev_field = "GROUND_ELEVATION_FT"
+stories_field = "NUMBER_FLOOR"
+notes = "About 197,000 buildings; HEIGHT_FEET filled on about 181,000. Some downtown buildings have null heights (matched from USA Structures)."
+
+[verified]
+date = "2026-10-21"
+point = [-91.1871, 30.4507]
+point_result = "44 outlines within 500 ft in downtown Baton Rouge; HEIGHT_FEET on 41"

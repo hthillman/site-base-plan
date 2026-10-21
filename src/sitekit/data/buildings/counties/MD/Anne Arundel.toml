@@ -1,0 +1,16 @@
+state = "MD"
+county = "Anne Arundel"
+name = "Anne Arundel County Buildings"
+publisher = "Anne Arundel County GIS"
+url = "https://gis.aacounty.org/arcgis/rest/services/OpenData/Structure_OpenData/MapServer/2"
+coverage = "All of Anne Arundel County"
+method = "planimetric"
+vintage = "Captured from county orthophotos; UPDATE_DAT 2014, 2020 and 2023 (item says captured from 2023 orthophotos, updated May 2024)"
+terms = "Public; county open data disclaimer: no liability, use at own risk, not for surveying or engineering (the linked full GIS Disclaimer PDF currently returns 404)"
+max_record_count = 2000
+notes = "Buildings only (decks, pools and piers are separate layers in the same service). No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-76.4922, 38.9784]
+point_result = "34 outlines in a ~200 x 180 m box in downtown Annapolis, EPSG 2248 feet"

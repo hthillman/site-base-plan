@@ -1,0 +1,20 @@
+state = "OH"
+county = "Franklin"
+name = "Franklin County Building Footprints (planimetrics)"
+publisher = "Franklin County Auditor"
+url = "https://gis.franklincountyohio.gov/hosting/rest/services/BaseMap/Reference_Data/MapServer/1"
+coverage = "All of Franklin County, including Columbus"
+method = "planimetric"
+vintage = "Maintained as part of the Auditor's planimetric base mapping"
+terms = "Public; Franklin County Auditor disclaimer (verify against the primary source, no legal responsibility assumed)"
+max_record_count = 2000
+height_field = "Roof_Height"
+height_units = "ft"
+top_elev_field = "Roof_Elev"
+base_elev_field = "Base_Elev"
+notes = "Planimetric building and similar-structure polygons from the Auditor's base mapping, with roof and base elevations."
+
+[verified]
+date = "2026-10-21"
+point = [-82.9988, 39.9612]
+point_result = "Downtown Columbus: 8 outlines in a ~250 m envelope, EPSG 3734 ft; Roof_Height present (e.g. 87 ft)"

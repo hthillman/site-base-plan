@@ -1,0 +1,18 @@
+state = "IA"
+county = "Polk"
+name = "Des Moines Area Building Footprints (planimetrics)"
+publisher = "Des Moines Area Regional GIS Partnership (City of Des Moines)"
+url = "https://services.arcgis.com/HT7H9QGiZQoRJDpJ/arcgis/rest/services/Building_Footprints_view/FeatureServer/0"
+coverage = "All of Polk County (Des Moines, suburbs and townships), plus edges of Dallas and Warren counties"
+method = "planimetric"
+vintage = "Stereo-digitized from 2006 flight (Sanborn), maintained by heads-up digitizing on newer orthos"
+terms = "Copyright City of Des Moines, all rights reserved; reference-only disclaimer, no warranty or liability"
+max_record_count = 2000
+height_field = "BuildingHeightFt"
+height_units = "ft"
+notes = "Height and base elevation computed from Iowa lidar. The item carries an all-rights-reserved notice with no explicit licence grant."
+
+[verified]
+date = "2026-10-21"
+point = [-93.6250, 41.5868]
+point_result = "Downtown Des Moines: 22 outlines in a ~250 m envelope, EPSG 6465 ft; BuildingHeightFt present (e.g. 188 ft)"

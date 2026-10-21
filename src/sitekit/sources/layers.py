@@ -740,8 +740,133 @@ STRUCTURES_URL = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/serv
 ASSUMED_HEIGHT_M = 4.5  # one story, when a structure has no height
 
 
-def fetch_buildings(clip: BaseGeometry, epsg: int, ft_per_m: float) -> LayerResult:
-    """Existing building footprints with heights (FEMA / ORNL USA Structures), for plan footprints and 3D massing."""
+def _usa_structures(clip: BaseGeometry, epsg: int) -> list[Feature]:
+    feats = query_features(STRUCTURES_URL, geometry=clip, in_sr=epsg, out_sr=epsg,
+                           out_fields="HEIGHT,OCC_CLS,PRIM_OCC,IMAGE_DATE,SOURCE,VAL_METHOD,OUTBLDG")
+    out = []
+    for f in feats:
+        g = f.geom if f.geom.is_valid else make_valid(f.geom)
+        if not g.is_empty:
+            out.append(Feature(g, f.props))
+    return out
+
+
+def _usa_height_m(props: dict) -> float | None:
+    h = props.get("HEIGHT")
+    return float(h) if isinstance(h, (int, float)) and 2 <= h <= 400 else None
+
+
+MS_FOOTPRINTS_URL = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/MSBFP2/FeatureServer/0"
+
+
+def _microsoft_source():
+    from ..footprints import BuildingSource
+
+    return BuildingSource(state="", name="Microsoft US Building Footprints", publisher="Microsoft, hosted by Esri Living Atlas",
+                          url=MS_FOOTPRINTS_URL, method="machine-traced from imagery", vintage="Microsoft footprints (imagery about 2014 to 2022)",
+                          terms="ODbL 1.0; contains Microsoft US Building Footprints data", max_record_count=2000)
+
+
+def fetch_buildings(clip: BaseGeometry, epsg: int, ft_per_m: float, state: str | None = None, county: str | None = None) -> LayerResult:
+    """Existing building footprints with heights, for plan outlines and 3D massing. In order: a county/city/state planimetric
+    layer from the footprint registry; Microsoft's nationwide footprints (machine-traced but much closer to roofs than USA
+    Structures in our comparisons), with heights matched from USA Structures; USA Structures alone as the last resort."""
+    from ..footprints import sources_for
+
+    srcs = sources_for(state, county)
+    src = srcs[0] if srcs else None
+    notes = []
+    try:
+        for cand in srcs:
+            try:
+                r = _buildings_from_registry(cand, clip, epsg, ft_per_m)
+                if r.status == "ok":
+                    r.notes[:0] = notes
+                    return r
+                notes.append(f"{cand.label} has no outlines here.")
+            except Exception as e:  # noqa: BLE001 - quota, outage, moved service: fall back, never fail the layer
+                notes.append(f"{cand.label} didn't answer ({type(e).__name__}).")
+        try:
+            r = _buildings_from_registry(_microsoft_source(), clip, epsg, ft_per_m)
+        except Exception as e:  # noqa: BLE001 - fall through to USA Structures
+            r = None
+            notes.append(f"Microsoft footprints didn't load ({type(e).__name__}).")
+        if r is not None and r.status == "ok":
+            r.extra["planimetric"] = False
+            r.extra["machine"] = "microsoft"
+            r.resolution = "Machine-traced from aerial imagery by Microsoft; heights matched from FEMA USA Structures where they overlap"
+            r.limitations = ["Outlines are machine-traced from aerial imagery (Microsoft), not surveyed: usually close to the roof but "
+                             "simplified, sometimes a few feet off, and they can miss buildings or mark tree canopy as a building.",
+                             "Heights come from FEMA USA Structures where a footprint overlaps one; others are drawn one story.",
+                             "Massing is a simple flat-roofed block at each building's height."]
+            r.notes[:0] = notes
+            return r
+        r = _buildings_from_usa_structures(clip, epsg, ft_per_m)
+        r.notes[:0] = notes
+        return r
+    except Exception as e:  # noqa: BLE001
+        r = LayerResult(key="buildings", title="Existing buildings", source=src.label if src else "FEMA / ORNL USA Structures",
+                        url=src.url if src else STRUCTURES_URL)
+        return _fail(r, e)
+
+
+def _buildings_from_registry(src, clip: BaseGeometry, epsg: int, ft_per_m: float) -> LayerResult:
+    r = LayerResult(
+        key="buildings", title="Existing buildings", source=src.label, url=src.url,
+        resolution=f"{(src.method or 'Published').capitalize()} building outlines from {src.publisher or src.name}",
+        vintage=src.vintage,
+        limitations=["Outlines as published by the local government; check the date against recent construction.",
+                     "Massing is a simple flat-roofed block at each building's height."],
+    )
+    where = src.filter or "1=1"
+    feats = query_features(src.url, geometry=clip, in_sr=epsg, out_sr=epsg, where=where, out_fields=src.out_fields())
+    feats = [Feature(f.geom if f.geom.is_valid else make_valid(f.geom), f.props) for f in feats]
+    feats = [f for f in feats if not f.geom.is_empty and f.geom.area >= 50 and f.geom.intersects(clip)]  # keep buildings straddling the edge
+    if not feats:
+        r.status = "empty"
+        r.retrieved_at = now_iso()
+        return r
+    usa = None
+    from_layer = matched = assumed = 0
+    for f in feats:
+        h = src.height_ft(f.props, ft_per_m)
+        how = "layer"
+        if h is None:
+            if usa is None:
+                try:
+                    usa = _usa_structures(clip, epsg)
+                except Exception:  # noqa: BLE001 - heights are a nice-to-have
+                    usa = []
+            best, best_a = None, 0.0
+            for u in usa:
+                a = u.geom.intersection(f.geom).area if u.geom.intersects(f.geom) else 0.0
+                if a > best_a:
+                    best, best_a = u, a
+            hm = _usa_height_m(best.props) if best is not None and best_a > 0.3 * min(best.geom.area, f.geom.area) else None
+            if hm is not None:
+                h, how = hm * ft_per_m, "usa"
+            else:
+                h, how = ASSUMED_HEIGHT_M * ft_per_m, "assumed"
+        from_layer += how == "layer"
+        matched += how == "usa"
+        assumed += how == "assumed"
+        r.features.append(Feature(f.geom, {"height_ft": round(h, 1), "height_assumed": how == "assumed", "height_source": how,
+                                           "use": "", "type": "", "image_date": "", "verified": src.method or ""}))
+    parts = []
+    if from_layer:
+        parts.append(f"{from_layer} from the layer")
+    if matched:
+        parts.append(f"{matched} matched from FEMA USA Structures")
+    if assumed:
+        parts.append(f"{assumed} assumed one story ({ASSUMED_HEIGHT_M * ft_per_m:.0f} ft)")
+    r.notes.append("Building heights: " + "; ".join(parts) + ".")
+    r.extra["planimetric"] = True
+    r.status = "ok"
+    r.retrieved_at = now_iso()
+    return r
+
+
+def _buildings_from_usa_structures(clip: BaseGeometry, epsg: int, ft_per_m: float) -> LayerResult:
     r = LayerResult(
         key="buildings", title="Existing buildings", source="FEMA / Oak Ridge National Laboratory USA Structures (via Esri)",
         url=STRUCTURES_URL,
@@ -751,33 +876,27 @@ def fetch_buildings(clip: BaseGeometry, epsg: int, ft_per_m: float) -> LayerResu
                      "Buildings built or removed since the source imagery date won't match.",
                      "Massing is a simple flat-roofed block at each building's estimated height."],
     )
-    try:
-        feats = query_features(STRUCTURES_URL, geometry=clip, in_sr=epsg, out_sr=epsg,
-                               out_fields="HEIGHT,OCC_CLS,PRIM_OCC,IMAGE_DATE,SOURCE,VAL_METHOD,OUTBLDG")
-        dates, assumed = set(), 0
-        for f in feats:
-            g = f.geom if f.geom.is_valid else make_valid(f.geom)
-            if g.is_empty or not clip.contains(g.representative_point()):
-                continue
-            h = f.props.get("HEIGHT")
-            est = isinstance(h, (int, float)) and 2 <= h <= 400
-            if not est:
-                assumed += 1
-            d = _ms_date(f.props.get("IMAGE_DATE"))
-            if d:
-                dates.add(d[:4])
-            r.features.append(Feature(g, {"height_ft": round((h if est else ASSUMED_HEIGHT_M) * ft_per_m, 1), "height_assumed": not est,
-                                          "use": f.props.get("OCC_CLS") or "", "type": f.props.get("PRIM_OCC") or "",
-                                          "image_date": d or "", "verified": f.props.get("VAL_METHOD") or ""}))
-        if dates:
-            r.vintage = "Source imagery " + (min(dates) if min(dates) == max(dates) else f"{min(dates)} to {max(dates)}")
-        if assumed:
-            r.notes.append(f"{assumed} building(s) had no height in the source and are drawn one story ({ASSUMED_HEIGHT_M * ft_per_m:.0f} ft) tall.")
-        r.status = "ok" if r.features else "empty"
-        if not r.features:
-            r.notes.append("No structures over 450 sq ft mapped in the extent.")
-    except Exception as e:  # noqa: BLE001
-        return _fail(r, e)
+    dates, assumed = set(), 0
+    for f in _usa_structures(clip, epsg):
+        if not f.geom.intersects(clip):
+            continue
+        hm = _usa_height_m(f.props)
+        if hm is None:
+            assumed += 1
+        d = _ms_date(f.props.get("IMAGE_DATE"))
+        if d:
+            dates.add(d[:4])
+        r.features.append(Feature(f.geom, {"height_ft": round((hm or ASSUMED_HEIGHT_M) * ft_per_m, 1), "height_assumed": hm is None,
+                                           "height_source": "usa" if hm else "assumed",
+                                           "use": f.props.get("OCC_CLS") or "", "type": f.props.get("PRIM_OCC") or "",
+                                           "image_date": d or "", "verified": f.props.get("VAL_METHOD") or ""}))
+    if dates:
+        r.vintage = "Source imagery " + (min(dates) if min(dates) == max(dates) else f"{min(dates)} to {max(dates)}")
+    if assumed:
+        r.notes.append(f"{assumed} building(s) had no height in the source and are drawn one story ({ASSUMED_HEIGHT_M * ft_per_m:.0f} ft) tall.")
+    r.status = "ok" if r.features else "empty"
+    if not r.features:
+        r.notes.append("No structures over 450 sq ft mapped in the extent.")
     r.retrieved_at = now_iso()
     return r
 

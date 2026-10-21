@@ -1,0 +1,16 @@
+state = "TN"
+county = "Hamilton"
+name = "Buildings (WWTA base layers)"
+publisher = "Hamilton County GIS (Water and Wastewater Treatment Authority base map)"
+url = "https://mapsdev.hamiltontn.gov/hcwa03/rest/services/WWTA_Base/MapServer/9"
+coverage = "Hamilton County, including Chattanooga (about 135,000 buildings)"
+method = "planimetric"
+vintage = "Mostly 2012 imagery (114,000) and 2016 imagery (12,000), with spot edits through 2022"
+terms = "Public; Hamilton County GIS service, no license or restriction stated"
+max_record_count = 1000
+notes = "Planimetric buildings (MAP_SCALE 100, IMAGERY_DATE per feature) from the county base map. HEIGHT holds roof elevation (about 700-750 ft in downtown Chattanooga), not building height, and there is no ground elevation, so it is not used; heights matched from USA Structures. Mostly 2012 vintage, so check recent construction. Served from the county's 'mapsdev' host."
+
+[verified]
+date = "2026-10-21"
+point = [-85.3097, 35.0456]
+point_result = "22 footprints in a 0.003-degree box in downtown Chattanooga (EPSG 2274, feet)"

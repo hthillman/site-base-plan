@@ -563,7 +563,8 @@ def sources() -> str:
         ("Wetlands", "U.S. Fish & Wildlife Service National Wetlands Inventory", "Public domain (USFWS)"),
         ("Road centerlines and names", "U.S. Census Bureau TIGER/Line via TIGERweb", "Public domain (U.S. Census Bureau)"),
         ("Topography backup (when 3DEP doesn't answer)", "AWS Terrain Tiles (Mapzen terrarium), built mostly from USGS NED", "Public; credit Mapzen and USGS"),
-        ("Existing buildings (footprints and heights)", "FEMA / Oak Ridge National Laboratory USA Structures, via Esri", "CC BY 4.0; credit FEMA, ORNL, Esri"),
+        ("Building outlines", "County and city planimetric layers where published (list on each state page); elsewhere Microsoft US Building Footprints, via Esri", "Per publisher; Microsoft data under ODbL 1.0"),
+        ("Building heights", "FEMA / Oak Ridge National Laboratory USA Structures, via Esri, where the local layer has none", "CC BY 4.0; credit FEMA, ORNL, Esri"),
         ("Aerial imagery", "Esri World Imagery (Vantor/Maxar, Earthstar Geographics, local contributors); USDA NAIP fallback",
          "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community. NAIP: public domain (USDA)"),
         ("Geocoding", "Esri World Geocoder, U.S. Census Geocoder, OpenStreetMap Nominatim", "Esri terms; Census public domain; © OpenStreetMap contributors (ODbL)"),
@@ -574,6 +575,12 @@ def sources() -> str:
 
     crows = "".join(f'<tr><td><a href="/parcels/{state_slug(k)}">{escape(STATES.get(k, k))}</a></td><td>{len(v)}: {escape(", ".join(sorted(c.county for c in v.values())))}</td></tr>'
                     for k, v in sorted(county_sources().items(), key=lambda kv: STATES.get(kv[0], kv[0])))
+    from .footprints import all_sources as building_sources
+
+    brows = "".join(
+        f"<tr><td>{escape(STATES.get(st, st) + (', ' + b.county if b.county else ' (statewide)'))}</td><td>{escape(b.publisher or b.name)}</td>"
+        f"<td>{escape(b.method or '')}</td><td>{'From the layer' if (b.height_field or b.top_elev_field) else ('From stories' if b.stories_field else 'Matched from USA Structures')}</td></tr>"
+        for st, b in sorted(building_sources(), key=lambda x: (STATES.get(x[0], x[0]), x[1].county)))
     src = all_sources()
     prows = "".join(
         f'<tr><td><a href="/parcels/{state_slug(k)}">{escape(STATES.get(k, k))}</a></td><td>{escape(s.publisher or s.name)}</td>' f"<td>{escape(s.coverage)}</td>"
@@ -587,6 +594,10 @@ services answered, when, and with what resolution and date.</p>
 <div class="tablewrap"><table><tr><th>Layer</th><th>Source</th><th>Terms / credit</th></tr>{nrows}</table></div>
 <h2>Statewide parcel layers</h2>
 <div class="tablewrap"><table><tr><th>State</th><th>Publisher</th><th>Coverage</th><th>Terms</th><th>Last verified</th></tr>{prows}</table></div>
+<h2>Building outlines</h2>
+<p>Where a county, city or state publishes surveyed or LiDAR-derived building outlines, Basesheet uses them. Everywhere else it uses
+Microsoft's machine-traced footprints, with heights from FEMA USA Structures. These are the local layers in use now:</p>
+<div class="tablewrap"><table><tr><th>Where</th><th>Publisher</th><th>Method</th><th>Heights</th></tr>{brows}</table></div>
 <h2>County parcel layers</h2>
 <p>In states without a free statewide layer, Basesheet uses county layers. Each state page lists every county source, its terms and when it was last verified.</p>
 <div class="tablewrap"><table><tr><th>State</th><th>Counties</th></tr>{crows}</table></div>

@@ -1,0 +1,17 @@
+state = "WA"
+county = "Clark"
+name = "Clark County Building Footprints"
+publisher = "Clark County WA GIS"
+url = "https://gis.clark.wa.gov/arcgisfed/rest/services/ClarkView_Public/BuildingFootprints/MapServer/0"
+coverage = "All of Clark County, WA (about 257,000 outlines, Vancouver and every other city plus unincorporated areas)"
+method = "planimetric"
+vintage = "County-maintained, republished regularly (PublishDt per record)"
+terms = "Public, no token; copyright text 'Clark County WA'. No license text on the service; county GIS disclaimer applies."
+max_record_count = 2000
+stories_field = "NumberStories"
+notes = "County building outlines kept with the Assessor data (source dw_Assessor.gdb). The service says they come from 'both manual and automated processes'; they are not a copy of USA Structures (low overlap match, more buildings). NumberStories is mostly empty, so heights are usually matched from USA Structures. Native SR EPSG 2927 (WA South ftUS HARN)."
+
+[verified]
+date = "2026-10-21"
+point = [-122.6720, 45.6290]
+point_result = "52 outlines within ~150 m in downtown Vancouver, returned in EPSG 2286 feet; NumberStories mostly null"

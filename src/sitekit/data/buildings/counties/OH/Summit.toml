@@ -1,0 +1,16 @@
+state = "OH"
+county = "Summit"
+name = "Summit County Building Footprints (2000)"
+publisher = "Summit County GIS"
+url = "https://scgis.summitoh.net/hosted/rest/services/Building_Footprints/MapServer/0"
+coverage = "All of Summit County, including Akron"
+method = "planimetric"
+vintage = "Collected in 2000 (not updated since, per the publisher)"
+terms = "For public use (Summit County item license)"
+max_record_count = 2000
+notes = "Old capture: buildings built or removed since 2000 will not match. The publisher does not state the capture method; outlines predate machine-traced datasets. No height field."
+
+[verified]
+date = "2026-10-21"
+point = [-81.5190, 41.0814]
+point_result = "Downtown Akron: 19 outlines in a ~250 m envelope, EPSG 3734 ft; no height field"

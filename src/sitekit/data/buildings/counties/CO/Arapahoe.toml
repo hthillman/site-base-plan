@@ -1,0 +1,18 @@
+state = "CO"
+county = "Arapahoe"
+name = "Arapahoe County Roof Prints"
+publisher = "Arapahoe County GIS"
+url = "https://gis.arapahoegov.com/arcgis/rest/services/CountyFeatureService/FeatureServer/34"
+coverage = "Arapahoe County within the DRCOG Denver-region capture area (Aurora, Centennial, Englewood, Littleton and the urbanized unincorporated county; about 400,000 roof prints). The rural eastern plains may be thin"
+method = "planimetric"
+vintage = "DRCOG Denver Regional Aerial Photography Project roofprints, first captured 2014 and updated every two years (Update_Status A/M/NC marks changes)"
+terms = "Public, no token; copyright text 'Arapahoe County GIS'. The county publishes this service for download (it feeds Esri Community Maps); no license text on the service. Data originates from DRCOG, whose copies carry an as-is, no-warranty notice; DRCOG's full catalog terms page sits behind a browser challenge and was not read."
+max_record_count = 5000
+height_field = "Bldg_Height"
+height_units = "ft"
+notes = "Stereocompiled roofprints (eave lines, 3D capture): buildings 48 sq ft and up and over 5 ft tall; multi-level commercial roofs are separate records sharing Building_ID. Bldg_Height is height in feet (highest point for pitched roofs); Ground_Elevation is in feet. Native SR EPSG 2232 (CO Central ftUS)."
+
+[verified]
+date = "2026-10-21"
+point = [-104.8800, 39.6100]
+point_result = "19 roof prints within ~150 m in Centennial/Aurora, returned in EPSG 2232 feet; Bldg_Height present"

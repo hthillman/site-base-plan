@@ -1,0 +1,19 @@
+state = "NY"
+county = "New York"
+name = "NYC Building Footprints"
+publisher = "NYC Office of Technology and Innovation (OTI) GIS"
+url = "https://services6.arcgis.com/yG5s3afENB5iO9fj/arcgis/rest/services/BUILDING_view/FeatureServer/0"
+coverage = "All of Manhattan (citywide layer covering the five boroughs)"
+method = "planimetric"
+vintage = "Photogrammetric basemap capture, maintained with ongoing edits (LAST_EDITED_DATE per building)"
+terms = "Public; NYC Open Data under the NYC.gov Terms of Use (as is, no warranty)"
+max_record_count = 2000
+height_field = "HEIGHT_ROOF"
+height_units = "ft"
+filter = "FEATURE_CODE IN (2100, 5100, 5110)"
+notes = "HEIGHT_ROOF is roof height above ground in feet; GROUND_ELEVATION (ft) is also available. The filter keeps buildings (2100), buildings under construction (5100) and garages (5110), and drops skybridges, canopies and other minor structures. Hosted on NYC's open data ArcGIS account (maps.nyc.data). Metadata: github.com/CityOfNewYork/nyc-geo-metadata (Metadata_BuildingFootprints.md)."
+
+[verified]
+date = "2026-10-21"
+point = [-73.9857, 40.7484]
+point_result = "41 outlines in a ~200 x 180 m box around the Empire State Building, EPSG 2263 feet; HEIGHT_ROOF on all"

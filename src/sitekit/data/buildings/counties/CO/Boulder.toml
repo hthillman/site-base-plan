@@ -1,0 +1,19 @@
+state = "CO"
+county = "Boulder"
+name = "City of Boulder Building Footprints"
+publisher = "City of Boulder Public Works GIS"
+url = "https://gis.bouldercolorado.gov/ags_svr3/rest/services/pw/BuildingFootprints/MapServer/0"
+coverage = "City of Boulder (about a third of Boulder County's population). Boulder County's own layer covers only unincorporated areas, so Longmont, Louisville, Lafayette and the rest fall back to USA Structures"
+method = "planimetric"
+vintage = "DRCOG 2016 stereocompiled roofprints, gaps filled from older city footprints; city edits since (BUILDYEAR, LAST_EDITED_DATE per record)"
+terms = "CC0 1.0 public domain dedication (per the city's open data item). Public, no token."
+max_record_count = 2000
+height_field = "BLDGHEIGHT"
+height_units = "ft"
+stories_field = "FLOORCOUNT"
+notes = "Built from DRCOG roofprints (DRCOGID kept; a building drawn as several polygons shares it) plus older city footprints. BLDGHEIGHT is height in feet; GROUNDELEV is ground elevation in feet; CITYLIMIT says whether the building is inside city limits. Native SR Web Mercator; reprojects on outSR."
+
+[verified]
+date = "2026-10-21"
+point = [-105.2790, 40.0170]
+point_result = "73 outlines within ~150 m in downtown Boulder, returned in EPSG 2231 feet; BLDGHEIGHT present"

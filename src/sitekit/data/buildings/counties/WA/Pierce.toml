@@ -1,0 +1,18 @@
+state = "WA"
+county = "Pierce"
+name = "City of Tacoma Building Footprints 2024"
+publisher = "City of Tacoma (Environmental Services / Open Data)"
+url = "https://services3.arcgis.com/SCwJH1pD8WSn5T5y/arcgis/rest/services/Tacoma_2024_BuildingFootprints/FeatureServer/0"
+coverage = "City of Tacoma 2024 LiDAR project area (about 43,600 acres; Tacoma is roughly a quarter of Pierce County's population); Pierce County publishes no public building layer, so elsewhere falls back to USA Structures"
+method = "lidar"
+vintage = "City of Tacoma 2024 LiDAR (NV5)"
+terms = "Public, no token. City of Tacoma Open Data disclaimer: as-is, use at own risk; apps using the data must show the city's stated disclaimer text (data modified from its original source, the City of Tacoma, no warranty); the city may require ending distribution at any time. No indemnity clause."
+max_record_count = 1000
+height_field = "average_z"
+height_units = "ft"
+notes = "3D building footprints produced from the 2024 city LiDAR. average_z reads as average roof height above grade in US feet (residential 7-12 ft, downtown towers 70+ ft) and lag as lowest adjacent grade elevation; the item does not define them, so treat heights as approximate. Displaying this layer should carry the Tacoma disclaimer text quoted in terms. Native SR EPSG 2927 (WA South ftUS HARN)."
+
+[verified]
+date = "2026-10-21"
+point = [-122.4400, 47.2530]
+point_result = "Downtown Tacoma outlines returned in EPSG 2286 feet; average_z present"

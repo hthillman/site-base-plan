@@ -1,0 +1,16 @@
+state = "CO"
+county = "Adams"
+name = "Adams County Building Footprints"
+publisher = "Adams County Assessor (Adams County GIS)"
+url = "https://services3.arcgis.com/4PNQOtAivErR7nbT/arcgis/rest/services/Building_Footprints/FeatureServer/0"
+coverage = "All of Adams County (about 198,000 outlines: Thornton, Westminster, Commerce City, Brighton, Northglenn and unincorporated)"
+method = "planimetric"
+vintage = "Maintained by the Assessor's Department, updated weekly"
+terms = "Creative Commons Attribution 4.0 (attribute Adams County Colorado Government); county disclaimer: no warranty, not responsible for errors. Public, no token."
+max_record_count = 2000
+notes = "Assessor-maintained building outlines tied to parcels (PIN, PARCELNB, Bldg_ID, PropertyType). The publisher does not state the capture method; they are not a copy of USA Structures (low overlap match, more buildings). No height field; heights matched from USA Structures. Large outFields=* queries can hit a 504; the tool requests only the fields it needs. Native SR Web Mercator; reprojects on outSR."
+
+[verified]
+date = "2026-10-21"
+point = [-104.9720, 39.8680]
+point_result = "86 outlines in a ~1000 ft box in Thornton, returned in EPSG 2232 feet; no height field"

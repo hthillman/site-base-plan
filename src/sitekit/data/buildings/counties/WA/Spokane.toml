@@ -1,0 +1,18 @@
+state = "WA"
+county = "Spokane"
+name = "City of Spokane Building Footprints"
+publisher = "City of Spokane GIS"
+url = "https://services.arcgis.com/3PDwyTturHqnGCu0/arcgis/rest/services/Building/FeatureServer/1"
+coverage = "City of Spokane only (about 135,000 outlines; roughly 40% of Spokane County's population). The county's own BuildingFootprints service is a third-party (Microsoft-style) dataset and is not used, so Spokane Valley and the rest fall back to USA Structures"
+method = "planimetric"
+vintage = "Digitized from high-resolution orthophotos; PhotoYear per building (e.g. 2018), UpdatedDT per edit"
+terms = "Public, no token; copyright text 'City of Spokane GIS'. Item text: 'This is not a legal document', compiled from various sources, not for locating facilities relative to property lines. No license or indemnity text."
+max_record_count = 2000
+height_field = "BldgHeight"
+height_units = "ft"
+notes = "Layer id 1 (there is no layer 0). BldgHeight is building height in feet; BaseElev is ground elevation in feet. FeatureCode gives building type. Native SR Web Mercator; reprojects on outSR."
+
+[verified]
+date = "2026-10-21"
+point = [-117.4230, 47.6580]
+point_result = "44 outlines within ~150 m in downtown Spokane, returned in EPSG 2285 (WA North ftUS) feet; BldgHeight present"

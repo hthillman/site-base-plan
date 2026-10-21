@@ -1,0 +1,16 @@
+state = "OK"
+county = "Oklahoma"
+name = "Building Footprints (Infrastructure Planimetrics)"
+publisher = "City of Oklahoma City, Information Technology Department"
+url = "https://utility.arcgis.com/usrsvcs/servers/2d4cd6c3279f48f394329f3367069c61/rest/services/OpenData/Infrastructure_Planimetrics/FeatureServer/2"
+coverage = "City of Oklahoma City only (most of Oklahoma County's urban area, plus OKC's parts of Canadian and Cleveland counties); Edmond, Midwest City, Del City and other suburbs fall back to nationwide layers"
+method = "planimetric"
+vintage = "Aerial planimetric data collected 2020; updated every 4 to 6 years"
+terms = "Public; City of Oklahoma City Open Data Policy"
+max_record_count = 10000
+notes = "About 466,000 buildings. ELEV is an elevation above sea level (US ft) without a matching ground value, so it isn't used; heights matched from USA Structures. URL is the city's ArcGIS Online proxy to its OpenData service."
+
+[verified]
+date = "2026-10-21"
+point = [-97.5164, 35.4676]
+point_result = "5 large downtown OKC outlines within 500 ft; heights matched from USA Structures"

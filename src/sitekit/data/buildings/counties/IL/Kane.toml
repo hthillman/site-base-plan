@@ -1,0 +1,16 @@
+state = "IL"
+county = "Kane"
+name = "Kane County Building Footprints"
+publisher = "Kane County GIS"
+url = "https://services1.arcgis.com/oRKmdBXD6EbdmVgJ/arcgis/rest/services/KaneCo_IL_BuildingFootprints/FeatureServer/0"
+coverage = "All of Kane County"
+method = "planimetric"
+vintage = "Traced from aerial photos over the years; maintained by the county (edits through 2025)"
+terms = "Public; Kane County GIS, provided as is for informational purposes, no-warranty/no-liability disclaimer"
+max_record_count = 2000
+notes = "County-digitized outlines from aerial photography. FrstFlrElev is a first-floor elevation from the 2017 lidar DSM, not a height, so heights come from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-88.3148, 41.7580]
+point_result = "Downtown Aurora: 21 outlines in a ~250 m envelope, EPSG 3435 ft; no height field"

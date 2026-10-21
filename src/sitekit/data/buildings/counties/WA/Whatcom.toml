@@ -1,0 +1,17 @@
+state = "WA"
+county = "Whatcom"
+name = "City of Bellingham Buildings"
+publisher = "City of Bellingham GIS"
+url = "https://maps.cob.org/arcgis4/rest/services/Maps/Grp_Places/MapServer/12"
+coverage = "City of Bellingham (the county's main urban area) plus a scattering of buildings just outside it; Whatcom County publishes no public building layer, so elsewhere in the county (Lynden, Ferndale, Blaine) this layer is nearly empty and the tool falls back to USA Structures"
+method = "planimetric"
+vintage = "City-maintained outlines; YEAR per building, mostly 2019 with 2016-2024 edits"
+terms = "Public, no token; copyright text 'City of Bellingham'. City website disclaimer: no warranty of accuracy, not liable for reliance. No license or indemnity text."
+max_record_count = 1000
+stories_field = "NUM_FLOORS"
+notes = "City-digitized outlines (the publisher does not state the capture method; YEAR is the edit/photo year per building). No height field; heights come from NUM_FLOORS (half stories like 1.5) at about 11 ft per floor. Native SR EPSG 2285 (WA North ftUS). The service description warns the city is migrating its ArcGIS Server and these legacy services may move; arcgis3 maps_StatePlane/WhatcomBaseMap_StatePlane/MapServer/18 is a near-identical copy if this URL goes away."
+
+[verified]
+date = "2026-10-21"
+point = [-122.505, 48.770]
+point_result = "320 outlines in a ~650 m box around 3102 Birchwood Ave; returned in EPSG 2285 feet; NUM_FLOORS on most"

@@ -1,0 +1,18 @@
+state = "CO"
+county = "Denver"
+name = "DRCOG Building Roofprints 2024"
+publisher = "Denver Regional Council of Governments (DRCOG Regional Data Catalog)"
+url = "https://gis.drcog.org/server/rest/services/RDC/PLANIMETRICS_2024_BUILDING_ROOFPRINTS_TOTAL/MapServer/0"
+coverage = "All of the City and County of Denver"
+method = "planimetric"
+vintage = "Stereocompiled from DRCOG 2024 Denver Regional Aerial Photography Project imagery; first captured 2014, updated 2016, 2018, 2020, 2022 and 2024"
+terms = "CC BY 3.0 per the DRCOG Regional Data Catalog terms (credit 'DRCOG Regional Data Catalog' and the license); the catalog also points to the drcog.org website terms of use, which sit behind a browser challenge and were not read. As-is, no warranty. Public, no token."
+max_record_count = 5000
+height_field = "Bldg_Height"
+height_units = "ft"
+notes = "Used for Denver because the City and County of Denver's own copy of these roofprints (ODC_PROP_BUILDINGOUTLINES_A) is published under terms requiring users to indemnify the city. Regional layer covering the DRCOG capture area (no county field, so the same URL can serve several counties). Roofprints are captured at the eaves in 3D: buildings 48 sq ft and up and over 5 ft tall; multi-level commercial roofs are separate records sharing Building_ID. Bldg_Height is height in feet (highest point for pitched roofs); Ground_Elevation is in feet. The DRCOG server was briefly unresponsive (60 s+ timeouts) during testing, then recovered."
+
+[verified]
+date = "2026-10-21"
+point = [-104.9903, 39.7420]
+point_result = "379 roofprints in a ~900 m box downtown; heights in feet"

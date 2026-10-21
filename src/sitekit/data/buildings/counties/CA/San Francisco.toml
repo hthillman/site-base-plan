@@ -1,0 +1,18 @@
+state = "CA"
+county = "San Francisco"
+name = "San Francisco Building Footprints"
+publisher = "City and County of San Francisco (DataSF / SF GIS)"
+url = "https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Building_Footprints_from_DataSF_pulled_weekly_/FeatureServer/0"
+coverage = "All of San Francisco (city and county)"
+method = "planimetric"
+vintage = "Outlines collapsed from a 2010 Pictometry 3D building model; heights from 2010 LiDAR"
+terms = "Open Data Commons Public Domain Dedication and License (PDDL 1.0). Public, no token."
+max_record_count = 2000
+height_field = "hgt_median_m"
+height_units = "m"
+notes = "About 177,000 footprints split along likely firewalls using parcel lines, so row buildings come back as separate structures. hgt_median_m is the median LiDAR height above ground in metres; peak_1st_m and gnd_min_m are absolute elevations, p2010_zmaxn88ft/p2010_zminn88ft are NAVD88 feet. mblr is the block-lot (APN). SF GIS's weekly ArcGIS Online mirror of the DataSF dataset."
+
+[verified]
+date = "2026-10-21"
+point = [-122.4010, 37.7890]
+point_result = "64 footprints within ~150 m in SoMa/FiDi, returned in EPSG 2227 feet; hgt_median_m present"

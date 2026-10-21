@@ -1,0 +1,16 @@
+state = "NC"
+county = "Mecklenburg"
+name = "Building Footprints"
+publisher = "Mecklenburg County GIS"
+url = "https://meckgis.mecklenburgcountync.gov/server/rest/services/BuildingFootprints/FeatureServer/0"
+coverage = "All of Mecklenburg County (about 451,000 buildings), including Charlotte and the towns"
+method = "planimetric"
+vintage = "County capture from 2002 onward, updated yearly (sourceyear 2002-2026)"
+terms = "Public; Mecklenburg County GIS, no-warranty disclaimer"
+max_record_count = 2000
+notes = "Building outlines compiled by the county from its photogrammetry and yearly imagery updates (source: Mecklenburg County, GIS, EDNC, Nearmap, Pictometry, Charlotte Storm Water). A 'height' field exists but is 0 on nearly all records (about 1,100 filled), so it is not used; heights matched from USA Structures. layer = RESIDENTIAL or COMMERCIAL."
+
+[verified]
+date = "2026-10-21"
+point = [-80.8431, 35.2271]
+point_result = "14 footprints in a 0.003-degree box in uptown Charlotte (EPSG 2264, feet)"

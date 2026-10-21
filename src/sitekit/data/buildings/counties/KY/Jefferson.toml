@@ -1,0 +1,18 @@
+state = "KY"
+county = "Jefferson"
+name = "Jefferson County KY Buildings with Building Heights"
+publisher = "LOJIC (Louisville/Jefferson County Information Consortium)"
+url = "https://gis.lojic.org/maps/rest/services/LojicSolutions/OpenDataBase/MapServer/8"
+coverage = "All of Louisville Metro / Jefferson County (about 458,000 buildings)"
+method = "planimetric"
+vintage = "Digitized by NV5 in spring 2025 from spring 2024 imagery"
+terms = "Public; LOJIC open data, copyright LOJIC participants, no-warranty limitation of liability (no license or redistribution restriction stated)"
+max_record_count = 2000
+height_field = "PTD.building_heights.MEAN_HEIGHT_FEET"
+height_units = "ft"
+notes = "Planimetric rooflines (buildings at least 10 x 10 ft) joined to a LiDAR-derived heights table; MEAN_HEIGHT_FEET is filled on about 406,000 of 458,000. MAX_HEIGHT_FEET also exists. The layer does not support pagination, which is fine for site-sized queries."
+
+[verified]
+date = "2026-10-21"
+point = [-85.7585, 38.2527]
+point_result = "34 rooflines in a 0.003-degree box in downtown Louisville (EPSG 2246, feet); MEAN_HEIGHT_FEET present"

@@ -1,0 +1,16 @@
+state = "KS"
+county = "Sedgwick"
+name = "Building Footprints"
+publisher = "Sedgwick County GIS (Data Development team)"
+url = "https://gismaps.sedgwickcounty.org/arcgis/rest/services/Map/Base_Streets_Cached_SP/MapServer/7"
+coverage = "All of Sedgwick County (about 335,850 buildings)"
+method = "planimetric"
+vintage = "Photogrammetric capture (DATE_OF_PHOTOGRAPHY per building, mostly 2011); county lists the layer as static"
+terms = "Public; free download from Sedgwick County GIS data layers page, no license or restrictions stated"
+max_record_count = 1000
+notes = "No height field; heights matched from USA Structures. Static layer, so recent construction may be missing."
+
+[verified]
+date = "2026-10-21"
+point = [-97.3375, 37.6872]
+point_result = "21 outlines within 500 ft in downtown Wichita; heights matched from USA Structures"

@@ -1,0 +1,17 @@
+state = "NY"
+county = "Suffolk"
+name = "Suffolk County Building Footprint Polygon"
+publisher = "Suffolk County Department of Information Technology (GIS)"
+url = "https://gis.suffolkcountyny.gov/server/rest/services/LocalGovernmentSQLData/BuildingFootprintPolygon/FeatureServer/0"
+coverage = "All of Suffolk County"
+method = "planimetric"
+vintage = "Not stated; publisher says 'from an aerial fly over', with STATUS edits for new and demolished buildings"
+terms = "CC BY (attribution), per the Suffolk County open data item"
+max_record_count = 2000
+filter = "STATUS IS NULL OR STATUS NOT IN ('Demolished', 'DEMOLISHED')"
+notes = "About 913,000 outlines, county-captured from aerial imagery (not a Microsoft or USA Structures copy: median overlap with USA Structures at the test block was 0.45 IoU, with more and more detailed buildings). The filter drops buildings marked demolished. No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-73.0154, 40.7657]
+point_result = "10 outlines in a ~200 x 180 m box in downtown Patchogue, EPSG 2263 feet"

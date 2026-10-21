@@ -1,0 +1,17 @@
+state = "NY"
+county = "Nassau"
+name = "NYS Building Footprints (Nassau County planimetrics)"
+publisher = "NYS ITS Geospatial Services (NYS GIS Program Office)"
+url = "https://services6.arcgis.com/EbVsqZ18sv1kVJ3k/arcgis/rest/services/NYS_Building_Footprints/FeatureServer/2"
+coverage = "All of Nassau County"
+method = "planimetric"
+vintage = "Nassau County Office of Information Technology footprints, 2013 (compiled by NYSERDA)"
+terms = "Public; NYS ITS: as is, no warranty, user assumes all risk"
+max_record_count = 1000
+filter = ""  # keep Microsoft-traced outlines too: dropping them leaves buildings missing with no fallback
+notes = "Statewide NYS layer; in Nassau 99.6% of outlines come from the county's own 2013 footprints (Source = 'Nassau County Office of Information Technology'). The filter drops the ~2,200 Microsoft ML footprints NYS added where the county data had gaps, so buildings built after 2013 may be missing. The county's own GIS server requires a token. No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-73.6407, 40.7062]
+point_result = "97 outlines in a ~200 x 180 m box in Hempstead village, EPSG 2263 feet"

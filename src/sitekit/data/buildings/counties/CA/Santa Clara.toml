@@ -1,0 +1,20 @@
+state = "CA"
+county = "Santa Clara"
+name = "City of San Jose Buildings"
+publisher = "City of San Jose Public Works (Enterprise GIS)"
+url = "https://geo.sanjoseca.gov/server/rest/services/DPW/DPW_BasemapService/MapServer/21"
+coverage = "City of San Jose only (about half of Santa Clara County's population); the county publishes no building layer, so other cities fall back to USA Structures"
+method = "lidar"
+vintage = "Roofline outlines digitized from the city's 2006 LiDAR survey; LASTUPDATE per building (Public Works maintains the layer)"
+terms = "Public, no token; copyright text 'City of San Jose - Public Works'. City GIS disclaimer: as-is, no warranty, use at your own risk. No license or indemnity text."
+max_record_count = 20000
+height_field = "BUILDINGHEIGHT"
+height_units = "ft"
+base_elev_field = "BASEELEVATION"
+top_elev_field = "TOTALHEIGHT"
+notes = "Roofline outlines (not wall footprints) from the 2006 LiDAR survey, per the description on the DOT copy of this layer. BUILDINGHEIGHT is height in feet; BASEELEVATION is ground elevation and TOTALHEIGHT is roof elevation (ft). Public Works basemap editing service, not on the open data portal; a static copy is DOT/DOT_Basemap_InfrastructureMaintenance/MapServer/13. Native SR EPSG 2227 (CA zone 3 ftUS)."
+
+[verified]
+date = "2026-10-21"
+point = [-121.8880, 37.3360]
+point_result = "19 outlines within ~150 m in downtown San Jose, returned in EPSG 2227 feet; BUILDINGHEIGHT present"

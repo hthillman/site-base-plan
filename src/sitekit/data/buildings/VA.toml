@@ -1,0 +1,15 @@
+state = "VA"
+name = "Virginia Building Footprints"
+publisher = "Virginia Geographic Information Network (VGIN), VDEM"
+url = "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VA_Building_Footprints/FeatureServer/0"
+coverage = "Statewide aggregate of locality-submitted footprints (about 4.5 million); most but not all localities"
+method = "planimetric"
+vintage = "Locality data call, published quarterly (LASTUPDATE per feature)"
+terms = "Public; VGIN Virginia Base Data, no-warranty disclaimer"
+max_record_count = 2000
+notes = "Footprints produced by Virginia's local governments (DATASOURCENAME = 'Jurisdiction' on all records) by digitizing VBMP orthophotography or subdivision plats, aggregated by VGIN. BLDGHEIGHT and NUMSTORIES exist but are empty for the localities checked, so heights are matched from USA Structures. Used wherever a county or city file doesn't apply (e.g. Fairfax, Loudoun, Virginia Beach, Richmond)."
+
+[verified]
+date = "2026-10-21"
+point = [-77.436, 37.5407]
+point_result = "64 footprints in a 0.003-degree box in downtown Richmond (Richmond City records; EPSG 2284, feet)"

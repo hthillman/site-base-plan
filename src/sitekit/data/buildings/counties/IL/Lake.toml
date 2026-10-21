@@ -1,0 +1,16 @@
+state = "IL"
+county = "Lake"
+name = "Lake County Building Outlines (planimetrics)"
+publisher = "Lake County, Illinois GIS Division"
+url = "https://services3.arcgis.com/HESxeTbDliKKvec2/arcgis/rest/services/LakeCounty_Planimetrics/FeatureServer/1"
+coverage = "All of Lake County, Illinois"
+method = "planimetric"
+vintage = "Traced from 2002 aerials, updated from successive flights through 2017-2018"
+terms = "Lake County GIS Terms of Use: free for personal or business use, no copyright held; as-is, no-liability disclaimer; not intended as a base for engineering design"
+max_record_count = 2000
+notes = "Roof outlines traced from aerial photography to 1:1200 NMAS; enclosed structures over 100 sq ft. Touching structures may be one polygon (e.g. a mall). No height field."
+
+[verified]
+date = "2026-10-21"
+point = [-87.8448, 42.3636]
+point_result = "Downtown Waukegan: 97 outlines in a ~250 m envelope, EPSG 3435 ft; no height field"

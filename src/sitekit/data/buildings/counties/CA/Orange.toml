@@ -1,0 +1,18 @@
+state = "CA"
+county = "Orange"
+name = "Orange County Building Footprints"
+publisher = "OC Public Works / OC Survey (ocgis.com)"
+url = "https://www.ocgis.com/arcpub/rest/services/Map_Layers/Building_Footprints/FeatureServer/0"
+coverage = "All of Orange County (every city plus unincorporated areas)"
+method = "lidar"
+vintage = "Derived from 2011 USGS LiDAR"
+terms = "CC0 (per the OC open data item). Public, no token."
+max_record_count = 1000
+height_field = "Height"
+height_units = "ft"
+notes = "Outlines and heights derived from 2011 USGS LiDAR. Height is object height above ground in US feet; ABS_HT is absolute roof elevation. Address/City/Zipcode attached. Buildings built after 2011 are missing; the county's newer 2021 layer was not used because it merges in Microsoft footprints. Same ocgis.com server as the OC parcel source."
+
+[verified]
+date = "2026-10-21"
+point = [-117.8670, 33.7490]
+point_result = "27 footprints within ~150 m in downtown Santa Ana, returned in EPSG 2230 feet; Height present"

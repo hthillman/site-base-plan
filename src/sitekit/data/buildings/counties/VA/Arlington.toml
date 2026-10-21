@@ -1,0 +1,19 @@
+state = "VA"
+county = "Arlington"
+name = "Building Height Polygons"
+publisher = "Arlington County Department of Environmental Services (GIS)"
+url = "https://arlgis.arlingtonva.us/arcgis/rest/services/Open_Data/od_Building_Height_Polygons/FeatureServer/0"
+coverage = "All of Arlington County"
+method = "planimetric"
+vintage = "Created 2023-11-27 from planimetric updates"
+terms = "Public; Arlington County open data, data disclaimer"
+max_record_count = 2000
+height_field = "Est_Building_Height_ft"
+height_units = "ft"
+filter = "TYPE <> 'Canopy'"
+notes = "Building outlines captured primarily from planimetric updates, split into parts that each carry a roof elevation (ELEVATION_ft), an estimated ground elevation and an estimated building height in feet, so a tower and its podium come back as separate parts. TYPE is Residential, Commercial or Canopy; canopies are filtered out."
+
+[verified]
+date = "2026-10-21"
+point = [-77.095, 38.887]
+point_result = "Building parts with Est_Building_Height_ft around Clarendon (EPSG 2283, feet)"

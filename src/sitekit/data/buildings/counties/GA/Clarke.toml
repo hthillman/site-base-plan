@@ -1,0 +1,17 @@
+state = "GA"
+county = "Clarke"
+name = "Building Footprints"
+publisher = "Athens-Clarke County Unified Government GIS"
+url = "https://enigma.accgov.com/server/rest/services/ACC_Buildings/FeatureServer/0"
+coverage = "All of Athens-Clarke County (consolidated city-county)"
+method = "planimetric"
+vintage = "2008 planimetric capture, updated from plats, permits and 2013-2025 aerials"
+terms = "CC BY 4.0; Athens-Clarke County"
+max_record_count = 2000
+filter = "(Type IS NULL OR LOWER(Type) NOT IN ('deck','patio','porch','driveway','ramp','walkway','swimming pool','pool','foundation','other paved')) AND (Status IS NULL OR Status <> 'Potential')"
+notes = "52,500 of 60,000 features are '2008 planimetric'; the rest are edits from plats, zoning permits and later aerials (Source field). The filter drops decks, patios, porches and other flatwork, and proposed ('Potential') buildings; sheds, garages and mobile homes are kept. No height field."
+
+[verified]
+date = "2026-10-21"
+point = [-83.377, 33.958]
+point_result = "27 footprints in a 0.003-degree box in downtown Athens (EPSG 2240, feet)"

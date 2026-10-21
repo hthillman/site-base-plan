@@ -1,0 +1,17 @@
+state = "NC"
+county = "Forsyth"
+name = "Structures"
+publisher = "City of Winston-Salem / Forsyth County GIS"
+url = "https://arcgis2.cityofws.org/arcgissmwa02/rest/services/OICv2/Property2/MapServer/2"
+coverage = "All of Forsyth County (about 215,000 structures), including Winston-Salem and Kernersville"
+method = "planimetric"
+vintage = "Current city-county layer"
+terms = "Public; City of Winston-Salem GIS service, no license or restriction stated"
+max_record_count = 1000
+filter = "FEATURE IS NULL OR FEATURE <> 'CANOPY'"
+notes = "Joint city-county building footprints ('Building footprints for Forsyth County, NC'). The filter drops canopies. ELEVATION is an integer elevation (about 950-1,180 here) with no matching base, so it isn't used as a height; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-80.2442, 36.0999]
+point_result = "40 footprints in a 0.003-degree box in downtown Winston-Salem (EPSG 2264, feet); 56 in Kernersville"

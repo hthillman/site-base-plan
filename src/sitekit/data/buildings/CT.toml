@@ -1,0 +1,15 @@
+state = "CT"
+name = "Connecticut 2D Building Footprints (2023 LiDAR)"
+publisher = "State of Connecticut GIS Office"
+url = "https://services3.arcgis.com/3FL1kr7L4LvwA2Kb/arcgis/rest/services/2D_Building_Footprints/FeatureServer/0"
+coverage = "All of Connecticut (buildings over 100 sq ft)"
+method = "lidar"
+vintage = "Spring 2023 statewide LiDAR flight"
+terms = "CC0 (State of Connecticut GIS Office); produced by Dewberry for the CT GIS Services contract"
+max_record_count = 2000
+notes = "Extracted from the 2023 LiDAR by automated methods and checked against intensity imagery but not hand-edited, so expect some errors where trees overhang roofs and where buildings touch (urban centres). No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-72.6734, 41.7658]
+point_result = "11 outlines in a ~200 x 180 m box in downtown Hartford, EPSG 2234 feet"

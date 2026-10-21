@@ -1,0 +1,15 @@
+state = "NC"
+name = "North Carolina Composite Building Footprints"
+publisher = "NC Department of Public Safety, Emergency Management (NCEM)"
+url = "https://services1.arcgis.com/YBWrN5qiESVpqi92/arcgis/rest/services/North_Carolina_Composite_Building_Footprints/FeatureServer/0"
+coverage = "Statewide (all 100 counties, about 5.4 million footprints); primary structures generally over 800 sq ft"
+method = "imagery-traced"
+vintage = "Heads-up digitized from the 2020-2023 Statewide Orthoimagery cycles, QC'd 2022-2025"
+terms = "Public; NCEM, no license or restriction stated"
+max_record_count = 2000
+notes = "Hand-digitized (heads-up) rooflines from statewide orthoimagery, merged by region and imagery year. Generally limited to primary structures over 800 sq ft; detached garages, sheds and other outbuildings may be missing. No height field; heights matched from USA Structures. Used wherever a county file doesn't apply."
+
+[verified]
+date = "2026-10-21"
+point = [-78.6382, 35.7796]
+point_result = "Statewide layer; tested in downtown Raleigh (Wake County has no county file); 32 footprints in a 0.003-degree box in uptown Charlotte (EPSG 2264, feet)"

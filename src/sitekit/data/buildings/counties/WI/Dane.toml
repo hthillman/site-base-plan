@@ -1,0 +1,16 @@
+state = "WI"
+county = "Dane"
+name = "Dane County Building Footprints"
+publisher = "Dane County Land Information Office"
+url = "https://dcimapapps.countyofdane.com/arcgissrv/rest/services/Buildings/MapServer/2"
+coverage = "All of Dane County, including Madison (compiled from Dane County, Madison, Monona, Stoughton and Sun Prairie)"
+method = "planimetric"
+vintage = "Annual county editions (2017-2024); current service"
+terms = "Public; Dane County LIO disclaimer (no liability for accuracy or uses other than intended). Credit: Dane County LIO, City of Madison, Ayres Associates"
+max_record_count = 2000
+notes = "Eave and foundation outlines compiled from county and city planimetric mapping; structures the size of a single-car garage or larger. Capture method inferred from the eave/foundation coding and the photogrammetry credit; the service metadata is not published. No height field."
+
+[verified]
+date = "2026-10-21"
+point = [-89.3838, 43.0747]
+point_result = "Capitol Square, Madison: 10 outlines in a ~250 m envelope, EPSG 6609 ft; no height field"

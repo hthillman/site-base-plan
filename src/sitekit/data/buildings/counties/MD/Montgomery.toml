@@ -1,0 +1,16 @@
+state = "MD"
+county = "Montgomery"
+name = "Montgomery County Buildings (planimetrics)"
+publisher = "Montgomery County Planning Department (M-NCPPC) with Montgomery County ITI"
+url = "https://montgomeryplans.org/server/rest/services/Overlays/Buildings/FeatureServer/0"
+coverage = "All of Montgomery County, MD"
+method = "planimetric"
+vintage = "Planimetric capture for 1:1200 mapping, maintained by the Planning Department (3D update 2023)"
+terms = "Open: copy, modify, distribute and analyse, including commercially, with attribution to the Montgomery County Planning Department; no warranty (license on the Department's Buildings 3D item)"
+max_record_count = 2000
+notes = "Includes building ruins, buildings under construction and parking garages; overhead rooftops/canopies carry a separate FEATURE_CODE (2201 is the ordinary building code, ~98% of features). The publisher describes height-in-feet attributes, but this public layer does not expose them (the 3D height data is a multipatch for selected plan areas only), so heights are matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-77.0282, 38.9967]
+point_result = "9 outlines (large downtown blocks) in a ~200 x 180 m box in downtown Silver Spring, EPSG 2248 feet"

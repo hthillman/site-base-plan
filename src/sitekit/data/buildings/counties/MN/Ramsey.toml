@@ -1,0 +1,17 @@
+state = "MN"
+county = "Ramsey"
+name = "Ramsey County Building Footprints"
+publisher = "Ramsey County GIS"
+url = "https://gis.ramseycountymn.gov/server/rest/services/Structure/STRUC_Building_ViewOnly/FeatureServer/0"
+coverage = "All of Ramsey County, including Saint Paul"
+method = "planimetric"
+vintage = "Reviewed and updated from 2024 aerial photography (stereo)"
+terms = "Public; no use constraints, acknowledgment of the publisher appreciated; as-is, no-liability disclaimer"
+max_record_count = 2000
+notes = "Stereo-compiled structures including garages and outbuildings. Patio decks, skyways and canopies are excluded by the filter. No height field."
+filter = "FeatureCode IS NULL OR FeatureCode NOT IN ('PD','SK','CA')"
+
+[verified]
+date = "2026-10-21"
+point = [-93.0900, 44.9500]
+point_result = "Downtown Saint Paul: 19 outlines in a ~250 m envelope, EPSG 6505 ft; no height field"

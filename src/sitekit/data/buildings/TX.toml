@@ -1,0 +1,17 @@
+state = "TX"
+name = "TxGIO StratMap Building Footprints (lidar-derived)"
+publisher = "Texas Geographic Information Office (TxGIO)"
+url = "https://feature.geographic.texas.gov/arcgis/rest/services/Buidlings/TxGIO_Building_Footprints/MapServer/0"
+coverage = "Partial statewide and growing: counties with recent StratMap lidar (2022-2025), e.g. all of El Paso and Williamson, most of Hays, Smith, Brazos, Taylor; small parts of Travis and Tarrant. Not Harris, Dallas, Bexar, Collin, Denton, Fort Bend or Montgomery yet. Outside coverage the query is empty and the tool falls back to nationwide layers."
+method = "lidar"
+vintage = "StratMap lidar collections 2022-2025 (sourceyear per building); TxGIO says it is continuously updated"
+terms = "Public; Texas state agency open data (TxGIO), no license or restrictions stated on the service"
+max_record_count = 2000
+height_field = "buildingheight"
+height_units = "ft"
+notes = "Auto-extracted from lidar Class 6 (building) points, features 400 sq ft and up, horizontal accuracy about +/- 1 m per TxGIO. Outlines can be generalized or incomplete under trees. Also carries hre (highest roof elevation) and hag/lag (highest/lowest adjacent grade). County layers in counties/TX override this where present."
+
+[verified]
+date = "2026-10-21"
+point = [-106.4870, 31.7600]
+point_result = "20 lidar outlines within 500 ft in downtown El Paso; buildingheight on all 20"

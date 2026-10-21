@@ -1,0 +1,17 @@
+state = "VA"
+county = "Alexandria city"
+name = "Buildings"
+publisher = "City of Alexandria, Department of Information Technology Services, GIS Division"
+url = "https://services2.arcgis.com/ChYV69FhfjwkvRmy/arcgis/rest/services/Building/FeatureServer/0"
+coverage = "All of the City of Alexandria (independent city, about 36,000 buildings)"
+method = "planimetric"
+vintage = "Current city open data layer"
+terms = "Public; City of Alexandria open data, no-warranty disclaimer"
+max_record_count = 2000
+stories_field = "STORIES"
+notes = "City building footprints with use, size, year built and STORIES (filled on most buildings). No height field, so stories give an estimated height."
+
+[verified]
+date = "2026-10-21"
+point = [-77.0469, 38.8048]
+point_result = "148 footprints in a 0.003-degree box in Old Town (EPSG 2283, feet); STORIES on 145"

@@ -1,0 +1,20 @@
+state = "TX"
+county = "Travis"
+name = "Building Footprints 2017"
+publisher = "City of Austin"
+url = "https://services.arcgis.com/0L95CJ0VTaxqcmED/arcgis/rest/services/UTILITIESCOMMUNICATION_building_footprints_2017/FeatureServer/0"
+coverage = "City of Austin mapping area, extent covers all of Travis County plus parts of Williamson, Hays and Bastrop (737,000 buildings)"
+method = "planimetric"
+vintage = "Aerial imagery flown early 2017 (built on 2015 impervious cover); static, no further updates planned"
+terms = "Public; City of Austin open data, disclaimer only (informational, no warranty)"
+max_record_count = 1000
+height_field = "MAX_HEIGHT"
+height_units = "ft"
+top_elev_field = "ELEVATION"
+base_elev_field = "BASE_ELEVATION"
+notes = "Planimetric capture (AeroMetric) from 2013/2017 imagery; MAX_HEIGHT = ELEVATION - BASE_ELEVATION in feet, present on about 86% of buildings. Static 2017 layer, so check for newer construction."
+
+[verified]
+date = "2026-10-21"
+point = [-97.7431, 30.2672]
+point_result = "12 outlines within 500 ft in downtown Austin; MAX_HEIGHT on all 12"

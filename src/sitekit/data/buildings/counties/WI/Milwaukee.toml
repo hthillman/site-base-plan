@@ -1,0 +1,17 @@
+state = "WI"
+county = "Milwaukee"
+name = "Milwaukee County Planimetric Structure Polygons"
+publisher = "Milwaukee County GIS & Land Information Office"
+url = "https://services2.arcgis.com/s1wgJQKbKJihhhaT/arcgis/rest/services/Planimetric_Structure_Polygons/FeatureServer/18"
+coverage = "All of Milwaukee County, including the City of Milwaukee"
+method = "planimetric"
+vintage = "Current to the latest county orthophotography (Date_Changed per feature)"
+terms = "Public; Milwaukee County LIO terms of use (reference only, no liability, no warranty)"
+max_record_count = 2000
+notes = "Planimetric structure layer also holds bridges, slabs, pools and other features; the filter keeps structures (incl. outbuildings, mobile homes) and drops canopies. No height field."
+filter = "subtypename LIKE 'Structure%' AND subtypename <> 'Structure - Canopy'"
+
+[verified]
+date = "2026-10-21"
+point = [-87.9065, 43.0389]
+point_result = "Downtown Milwaukee: 10 outlines in a ~250 m envelope, EPSG 6609 ft; no height field"

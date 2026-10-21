@@ -1,0 +1,19 @@
+state = "OR"
+county = "Washington"
+name = "RLIS Building Footprint Database"
+publisher = "Oregon Metro (RLIS)"
+url = "https://services2.arcgis.com/McQ0OlIABe29rJJy/arcgis/rest/services/Building_Footprint_Database/FeatureServer/8"
+coverage = "Portland-region layer covering Multnomah, Washington and Clackamas counties (no county field, so the same layer serves all three); Beaverton, Hillsboro, Tigard and the rest of Washington County"
+method = "lidar"
+vintage = "Regional LiDAR footprints by Watershed Sciences, gaps digitized from 2008 orthos or taken from city data, DOGAMI 2018 footprints where no jurisdiction maintains data; Metro edits from current orthos yearly (last update 2026-07-27)"
+terms = "RLIS Open Database End User License Agreement (Oregon Metro's ODbL-style open license, https://rlisdiscovery.oregonmetro.gov/pages/open-database-license); attribute Oregon Metro RLIS. Public, no token."
+max_record_count = 2000
+height_field = "AVG_HEIGHT"
+height_units = "ft"
+stories_field = "NUM_STORY"
+notes = "Official RLIS data compiled from local jurisdictions (Portland, Gresham, Beaverton, Tigard, Lake Oswego, Oregon City, West Linn, Multnomah County) and Metro's own capture (SUBAREA says which). AVG_HEIGHT is average building height in feet (0 where unknown, which the tool ignores); SURF_ELEV and ROOF_ELEV are ground and roof elevations; HEIGHT_SRC gives the height method. Native SR EPSG 2913 (OR North ft intl, HARN)."
+
+[verified]
+date = "2026-10-21"
+point = [-122.8037, 45.4871]
+point_result = "Downtown Beaverton footprints returned in State Plane feet; AVG_HEIGHT present on most"

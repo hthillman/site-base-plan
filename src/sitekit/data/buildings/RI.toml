@@ -1,0 +1,15 @@
+state = "RI"
+name = "RIGIS Building Footprints (2022)"
+publisher = "RIGIS (Rhode Island Geographic Information System)"
+url = "https://services2.arcgis.com/S8zZg9pg23JUEexQ/arcgis/rest/services/FACILITY_Building_Footprints_2022/FeatureServer/1"
+coverage = "All of Rhode Island (buildings over 200 sq ft)"
+method = "lidar"
+vintage = "2022 statewide LiDAR (RI Statewide Enhancements D24 project)"
+terms = "RIGIS license: as is, no warranty; acknowledge RIGIS and the primary producers (USGS, Fugro) in derived products"
+max_record_count = 2000
+notes = "Machine-generated from the 2022 LiDAR point cloud (not hand-digitized). No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-71.4128, 41.8240]
+point_result = "20 outlines in a ~200 x 180 m box in downtown Providence, EPSG 3438 feet"

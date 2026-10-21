@@ -1,0 +1,19 @@
+state = "PA"
+county = "Chester"
+name = "DVRPC 2015 Impervious Surface: buildings (Chester County)"
+publisher = "Delaware Valley Regional Planning Commission (DVRPC)"
+url = "https://arcgis.dvrpc.org/portal/rest/services/structures/impervious_2015_chester/FeatureServer/0"
+coverage = "All of Chester County"
+method = "planimetric"
+vintage = "Digitized from 2015 orthoimagery (update of a 2013 capture from 2010 imagery); heights from LiDAR nDSM"
+terms = "Public; DVRPC Digital Data Disclaimer: as is, no warranty, user holds DVRPC harmless from damages arising from use; credit DVRPC as the source. Chester County's copy of the same data carries CC BY-NC-SA (non-commercial)"
+max_record_count = 2000
+height_field = "height_estimate"
+height_units = "ft"
+filter = "class = 'Building'"
+notes = "Impervious-surface landbase digitized from 2015 aerials; the filter keeps the 'Building' class (drops 'Other' and 'Road' paving). height_estimate is the 90th-percentile LiDAR nDSM height inside the outline (approximate, feet). Buildings 200 sq ft and up. DVRPC notes the outlines can look shifted against newer imagery. The county's own outline layer was not used: Chester County GIS republishes this same 2015 DVRPC dataset (BuildingFootprints2015, CC BY-NC-SA)."
+
+[verified]
+date = "2026-10-21"
+point = [-75.6052, 39.9606]
+point_result = "21 outlines in a ~200 x 180 m box in downtown West Chester, EPSG 2272 feet; height_estimate on all"

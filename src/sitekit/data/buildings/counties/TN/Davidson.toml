@@ -1,0 +1,18 @@
+state = "TN"
+county = "Davidson"
+name = "Building Footprints"
+publisher = "Metro Nashville and Davidson County, Information Technology Services"
+url = "https://services2.arcgis.com/HdTo6HJqh92wn4D8/arcgis/rest/services/Building_Footprints_view/FeatureServer/0"
+coverage = "All of Nashville-Davidson County (consolidated, about 329,000 buildings)"
+method = "planimetric"
+vintage = "Updated annually (metadata last updated 2024-11-19)"
+terms = "Public; Metro Nashville open data (Open Data Executive Order)"
+max_record_count = 2000
+height_field = "Height"
+height_units = "ft"
+notes = "Metadata: building footprints are digitized by Metro ITS; not survey grade. Height is building height in feet (filled on essentially all records); BuildingType and RoofType also present."
+
+[verified]
+date = "2026-10-21"
+point = [-86.7816, 36.1627]
+point_result = "71 footprints in a 0.003-degree box in downtown Nashville (EPSG 2274, feet); Height on all 71"

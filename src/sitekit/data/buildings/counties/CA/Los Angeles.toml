@@ -1,0 +1,18 @@
+state = "CA"
+county = "Los Angeles"
+name = "City of Los Angeles Building Footprints"
+publisher = "City of Los Angeles GeoHub"
+url = "https://services5.arcgis.com/7nsPwEMP38bSkCjy/arcgis/rest/services/Building_Footprints/FeatureServer/0"
+coverage = "City of Los Angeles only (about 40% of LA County's population; the county's own countywide layer is not used, see notes)"
+method = "planimetric"
+vintage = "LARIAC stereo capture: 2008 (LARIAC2), updated with 2014 (LARIAC4) imagery; LARIAC_DATE per building"
+terms = "Public, no token. City of LA GeoHub item carries no license or use-limitation text. Data originates from LA County's LARIAC program."
+max_record_count = 1000
+height_field = "HEIGHT"
+height_units = "ft"
+notes = "All buildings over 64 sq ft in the city, captured from LARIAC stereo imagery (roof lines, so lean-free). HEIGHT is building height in feet; ELEV is ground elevation in feet. LA County's own Countywide Building Outlines (2020) layer covers the whole county with heights, but it is served under the County eGIS Terms of Use, which include a clause requiring users to indemnify the County, so it is left out. Native SR EPSG 2229 (CA zone 5 ftUS)."
+
+[verified]
+date = "2026-10-21"
+point = [-118.2500, 34.0480]
+point_result = "58 footprints within ~150 m in downtown LA, returned in EPSG 2229 feet; HEIGHT present"

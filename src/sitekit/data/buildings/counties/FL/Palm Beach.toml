@@ -1,0 +1,17 @@
+state = "FL"
+county = "Palm Beach"
+name = "Planimetric Buildings (CWGIS.PLAN_BUILDING)"
+publisher = "Palm Beach County GIS"
+url = "https://gis.pbcgov.org/arcgis/rest/services/CWGIS/PLAN_BUILDING/MapServer/0"
+coverage = "All of Palm Beach County (about 405,000 polygons), including West Palm Beach and Boca Raton"
+method = "planimetric"
+vintage = "County planimetric layer, edited continuously (ET_EDITED per feature)"
+terms = "Public; Palm Beach County GIS service, no license or restriction stated (Florida public record)"
+max_record_count = 2000
+filter = "UPPER(TYPE) NOT LIKE '%COURTYARD%'"
+notes = "Countywide planimetric building layer (PLAN_ = planimetric theme). TYPE includes Building, Building Under Construction, House Trailer, Ruins and Building Interior Courtyard; the filter drops interior courtyards, which are drawn as polygons rather than holes. No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-80.0534, 26.7153]
+point_result = "16 polygons in a 0.003-degree box in downtown West Palm Beach (EPSG 2236, feet); also 52 in Boca Raton and 61 west of I-95"

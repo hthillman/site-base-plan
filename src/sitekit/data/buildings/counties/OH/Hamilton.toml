@@ -1,0 +1,18 @@
+state = "OH"
+county = "Hamilton"
+name = "Hamilton County Building Footprints (CAGIS)"
+publisher = "Cincinnati Area Geographic Information System (CAGIS)"
+url = "https://services.arcgis.com/JyZag7oO4NteHGiq/arcgis/rest/services/Open_Data_Feature_Collection/FeatureServer/58"
+coverage = "All of Hamilton County, including Cincinnati"
+method = "planimetric"
+vintage = "Captured from aerials 1991 onward, updated through 2024 (SOURCE per building)"
+terms = "Public; CAGIS open data disclaimer (as is, no warranty, no liability)"
+max_record_count = 2000
+height_field = "HEIGHT_IN_FEET"
+height_units = "ft"
+notes = "CAGIS planimetric building layer; SOURCE gives the aerial year each outline came from. EST_H_FEET is a stories-based estimate and is not used."
+
+[verified]
+date = "2026-10-21"
+point = [-84.5120, 39.1031]
+point_result = "Downtown Cincinnati: 43 outlines in a ~250 m envelope, EPSG 3735 ft; HEIGHT_IN_FEET present (e.g. 421 ft)"

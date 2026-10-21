@@ -1,0 +1,18 @@
+state = "MO"
+county = "St. Louis City"
+name = "Buildings (Assessor public parcels map)"
+publisher = "City of St. Louis"
+url = "https://maps8.stlouis-mo.gov/arcgis/rest/services/ASSESSOR/ASR_PUBLIC_PARCELS/MapServer/7"
+coverage = "All of the City of St. Louis (about 105,000 buildings)"
+method = "planimetric"
+vintage = "Current city building layer (Const_Date / Demo_Date per building); capture date not stated"
+terms = "Public; City of St. Louis GIS service, no license stated (city data disclaims warranty)"
+max_record_count = 2000
+height_field = "BLDGHEIGHT"
+height_units = "ft"
+notes = "Publisher doesn't describe the capture method; outlines are the city's main-building layer (LYR_DSC BLD-MAIN, keyed to parcel HANDLE). BLDGHEIGHT in feet on about 98% (tallest about 553 ft); also EAVEHEIGHT, ROOFFORM, BASEELEV."
+
+[verified]
+date = "2026-10-21"
+point = [-90.1935, 38.6270]
+point_result = "11 outlines within 500 ft in downtown St. Louis; BLDGHEIGHT on all 11"

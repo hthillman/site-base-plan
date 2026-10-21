@@ -1,0 +1,18 @@
+state = "FL"
+county = "Miami-Dade"
+name = "Building Footprint 2D"
+publisher = "Miami-Dade County ITD, Geospatial Infrastructure Support Group"
+url = "https://services.arcgis.com/8Pc9XBTAsYuxx9Ny/arcgis/rest/services/BuildingFootprint2D_gdb/FeatureServer/0"
+coverage = "All of Miami-Dade County, inside and outside the Urban Development Boundary (about 863,000 buildings)"
+method = "lidar"
+vintage = "2015 planimetric (SOURCE = 'P'), LiDAR-extracted 2018 (GPI) and updated with 2021 Woolpert data (SOURCE = 'L')"
+terms = "Public; Miami-Dade County open data, provided 'as is' (no-warranty disclaimer only)"
+max_record_count = 2000
+height_field = "HEIGHT"
+height_units = "ft"
+notes = "Publisher says features are extracted from 2018 LiDAR and the 2015 MDC planimetric layer. HEIGHT is filled on only about 40,000 of 863,000 records (2015 planimetric subset; values average about 20 and top out near 440, so read as feet, units not stated by the publisher); the rest get heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-80.1918, 25.7743]
+point_result = "14 footprints in a 0.003-degree box in downtown Miami (EPSG 2236, feet); HEIGHT null on all 14 here"

@@ -1,0 +1,18 @@
+state = "UT"
+county = "Salt Lake"
+name = "Salt Lake County Building Footprints"
+publisher = "Salt Lake County (Assessor / Surveyor GIS)"
+url = "https://services1.arcgis.com/DJP723NX3ukQ2LtF/arcgis/rest/services/SLCo_BuildingFootprints/FeatureServer/0"
+coverage = "All of Salt Lake County (about 443,000 outlines across every city)"
+method = "planimetric"
+vintage = "County compilation first loaded 2019, still edited (last data edit 2026)"
+terms = "Public, no token. County item text: not field verified, general reference only, not for ownership, final design or survey. No license or indemnity text."
+max_record_count = 1000
+height_field = "BLDGHEIGHT"
+height_units = "ft"
+notes = "The county names its Assessor's and Surveyor's offices as sources; the SOURCE field is blank for most records, with smaller sets credited to Salt Lake City, Sandy City, Cottonwood Heights, the Assessor, dated imagery (2000-2009) and about 44,000 marked 'ESRI'. Not a copy of USA Structures (low overlap match, more buildings). BLDGHEIGHT (ft) is filled for only about 27,000 records (the ESRI-sourced Cottonwood Heights set), so most heights come from USA Structures. PARCEL_ID and ADDRESS attached. Native SR EPSG 3566 (UT Central ftUS)."
+
+[verified]
+date = "2026-10-21"
+point = [-111.8910, 40.7608]
+point_result = "Downtown Salt Lake City outlines returned in EPSG 3566 feet; BLDGHEIGHT mostly empty"

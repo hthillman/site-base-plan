@@ -426,7 +426,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         "wetland": lambda: L.fetch_wetlands(site.clip, site.epsg),
         "roads": lambda: L.fetch_roads(site.clip, site.epsg),
         "adjacent": lambda: L.fetch_adjacent(site.clip, site.epsg, source_for(site.state, site.county), site.parcel.geom if site.parcel else None),
-        "buildings": lambda: L.fetch_buildings(site.clip, site.epsg, site.ft_per_m),
+        "buildings": lambda: L.fetch_buildings(site.clip, site.epsg, site.ft_per_m, site.state, site.county),
     }
     skip_keys = {("buildings" if k == "massing" else k) for k in opts.skip} & set(jobs)
     jobs = {k: fn for k, fn in jobs.items() if k not in skip_keys}
@@ -555,11 +555,18 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     bl = layers.get("buildings")
     if bl is not None and bl.ok():
         on_site = [f for f in bl.features if site.parcel is not None and f.geom.intersects(site.parcel.geom)]
-        msg = f"{len(bl.features)} existing building(s) in the extent are drawn as 3D massing from FEMA USA Structures footprints and heights"
-        if site.parcel is not None:
-            msg += f" ({len(on_site)} on the parcel)"
-        flags.append({"level": "info", "text": msg + ". These outlines are traced from aerial imagery by machine learning: often a few feet off, "
-                      "simplified to boxes, and small or tree-covered buildings can be missing. Use them for context, not as measured outlines."})
+        where = f" ({len(on_site)} on the parcel)" if site.parcel is not None else ""
+        if bl.extra.get("machine") == "microsoft":
+            flags.append({"level": "info", "text": f"{len(bl.features)} existing building(s) in the extent{where} are drawn as 3D massing. "
+                          "Outlines are Microsoft's machine-traced footprints: usually close to the roof, but simplified and sometimes off or "
+                          "missing; use them for context, not as measured outlines. " + " ".join(bl.notes[-1:])})
+        elif bl.extra.get("planimetric"):
+            flags.append({"level": "info", "text": f"{len(bl.features)} existing building(s) in the extent{where}, outlined from {bl.source} "
+                          f"({bl.vintage or 'date not stated'}) and drawn as 3D massing. " + " ".join(bl.notes[-1:])})
+        else:
+            flags.append({"level": "info", "text": f"{len(bl.features)} existing building(s) in the extent{where} are drawn as 3D massing from "
+                          "FEMA USA Structures. These outlines are traced from aerial imagery by machine learning: often a few feet off, "
+                          "simplified to boxes, and small or tree-covered buildings can be missing. Use them for context, not as measured outlines."})
     if envelope:
         flags.append({"level": "info", "text": f"{envelope['label']}. Shown as a translucent block in the 3D files; a quick volume check, not a design."})
 

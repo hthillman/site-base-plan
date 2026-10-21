@@ -1,0 +1,16 @@
+state = "MD"
+county = "Baltimore city"
+name = "Baltimore City Buildings Footprint"
+publisher = "City of Baltimore (Open Baltimore)"
+url = "https://services1.arcgis.com/UWYHeuuJISiGmgXx/arcgis/rest/services/buildings/FeatureServer/0"
+coverage = "All of Baltimore City"
+method = "planimetric"
+vintage = "Planimetric capture, SRCDATE 2008; publisher says not fully reviewed or updated since 2010"
+terms = "Public Open Baltimore layer; no license or use text on the item. No token."
+max_record_count = 2000
+notes = "Old: newer construction and demolitions since about 2010 are not reflected, and rowhouse blocks are often one polygon. No height field; heights matched from USA Structures."
+
+[verified]
+date = "2026-10-21"
+point = [-76.6122, 39.2904]
+point_result = "15 outlines in a ~200 x 180 m box at the Inner Harbor / downtown, EPSG 2248 feet"

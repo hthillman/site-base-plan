@@ -1,0 +1,16 @@
+state = "NC"
+county = "Durham"
+name = "Buildings (Durham GIS reference layers)"
+publisher = "City of Durham / Durham County GIS (Public Works)"
+url = "https://webgis2.durhamnc.gov/server/rest/services/PublicWorksServices/DurhamGISReferenceLayers/MapServer/104"
+coverage = "City of Durham (about 290,000 of the county's 330,000 people); outside the city the nationwide layer is used"
+method = "planimetric"
+vintage = "Current city impervious-surface/building layer"
+terms = "Public; City of Durham GIS service, no license or restriction stated"
+max_record_count = 2000
+notes = "Parcel-linked building polygons from the city's planimetric impervious-surface data (IMPERVIOUSTYPE = BUILDING), about 123,000 buildings. Capture method not stated on the service. No height field. Because this file takes precedence over NC.toml, sites in the unincorporated county fall back to USA Structures rather than the statewide NC layer."
+
+[verified]
+date = "2026-10-21"
+point = [-78.9012, 35.996]
+point_result = "81 buildings in a 0.003-degree box in downtown Durham (EPSG 2264, feet)"

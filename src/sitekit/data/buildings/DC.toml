@@ -1,0 +1,15 @@
+state = "DC"
+name = "DC Building Footprints (planimetrics)"
+publisher = "DC Office of the Chief Technology Officer (DC GIS)"
+url = "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Facility_and_Structure/MapServer/1"
+coverage = "All of the District of Columbia"
+method = "planimetric"
+vintage = "Current planimetric capture (CAPTUREYEAR per building)"
+terms = "Public; DC GIS open data (CC BY 4.0)"
+max_record_count = 1000
+notes = "No height field; heights matched from USA Structures. Includes parking garages and monuments; buildings 100 sq ft and up."
+
+[verified]
+date = "2026-10-21"
+point = [-76.9950, 38.8870]
+point_result = "Rowhouse outlines on Capitol Hill; heights matched from USA Structures"

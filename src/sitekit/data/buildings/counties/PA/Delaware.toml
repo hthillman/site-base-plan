@@ -1,0 +1,19 @@
+state = "PA"
+county = "Delaware"
+name = "DVRPC 2015 Impervious Surface: buildings (Delaware County)"
+publisher = "Delaware Valley Regional Planning Commission (DVRPC)"
+url = "https://arcgis.dvrpc.org/portal/rest/services/structures/impervious_2015_delaware/FeatureServer/0"
+coverage = "All of Delaware County"
+method = "planimetric"
+vintage = "Digitized from 2015 orthoimagery (update of a 2013 capture from 2010 imagery); heights from LiDAR nDSM"
+terms = "Public; DVRPC Digital Data Disclaimer: as is, no warranty, user holds DVRPC harmless from damages arising from use; credit DVRPC as the source"
+max_record_count = 2000
+height_field = "height_estimate"
+height_units = "ft"
+filter = "class = 'Building'"
+notes = "Impervious-surface landbase digitized from 2015 aerials; the filter keeps the 'Building' class (drops 'Other' and 'Road' paving). height_estimate is the 90th-percentile LiDAR nDSM height inside the outline (approximate, feet). Buildings 200 sq ft and up. DVRPC notes the outlines can look shifted against newer imagery. The county's own outline layer was not used: it is NearMap AI output (AiVersion field)."
+
+[verified]
+date = "2026-10-21"
+point = [-75.2591, 39.9620]
+point_result = "13 outlines in a ~200 x 180 m box at 69th Street, Upper Darby, EPSG 2272 feet; height_estimate on all"

@@ -1,0 +1,20 @@
+state = "IL"
+county = "Cook"
+name = "Cook County Building Footprints 2022"
+publisher = "Cook County GIS"
+url = "https://gis.cookcountyil.gov/traditional/rest/services/buildingFootprint_2022/MapServer/0"
+coverage = "All of Cook County, including the City of Chicago"
+method = "lidar"
+vintage = "Spring 2022 lidar and orthoimagery; published 2025"
+terms = "Public; Cook County GIS open data, provided as is with a no-liability disclaimer"
+max_record_count = 2000
+height_field = "Height"
+height_units = "ft"
+top_elev_field = "Max_Point"
+base_elev_field = "Ground_Z"
+notes = "Semi-automated outlines from building-classified lidar points, visually reviewed against 2022 orthos; large polygons split along parcel lines. Height = highest lidar point inside the polygon minus ground (ft)."
+
+[verified]
+date = "2026-10-21"
+point = [-87.6298, 41.8800]
+point_result = "Loop block: 20 footprints in a ~250 m envelope, EPSG 3435 ft; Height present (e.g. 410 ft tower)"

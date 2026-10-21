@@ -1,0 +1,18 @@
+state = "OH"
+county = "Cuyahoga"
+name = "Cuyahoga County 2023 Building Footprints"
+publisher = "Cuyahoga County GIS"
+url = "https://gis.cuyahogacounty.gov/server/rest/services/Hosted/2023_Building_Footprints/FeatureServer/0"
+coverage = "All of Cuyahoga County, including Cleveland"
+method = "planimetric"
+vintage = "Spring 2023 orthophotography"
+terms = "Public; Cuyahoga County GIS Disclaimer and Terms of Use (as is, no warranty; not an official record)"
+max_record_count = 2000
+height_field = "height"
+height_units = "ft"
+notes = "Structures of 100 sq ft and up created from spring 2023 orthophotography. In dense areas such as Downtown Cleveland neighbouring buildings may be merged into one footprint, so its height is a single value for the merged block."
+
+[verified]
+date = "2026-10-21"
+point = [-81.6944, 41.4993]
+point_result = "Public Square: 15 outlines in a ~250 m envelope, EPSG 3734 ft; height present (to ~426 ft)"

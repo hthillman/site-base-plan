@@ -1,0 +1,16 @@
+state = "MN"
+county = "Dakota"
+name = "Dakota County Building Polygons"
+publisher = "Dakota County GIS"
+url = "https://gis2.co.dakota.mn.us/arcgis/rest/services/DCGIS_OL_PropertyInformation/MapServer/50"
+coverage = "All of Dakota County"
+method = "planimetric"
+vintage = "Derived from aerial photography; metadata updated 2021-2022"
+terms = "Free, no use restrictions (Dakota County GIS Database Disclaimer; pass the disclaimer and metadata along if redistributing)"
+max_record_count = 2000
+notes = "County building polygons traced from aerial photography (also on the Minnesota Geospatial Commons). No height field."
+
+[verified]
+date = "2026-10-21"
+point = [-93.1615, 44.7310]
+point_result = "Apple Valley: 36 outlines in a ~250 m envelope, EPSG 6505 ft; no height field"

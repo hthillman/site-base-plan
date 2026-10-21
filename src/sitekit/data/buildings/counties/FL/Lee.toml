@@ -1,0 +1,17 @@
+state = "FL"
+county = "Lee"
+name = "Building Footprints"
+publisher = "Lee County GIS and Lee County Property Appraiser"
+url = "https://services2.arcgis.com/LvWGAAhHwbCJ2GMP/arcgis/rest/services/Building_Footprints/FeatureServer/0"
+coverage = "All of Lee County (about 360,000 buildings), including Fort Myers, Cape Coral and Lehigh Acres"
+method = "planimetric"
+vintage = "Property Appraiser footprints maintained continuously; Lee County GIS additions from 2025 imagery"
+terms = "Public; Lee County GIS public information resource, no-warranty disclaimer"
+max_record_count = 2000
+stories_field = "MaxStories"
+notes = "334,000 footprints maintained by the Lee County Property Appraiser's GIS and 11,000 condo buildings from the appraiser's parcel fabric. About 14,700 records (BldgDataSource = 'Lee County GIS') were added by the county; most are mobile/manufactured homes extracted with Esri's deep-learning building extraction from 2025 imagery and regularized, so those few are machine traces. No height field; MaxStories gives an estimate."
+
+[verified]
+date = "2026-10-21"
+point = [-81.8723, 26.6406]
+point_result = "18 footprints in a 0.003-degree box in downtown Fort Myers (EPSG 2237, feet); MaxStories on all 18"

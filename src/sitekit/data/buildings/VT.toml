@@ -1,0 +1,18 @@
+state = "VT"
+name = "VT Building Footprints (E911)"
+publisher = "VCGI / Vermont Enhanced 911 Board"
+url = "https://services1.arcgis.com/BkFxaEFNwHqX3tAw/arcgis/rest/services/FS_VCGI_OPENDATA_STRUCTURES_POLY_SP_v1/FeatureServer/0"
+coverage = "All of Vermont, except buildings whose only outline is a Microsoft (Bing) trace, which are filtered out"
+method = "lidar"
+vintage = "Mostly 2016 high-resolution land cover (LiDAR + imagery); E911 and municipal edits from 2018-2023 orthos; updated weekly"
+terms = "Public; VCGI open data, no warranty. Publisher says not intended for property assessment or site engineering"
+max_record_count = 2000
+height_field = "HEIGHTFT"
+height_units = "ft"
+filter = ""  # keep Microsoft-traced outlines too: dropping them leaves buildings missing with no fallback
+notes = "Merged best-available layer. SRC_ORIG: 2016HIGHRESLC (~60%, from the UVM 2016 land-cover mapping built on LiDAR), E911 and MUNICIPALITY/RPC digitizing from state orthos, and BING (~20%, Microsoft ML footprints) which the filter drops; where only a Bing outline existed the building will be missing. HEIGHTFT is populated on about half the records. In Vermont State Plane metres (EPSG 32145)."
+
+[verified]
+date = "2026-10-21"
+point = [-73.2121, 44.4759]
+point_result = "23 outlines in a ~200 x 180 m box in downtown Burlington, EPSG 32145"

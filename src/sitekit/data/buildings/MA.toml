@@ -1,0 +1,15 @@
+state = "MA"
+name = "MassGIS Building Structures (2D)"
+publisher = "MassGIS (Bureau of Geographic Information)"
+url = "https://services1.arcgis.com/hGdibHYSPO59RG1h/arcgis/rest/services/Building_Structures/FeatureServer/0"
+coverage = "All of Massachusetts (buildings over 150 sq ft)"
+method = "planimetric"
+vintage = "Roofprints from 2011-12 orthos plus 2002-11 LiDAR; updated with 2019, 2021, 2023 and 2025 imagery; layer updated May 2026"
+terms = "Public; MassGIS open data, no license restrictions stated (credit: MassGIS, City of Boston)"
+max_record_count = 2000
+notes = "Roof outlines ('roofprints'), not wall footprints. No height field in the hosted layer (MassGIS 3D structures are a separate download only); heights matched from USA Structures. SOURCE field records the origin (e.g. 'City of Boston')."
+
+[verified]
+date = "2026-10-21"
+point = [-71.0589, 42.3601]
+point_result = "14 roof outlines in a ~200 x 180 m box at Boston City Hall Plaza, EPSG 2249 feet"

@@ -1,0 +1,16 @@
+state = "IN"
+county = "Marion"
+name = "Indianapolis/Marion County Building Footprints"
+publisher = "City of Indianapolis and Marion County (IndyGIS)"
+url = "https://gis.indy.gov/server/rest/services/OpenData/OpenData_Boundaries/MapServer/12"
+coverage = "All of Marion County (consolidated Indianapolis)"
+method = "planimetric"
+vintage = "Current city-county layer (metadata dated 2024)"
+terms = "No restrictions on use; derived data must acknowledge the City of Indianapolis/Marion County; as is"
+max_record_count = 1000
+notes = "All buildings over 100 sq ft, including non-addressed outbuildings. The publisher does not state the capture method. No height field."
+
+[verified]
+date = "2026-10-21"
+point = [-86.1581, 39.7684]
+point_result = "Monument Circle: 26 outlines in a ~250 m envelope, EPSG 6459 ft; no height field"

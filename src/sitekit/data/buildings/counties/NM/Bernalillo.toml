@@ -1,0 +1,18 @@
+state = "NM"
+county = "Bernalillo"
+name = "Building Footprints (3D outlines)"
+publisher = "City of Albuquerque and Bernalillo County"
+url = "https://coageo.cabq.gov/cabqgeo/rest/services/public/fullviewer/MapServer/76"
+coverage = "Albuquerque and Bernalillo County (about 308,000 buildings)"
+method = "planimetric"
+vintage = "Outlines from MRCOG 2012 1:1200 orthophotography; heights from 2010 MRCOG lidar and 2012 stereo auto-correlation"
+terms = "Public; City of Albuquerque / Bernalillo County GIS, no license or restrictions stated"
+max_record_count = 1000
+height_field = "HEIGHT"
+height_units = "ft"
+notes = "HEIGHT filled on every building (feet; tallest about 230 ft, so tower heights may read low). 2012 vintage, so check recent construction."
+
+[verified]
+date = "2026-10-21"
+point = [-106.6504, 35.0844]
+point_result = "12 outlines within 500 ft in downtown Albuquerque; HEIGHT on all 12"

@@ -1,0 +1,18 @@
+state = "GA"
+county = "DeKalb"
+name = "Building Footprints"
+publisher = "DeKalb County GIS Department"
+url = "https://services2.arcgis.com/IxVN2oUE9EYLSnPE/arcgis/rest/services/Building_Footprints/FeatureServer/0"
+coverage = "All of DeKalb County (about 272,000 buildings)"
+method = "planimetric"
+vintage = "Current county layer (LASTUPDATE per feature)"
+terms = "CC BY 4.0; DeKalb County open data"
+max_record_count = 2000
+height_field = "BLDGHEIGHT"
+height_units = "ft"
+notes = "Local Government Information Model building footprints compiled from orthoimagery. BLDGHEIGHT (feet), BASEELEV, EAVEHEIGHT and FLOORCOUNT are populated; the Atlanta-in-DeKalb portion is included."
+
+[verified]
+date = "2026-10-21"
+point = [-84.2963, 33.7748]
+point_result = "39 footprints in a 0.003-degree box in downtown Decatur (EPSG 2240, feet); BLDGHEIGHT on all 39"
