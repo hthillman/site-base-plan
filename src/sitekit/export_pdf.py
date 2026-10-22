@@ -335,10 +335,16 @@ def write_pdf(res, cfg: Config, opts) -> Path:
 
     tf = getattr(res, "testfit", None) if testfit_available() else None
     tf_pages = 0 if tf is None or tf.status == "unsupported" else (1 + len(tf.options) if tf.envelope is not None and tf.options else 1)
-    pages = 4 + tf_pages
+    pages = 5 + tf_pages  # cover, base, slope, soils, [test fit], findings
 
     with PdfPages(path) as pdf:
-        # 1. Base plan
+        # 1. Cover: what this is and isn't, before anything else
+        fig = plt.figure(figsize=PAGE)
+        _cover_page(fig, res, pages)
+        pdf.savefig(fig)
+        plt.close(fig)
+
+        # 2. Base plan
         fig = plt.figure(figsize=PAGE)
         ax = _map_axes(fig, res.site.clip, scale)
         _aerial(ax, res)
@@ -374,7 +380,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
             legend.append(("fill", {"local": "Existing building (local outline)", "approximate": "Existing building (approx., machine-traced)",
                                     "rough": "Existing building (rough, FEMA)"}[acc],
                            dict(facecolor=matplotlib.colors.to_rgba("#9d9a90", 0.35), edgecolor="#7d7a72")))
-        _sidebar(fig, res, "SITE CONTEXT (PUBLIC GIS DATA)", scale, legend, 1, pages)
+        _sidebar(fig, res, "SITE CONTEXT (PUBLIC GIS DATA)", scale, legend, 2, pages)
         pdf.savefig(fig)
         try:  # small preview of the base plan sheet for the results page
             box = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())  # the map only, not the sidebar
@@ -398,7 +404,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
             _missing_stamp(ax, "SLOPE ANALYSIS UNAVAILABLE (DEM FAILED)")
         legend = [("fill", f"{lo:g}-{hi:g}% slope" if hi is not None else f"{lo:g}%+ slope", dict(facecolor=SLOPE_COLORS[i % len(SLOPE_COLORS)], alpha=0.7, edgecolor="none")) for i, (lo, hi, *_r) in enumerate(bands)]
         legend += [("line", PARCEL_NOTE, dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2))))]
-        _sidebar(fig, res, "SLOPE ANALYSIS", scale, legend, 2, pages)
+        _sidebar(fig, res, "SLOPE ANALYSIS", scale, legend, 3, pages)
         pdf.savefig(fig)
         plt.close(fig)
 
@@ -423,7 +429,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         _scale_bar(ax, scale)
         legend = [("fill", f"Hydrologic group {k}", dict(facecolor=v, alpha=0.7, edgecolor="#5b4630")) for k, v in HSG_COLORS.items()]
         legend += [("line", PARCEL_NOTE, dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2))))]
-        _sidebar(fig, res, "SOILS (SSURGO)", scale, legend, 3, pages)
+        _sidebar(fig, res, "SOILS (SSURGO)", scale, legend, 4, pages)
         # Map-unit key under the map's top-left corner.
         if units:
             lines = [f"{k}  {v.get('muname')}  [HSG {v.get('hydgrpdcd') or '-'}, {v.get('drclassdcd') or '-'}, hydric {v.get('hydclprs') or 0}%]" for k, v in sorted(units.items(), key=lambda kv: str(kv[0]))]
@@ -435,7 +441,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         if tf is not None:
             from .testfit.export import pdf_pages
 
-            pdf_pages(pdf, res, cfg, opts, start=4, total=pages)
+            pdf_pages(pdf, res, cfg, opts, start=5, total=pages)
 
         # Last: findings + sources
         fig = plt.figure(figsize=PAGE)
@@ -453,6 +459,63 @@ def _sfha(f) -> bool:
     from .sources.layers import is_sfha
 
     return is_sfha(f.props)
+
+
+COVER_IS = [
+    "An automated compilation of public GIS data (assessor parcels, USGS elevation, FEMA, NWI, USDA soils, local zoning maps)",
+    "For early design, feasibility and site context",
+    "Approximate: every line and number comes from someone else's dataset, at that dataset's accuracy and date",
+]
+COVER_IS_NOT = [
+    "A boundary, topographic, ALTA/NSPS or any other survey",
+    "A legal description, or a determination of property lines, easements, setbacks or rights-of-way",
+    "A zoning, flood zone or wetland determination",
+    "A site plan for a permit application, or construction documents",
+    "Professional surveying, engineering, architecture or legal advice",
+]
+COVER_DO = [
+    "Have a land surveyor licensed in this state survey the property before any design, purchase or permit decision that depends on lines, areas, elevations or setbacks.",
+    "Confirm zoning, setbacks, flood zones and wetlands directly with the jurisdiction and the responsible agencies.",
+    "Keep this cover and the sheet notes with any copy you share. Don't submit these sheets to any agency.",
+]
+
+
+def _cover_page(fig, res, pages):
+    """Sheet 1: says plainly what this document is not, before anyone looks at a line on a map."""
+    import os
+
+    site, W, H = res.site, PAGE[0], PAGE[1]
+    red = FLAG_COLORS["alert"]
+    fig.patches.append(Rectangle((0.3 / W, 0.3 / H), (W - 0.6) / W, (H - 0.6) / H, transform=fig.transFigure, fill=False, edgecolor=red, lw=6))
+
+    def t(x, y, s, **kw):
+        fig.text(x / W, y / H, s, **{"fontsize": 12, "color": INK, "va": "top", **kw})
+
+    t(W / 2, 10.1, WATERMARK_LINES[0], fontsize=88, fontweight="bold", color=red, ha="center")
+    t(W / 2, 8.75, WATERMARK_LINES[1], fontsize=46, fontweight="bold", color=red, ha="center")
+    firm = getattr(res, "firm", None) or {}
+    who = f" by {firm.get('prepared_by') or firm.get('name')} using Basesheet" if firm else " automatically by Basesheet"
+    t(W / 2, 7.8, f"Planning-level compilation of public GIS data for {site.matched_address}", fontsize=15, ha="center")
+    t(W / 2, 7.45, f"Prepared {date.today().isoformat()}{who}. {pages} sheets.", fontsize=11, color=MUTED, ha="center")
+
+    def block(x, y, head, items, numbered=False, width=62):
+        t(x, y, head, fontsize=14, fontweight="bold", color=red if "NOT" in head or "BEFORE" in head else INK)
+        y -= 0.42
+        for i, it in enumerate(items, 1):
+            lines = textwrap.wrap(it, width)
+            t(x, y, (f"{i}." if numbered else "\u2022"), fontsize=11.5)
+            t(x + 0.3, y, "\n".join(lines), fontsize=11.5, linespacing=1.35)
+            y -= 0.27 * len(lines) + 0.14
+        return y
+
+    block(0.9, 6.7, "WHAT THIS IS", COVER_IS)
+    block(8.8, 6.7, "WHAT THIS IS NOT", COVER_IS_NOT)
+    block(0.9, 3.15, "BEFORE YOU RELY ON ANYTHING HERE", COVER_DO, numbered=True, width=130)
+
+    terms = os.environ.get("SITE_URL", "").rstrip("/")
+    foot = DISCLAIMER + (f" Use is subject to the Basesheet Terms: {terms}/terms." if terms else "")
+    t(0.9, 0.95, "\n".join(textwrap.wrap(foot, 190)), fontsize=8.5, color=MUTED)
+    fig.text((W - 0.6) / W, 0.5 / H, f"Sheet 1 of {pages}", fontsize=8, color=MUTED, ha="right")
 
 
 def _summary_page(fig, res, cfg, opts, pages):
