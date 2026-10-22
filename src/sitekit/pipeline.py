@@ -26,6 +26,7 @@ from .terrain import Grid, make_contours, slope_bands, slope_percent, stats_with
 ASSUMED_EXTENT_FT = 150.0
 MAX_PARCELS = 5
 MAX_COMBINED_ACRES = 20.0
+ZONING_BUDGET_S = 25  # the zoning lookup runs alongside the layer fetch; past this the plan finishes without it
 FETCH_BUDGET_S = 60  # all layers fetch in parallel; slow sources past this are flagged as missing  # half-width of the box used when no parcel resolves
 
 Log = Callable[[str], None]
@@ -495,6 +496,13 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         opts = replace(opts, skip=set(opts.skip) | {"massing", "adjacent"}, testfit=False)
 
     t1 = time.time()
+    from .plugins import testfit_available, zoning_summary
+
+    # The free zoning lookup only needs the site, so it runs while the layers download (a slow city zoning
+    # server used to add its full wait after everything else).
+    zex = ThreadPoolExecutor(max_workers=1)
+    zfut = None if (opts.testfit and testfit_available()) else zex.submit(zoning_summary, site)
+    zex.shutdown(wait=False)
     log("Fetching layers in parallel: DEM, imagery, soils, flood, wetlands, buildings")
     jobs = {
         "dem": lambda: L.fetch_dem(site.clip, site.epsg, cell_ft=opts.dem_cell_ft, ft_per_m=site.ft_per_m),
@@ -620,10 +628,15 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         flags = tf_flags(tf) + flags
         timings["testfit"] = time.time() - t4
     else:
-        t4 = time.time()
-        zflags, zoning = zoning_summary(site)
+        try:
+            zflags, zoning = zfut.result(timeout=max(1.0, ZONING_BUDGET_S - (time.time() - t1)))
+        except Exception as e:  # noqa: BLE001 - TimeoutError or a crash: the plan finishes without zoning
+            timed_out = isinstance(e, TimeoutError) or "Timeout" in type(e).__name__
+            zflags, zoning = [{"level": "caution", "kind": "zoning", "text": (
+                f"Zoning lookup skipped: the jurisdiction's zoning map didn't answer within {ZONING_BUDGET_S} s. The rest of the plan is complete; "
+                "try again later for zoning." if timed_out else f"Zoning lookup failed ({type(e).__name__}); the rest of the plan is unaffected.")}], None
         flags = zflags + flags
-        timings["zoning"] = time.time() - t4
+        timings["zoning"] = time.time() - t1  # from the start of the fetch it ran alongside
 
     envelope = None
     if "massing" not in opts.skip and tf is not None and getattr(tf, "envelope", None) is not None and getattr(tf, "rules", None) is not None and tf.rules.get("height", "max_ft"):

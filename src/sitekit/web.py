@@ -304,6 +304,7 @@ def run_request(d: dict, batch: bool = False):
                 "parcels": len(res.site.parcels) or (1 if res.site.parcel is not None else 0), "layers": opts.layer_preset + ("+custom" if opts.layer_custom else ""),
                 "parcel": res.site.parcel is not None, "testfit": getattr(res.testfit, "status", None), "zoning": zoning_coverage(res),
                 "seconds": round(time.time() - t0, 1), "interval": opts.contour_interval,
+                "t": {k: round(v, 1) for k, v in res.timings.items()},  # per stage, to find what makes a run slow
                 "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
             })

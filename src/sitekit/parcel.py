@@ -23,6 +23,8 @@ from .http import get_json
 from .model import Feature
 from .sources.arcgis import query_features
 
+PARCEL_TIMEOUT_S = 12  # per request; a stalled parcel server gets one fresh try (see query_features stall_retries)
+
 SOURCES_DIR = Path(__file__).resolve().parent / "data" / "parcels"
 
 WA_FIPS = {
@@ -265,7 +267,7 @@ def parcel_at_point(lon: float, lat: float, out_sr: int, state: str | None = Non
         errors.append(f"No parcel source for {county + ' County, ' if county else ''}{state or 'this state'} yet.")
     else:
         try:
-            feats = [_normalise(f, src) for f in query_features(src.url, geometry=pt_ll, in_sr=4326, out_sr=out_sr)]
+            feats = [_normalise(f, src) for f in query_features(src.url, geometry=pt_ll, in_sr=4326, out_sr=out_sr, timeout=PARCEL_TIMEOUT_S, stall_retries=1)]
             best, ids = _pick(feats, pt)
             if best:
                 return best, src.label, ids, errors
@@ -274,7 +276,7 @@ def parcel_at_point(lon: float, lat: float, out_sr: int, state: str | None = Non
             errors.append(f"{src.name}: {e}")
     for county, cfg in COUNTY_FALLBACKS.get((state or "").upper(), {}).items():
         try:
-            feats = query_features(cfg["url"], geometry=pt_ll, in_sr=4326, out_sr=out_sr)
+            feats = query_features(cfg["url"], geometry=pt_ll, in_sr=4326, out_sr=out_sr, timeout=PARCEL_TIMEOUT_S, stall_retries=1)
             for f in feats:
                 f.props.update(_APN=str(f.props.get(cfg["apn_field"]) or ""), _SITUS="", _CITY="", _COUNTY=county)
             best, ids = _pick(feats, pt)

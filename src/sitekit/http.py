@@ -18,7 +18,9 @@ def session() -> requests.Session:
     global _session
     if _session is None:
         s = requests.Session()
-        retry = Retry(total=2, backoff_factor=0.5, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=None)
+        # Retry server errors and dropped connections, but never a read timeout: a server that was too slow once is
+        # usually too slow again, and retrying it tripled the wait (45 s became 135 s per stuck layer).
+        retry = Retry(total=2, read=0, backoff_factor=0.5, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=None)
         s.mount("https://", HTTPAdapter(max_retries=retry, pool_maxsize=16))
         s.mount("http://", HTTPAdapter(max_retries=retry, pool_maxsize=16))
         s.headers["User-Agent"] = USER_AGENT

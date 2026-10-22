@@ -104,11 +104,14 @@ def fetch_flood(clip: BaseGeometry, epsg: int) -> LayerResult:
             feats = query_features(f"{NFHL_URL}/28", geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields,
                                    max_offset=0.5, timeout=FEMA_TIMEOUT_S, retry=False)
         except Exception as primary:  # noqa: BLE001
-            feats = query_features(NFHL_MIRROR_URL, geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields, max_offset=0.5)
+            feats = query_features(NFHL_MIRROR_URL, geometry=clip, in_sr=epsg, out_sr=epsg, out_fields=fields, max_offset=0.5,
+                                   timeout=20, stall_retries=1)
             return _flood_from_mirror(r, feats, clip, primary)
         r.features = _clip(feats, clip)
         try:
-            panels = query_features(f"{NFHL_URL}/3", geometry=clip, in_sr=epsg, out_sr=epsg, out_fields="FIRM_PAN,EFF_DATE,PANEL_TYP")
+            # Panel dates are nice-to-have and come from the same often-overloaded FEMA server: one short try.
+            panels = query_features(f"{NFHL_URL}/3", geometry=clip, in_sr=epsg, out_sr=epsg, out_fields="FIRM_PAN,EFF_DATE,PANEL_TYP",
+                                    timeout=FEMA_TIMEOUT_S, retry=False)
             effs = sorted({(p.props.get("FIRM_PAN"), _ms_date(p.props.get("EFF_DATE"))) for p in panels})
             if effs:
                 r.vintage = "FIRM panel(s) " + ", ".join(f"{p} eff. {d}" for p, d in effs if p)
@@ -926,7 +929,7 @@ def fetch_adjacent(clip: BaseGeometry, epsg: int, src, subject_geom: BaseGeometr
         r.retrieved_at = now_iso()
         return r
     try:
-        feats = [_normalise(f, src) for f in query_features(src.url, geometry=clip, in_sr=epsg, out_sr=epsg)]
+        feats = [_normalise(f, src) for f in query_features(src.url, geometry=clip, in_sr=epsg, out_sr=epsg, timeout=12, stall_retries=1)]
         for f in feats:
             if subject_geom is not None and f.geom.intersection(subject_geom).area > 0.5 * min(f.geom.area, subject_geom.area):
                 continue  # the subject parcel itself (or a stacked duplicate)

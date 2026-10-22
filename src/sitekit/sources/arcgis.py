@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import requests
+
 from shapely.geometry import LinearRing, MultiPolygon, Polygon, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.validation import make_valid
@@ -65,7 +67,10 @@ def query_features(
     return_geometry: bool = True,
     timeout: float = 45,
     retry: bool = True,
+    stall_retries: int = 0,
 ) -> list[Feature]:
+    """stall_retries: send a fresh request this many times when one times out. Some hosted layers stall at random
+    (the same query takes 0.3 s, then 37 s); a short timeout plus a fresh request beats one long wait."""
     params: dict[str, Any] = {
         "where": where,
         "outFields": out_fields,
@@ -98,7 +103,13 @@ def query_features(
             if page_size:
                 p["resultRecordCount"] = page_size
         # Long polygon geometries blow past URL limits; POST is always safe.
-        r = (session() if retry else plain_session()).post(f"{layer_url}/query", data=p, timeout=timeout)
+        for attempt in range(stall_retries + 1):
+            try:
+                r = (session() if retry else plain_session()).post(f"{layer_url}/query", data=p, timeout=timeout)
+                break
+            except requests.Timeout:
+                if attempt == stall_retries:
+                    raise
         r.raise_for_status()
         data = r.json()
         if "error" in data:

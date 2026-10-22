@@ -176,7 +176,7 @@ def build(args: dict) -> dict:
           "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
     save_result(run_id, rj)
     record_usage({**base, "outcome": "ok", "state": res.site.state, "parcel": res.site.parcel is not None, "zoning": zoning_coverage(res),
-                  "seconds": round(time.time() - t0, 1),
+                  "seconds": round(time.time() - t0, 1), "t": {k: round(v, 1) for k, v in res.timings.items()},
                   "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed")})
     link = f"{_site_url()}/r/{run_id}"
     content = [{"type": "text", "text": _result_text(rj, link)}]
