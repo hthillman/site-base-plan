@@ -20,7 +20,7 @@ from flask import Flask, Response, abort, jsonify, request, send_file
 
 from .config import REPO_ROOT
 from .parcel import looks_like_apn
-from .pipeline import Options, run
+from .pipeline import Options, run, zoning_coverage
 
 ON_VERCEL = bool(os.environ.get("VERCEL"))
 OUT = Path("/tmp/sitekit-out") if ON_VERCEL else REPO_ROOT / "out"
@@ -69,6 +69,14 @@ try:  # Terms of Service (hosted site only)
     app.register_blueprint(_terms_bp)
 except ImportError:
     pass
+
+try:  # /zoning coverage page (hosted site only: the zoning registry isn't in the open-source mirror)
+    from .zoning.coverage_page import bp as _zoning_page_bp
+
+    app.register_blueprint(_zoning_page_bp)
+    ZONING_PAGE = True
+except ImportError:
+    ZONING_PAGE = False
 
 try:  # one-time setup endpoints (hosted site only; removed after use)
     from .admin_setup import bp as _admin_bp
@@ -284,7 +292,7 @@ def run_request(d: dict, batch: bool = False):
             record_usage({
                 **base, "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
                 "parcels": len(res.site.parcels) or (1 if res.site.parcel is not None else 0), "layers": opts.layer_preset + ("+custom" if opts.layer_custom else ""),
-                "parcel": res.site.parcel is not None, "testfit": getattr(res.testfit, "status", None),
+                "parcel": res.site.parcel is not None, "testfit": getattr(res.testfit, "status", None), "zoning": zoning_coverage(res),
                 "seconds": round(time.time() - t0, 1), "interval": opts.contour_interval,
                 "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
@@ -678,7 +686,7 @@ def sitemap():
     base = _site_url()
     from .guides import all_paths
 
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/firms"] if FIRMS_PAGE else []) + all_paths()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/zoning"] if ZONING_PAGE else []) + (["/firms"] if FIRMS_PAGE else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")
@@ -698,7 +706,7 @@ def llms_txt():
     cstates = ", ".join(sorted(county_sources()))
     text = f"""# Basesheet
 
-> Basesheet is a free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files. No account. Open source (MIT).
+> Basesheet is a free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files, plus the zoning district and its rules in covered cities and counties. Outputs are not a survey and not for permit submission. No account. Open source (MIT).
 
 Built for landscape architects, site designers and civil engineers doing early site studies, feasibility and concept design. It replaces the hour or two of pulling public GIS layers into CAD by hand. It is not a survey.
 
@@ -709,6 +717,7 @@ Built for landscape architects, site designers and civil engineers doing early s
 - [Privacy]({base}/privacy)
 - [MCP server]({base}/mcp): Streamable HTTP endpoint (no auth) with one tool, build_base_plan(site), for ChatGPT, Claude and other MCP clients; returns key facts, a preview map and a result page link
 - [Source code]({REPO_URL}): MIT-licensed Python core and the parcel source registry
+- [Free zoning lookup]({base}/zoning): every city and county where Basesheet finds the zoning district for an address, with rule summaries (setbacks, height, density, parking) where drafted; not a zoning determination
 - [Free parcel data by state]({base}/parcels): every verified free statewide parcel layer, with publisher, coverage, vintage, fields and REST endpoint
 
 ## Guides

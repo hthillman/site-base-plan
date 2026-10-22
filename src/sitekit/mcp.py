@@ -114,7 +114,7 @@ def _result_text(rj: dict, link: str) -> str:
     if warn:
         lines += ["", "Needs a look:"] + [f"- {t}" for t in warn[:6]]
     lines += ["", f"Result page with the files (CAD/DXF, SketchUp, Civil 3D LandXML, GIS, PDF; kept 2 days): {link}",
-              "", "Planning-level public data, not a survey or zoning determination: verify with a licensed surveyor and the "
+              "", "NOT A SURVEY. NOT FOR PERMIT SUBMISSION. Planning-level public data, not a zoning determination: verify with a licensed surveyor and the "
               "jurisdiction before relying on it."]
     return "\n".join(lines)
 
@@ -122,7 +122,7 @@ def _result_text(rj: dict, link: str) -> str:
 def build(args: dict) -> dict:
     """Run one base plan for a tools/call; returns an MCP CallToolResult."""
     from .geocode import GeocodeError
-    from .pipeline import Options, run
+    from .pipeline import Options, run, zoning_coverage
     from .web import OUT, looks_like_apn, publish, query_shape, record_usage, save_result
 
     q = str(args.get("site") or "").strip()[:300]
@@ -165,7 +165,7 @@ def build(args: dict) -> dict:
     rj = {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
           "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
     save_result(run_id, rj)
-    record_usage({**base, "outcome": "ok", "state": res.site.state, "parcel": res.site.parcel is not None,
+    record_usage({**base, "outcome": "ok", "state": res.site.state, "parcel": res.site.parcel is not None, "zoning": zoning_coverage(res),
                   "seconds": round(time.time() - t0, 1),
                   "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed")})
     link = f"{_site_url()}/r/{run_id}"
@@ -178,7 +178,7 @@ def build(args: dict) -> dict:
         "facts": [{k: f.get(k) for k in ("label", "value", "sub")} for f in rj["facts"] or []],
         "needs_a_look": [x["text"] for x in res.flags if x.get("level") in ("alert", "caution", "missing")],
         "files": {"zip": urls.get("zip"), "pdf": urls.get("pdf"), "preview": urls.get("preview")},
-        "disclaimer": "Planning-level public data, not a survey or zoning determination. Verify with a licensed surveyor and the jurisdiction.",
+        "disclaimer": "Not a survey. Not for permit submission. Planning-level public data, not a zoning determination. Verify with a licensed surveyor and the jurisdiction.",
     }}
 
 

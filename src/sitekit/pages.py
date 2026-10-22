@@ -137,6 +137,7 @@ ul{padding-left:20px}li{margin:5px 0}
 @media(max-width:560px){#pickmap{height:300px}}
 .tipline{margin:0;font-size:14px;color:var(--muted)}.tipline a{font-weight:600}
 .rhead{display:grid;gap:2px}.rhead h3{font-size:20px;margin:0}
+.nsurvey{margin:10px 0 0;padding:8px 12px;border-left:4px solid var(--alert);background:color-mix(in srgb,var(--alert) 7%,transparent);font-size:14px}
 .rtop{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;margin-top:14px;align-items:start}
 .rtop.nopv{grid-template-columns:1fr}
 @media(max-width:640px){.rtop{grid-template-columns:1fr}}
@@ -209,6 +210,22 @@ NAV = [("/", "Base plan"), ("/about", "About"), ("/sources", "Sources"), ("/priv
 
 
 SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # canonical origin, e.g. https://basesheet.site
+def zoning_counts() -> dict | None:
+    """{"jurisdictions", "with_rules", "states"} where the hosted zoning registry is present, else None."""
+    try:
+        from .zoning.coverage_page import counts
+    except ImportError:
+        return None
+    return counts()
+
+
+def _zoning_phrase() -> str:
+    z = zoning_counts()
+    return f' Free zoning lookup in <a href="/zoning">{z["jurisdictions"]} cities and counties</a>.' if z else ""
+
+
+ZONING_LINK = ' · <a href="/zoning">Zoning by city</a>' if importlib.util.find_spec("sitekit.zoning.coverage_page") else ""
+
 DEFAULT_DESCRIPTION = ("Free planning-level site base plans from any US address: parcel lines, LiDAR contours, slopes, soils, "
                        "FEMA flood zones, wetlands and aerial, as DXF, SketchUp terrain, LandXML, GIS and PDF.")
 
@@ -242,7 +259,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -276,7 +293,7 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
         actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
 <h1>A site base plan from any US address</h1>
-<p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands, aerial and 3D building massing, ready for AutoCAD, SketchUp, Civil 3D and GIS.
+<p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands, aerial and 3D building massing, ready for AutoCAD, SketchUp, Civil 3D and GIS.{_zoning_phrase()}
 Free, no account.</p>
 
 <form id="gate" hidden class="search">
@@ -329,7 +346,7 @@ Free, no account.</p>
 
 <footer>
 <p class="fine">Planning-level public data, not a survey. Parcel lines in <a href="/about#coverage">{n} states{county_txt}</a>.</p>
-<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>{TERMS_LINK}{(" · Contact: " + CONTACT_HTML) if CONTACT_HTML else ""}</p>
+<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>{ZONING_LINK}{TERMS_LINK}{(" · Contact: " + CONTACT_HTML) if CONTACT_HTML else ""}</p>
 <p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
 <form id="fb" hidden>
 <textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
@@ -426,6 +443,7 @@ function render(j){
  const facts=(j.facts||[]).map(f=>'<div class="fact '+esc(f.tone)+'"><span class="fl">'+esc(f.label)+'</span><span class="fv">'+esc(f.value)+'</span>'+(f.sub?'<span class="fs">'+esc(f.sub)+'</span>':'')+'</div>').join('');
  out.innerHTML='<div class="result">'+
  '<div class="rhead"><h3>Base plan ready</h3><span class="note">'+esc(j.title||'')+' · built in '+j.seconds+' s</span></div>'+
+  '<p class="nsurvey"><b>Not a survey. Not for permit submission.</b> Planning-level public data: parcel lines are assessor tax lines. Check everything with a licensed surveyor and the jurisdiction before relying on it.</p>'+
  '<div class="rtop'+(pv?'':' nopv')+'">'+
   (pv?'<a class="preview" href="'+esc(pdf||pv)+'" target="_blank" rel="noopener" title="Open the PDF" data-ev="open_pdf"><img src="'+esc(pv)+'" alt="Preview of the base plan sheet"></a>':'')+
   '<div class="ract">'+
@@ -592,6 +610,15 @@ def faq_jsonld() -> dict:
             "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq_items()]}
 
 
+def _about_zoning() -> str:
+    z = zoning_counts()
+    if not z:
+        return ""
+    return (f'<p class="note"><b>Zoning:</b> the zoning district for addresses in {z["jurisdictions"]} cities and counties across {z["states"]} states, '
+            f'from each jurisdiction\'s own zoning map, with a rule summary (setbacks, height, density, parking) in {z["with_rules"]} of them. '
+            f'Rule sheets cite the code and are marked draft until checked by a professional. <a href="/zoning">Full list</a>.</p>')
+
+
 def about(parcel_states: list[str]) -> str:
     from .parcel import all_sources
     from .plugins import testfit_available
@@ -652,6 +679,7 @@ The server address is <code>{SITE_URL or ""}/mcp</code>.</p>
 <p class="note">No free statewide parcel layer yet (the plan is drawn around the address instead): {escape(", ".join(missing))}.</p>
 <p class="note"><b>Elevation:</b> USGS 3DEP. Most of the country has 1 m LiDAR; where it doesn't, the elevation model is 3-10 m and the tool raises the
 contour interval to what the data supports (5 ft at 10 m) and says so.</p>
+{_about_zoning()}
 
 {TF_SECTION}
 
@@ -727,7 +755,7 @@ def privacy() -> str:
 <ul>
 <li>It's sent to geocoding services (Esri, the U.S. Census Bureau, OpenStreetMap) to find the location, and to public GIS services (USGS, USDA, FEMA, USFWS, state parcel servers) to fetch data around it.</li>
 <li>The finished files are stored at an unlisted web link for <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
-<li>Each run leaves an anonymous usage record (state, whether a parcel was found, run time, which data sources failed) so we can see what's working. It never includes the address or any location finer than the state.</li>
+<li>Each run leaves an anonymous usage record (state, whether a parcel was found, whether we had zoning for it, run time, which data sources failed) so we can see what's working. It never includes the address or any location finer than the state.</li>
 <li>Your browser keeps a count of the plans you've made and the date of your first one. Each run sends just those two numbers, so we can tell whether people come back. There's no ID and nothing that identifies you or your browser; clearing site data resets the count.</li>
 </ul>
 <h2>Analytics</h2>

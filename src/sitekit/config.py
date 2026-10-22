@@ -12,6 +12,9 @@ DEFAULT_LAYERS_FILE = REPO_ROOT / "config" / "layers.toml"
 
 US_FT_PER_M = 3937 / 1200  # US survey foot
 
+# Stamped across every drawing (PDF sheets, preview, DXF) and shown on the result page.
+WATERMARK_LINES = ("NOT A SURVEY", "NOT FOR PERMIT SUBMISSION")
+
 DISCLAIMER = (
     "PLANNING-LEVEL DATA ONLY. Compiled from public GIS sources of varying "
     "resolution and vintage. Not a substitute for a boundary or topographic "

@@ -19,7 +19,7 @@ from ezdxf.enums import TextEntityAlignment
 from shapely.geometry import LineString, MultiPolygon, Polygon
 from shapely.geometry.base import BaseGeometry
 
-from .config import DISCLAIMER, Config
+from .config import DISCLAIMER, WATERMARK_LINES, Config
 from .crs import wkid_text
 
 DXF_VERSION = "R2013"  # opens in AutoCAD 2013+ and SketchUp Pro's importer
@@ -213,6 +213,7 @@ def write_dxf(res, cfg: Config, opts) -> dict[str, str]:
     bx, by = base_point(site.clip)
     _basepoint(msp, bx, by, site, cfg, txt_h)
     _notes(msp, res, cfg, txt_h)
+    _watermark(msp, res, cfg)
 
     dxf_path = out / "site.dxf"
     doc.saveas(dxf_path)
@@ -286,11 +287,22 @@ def _label_contour(msp, line: LineString, z: float, layer: str, txt_h: float):
         msp[-1].dxf.rotation = ang
 
 
+def _watermark(msp, res, cfg: Config):
+    """Large red 'NOT A SURVEY / NOT FOR PERMIT SUBMISSION' across the site on the notes layer."""
+    x0, y0, x1, y1 = res.site.clip.bounds
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    h = (x1 - x0) / 16
+    for i, line in enumerate(WATERMARK_LINES):
+        off = (0.75 - 1.5 * i) * h
+        _label(msp, line, (cx - off * 0.47, cy + off * 0.88), cfg.layer("notes").name, h, rotation=28)
+        msp[-1].dxf.color = 1  # red
+
+
 def _notes(msp, res, cfg: Config, txt_h: float):
     site = res.site
     x0, y0, x1, y1 = site.clip.bounds
     lines = [
-        "SITE BASE PLAN - PLANNING LEVEL",
+        "SITE BASE PLAN - PLANNING LEVEL. " + " - ".join(WATERMARK_LINES) + ".",
         f"{site.matched_address}",
         f"County: {site.county}   APN: {', '.join(site.parcel_ids) or 'not resolved'}",
         f"Coordinates: {site.crs_label}, {wkid_text(site.epsg)}. Elevations: {site.units} NAVD88.",

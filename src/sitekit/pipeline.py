@@ -702,5 +702,16 @@ def _write_dem(path: Path, grid: Grid, epsg: int) -> Path:
     return path
 
 
+def zoning_coverage(res: RunResult) -> str:
+    """Coverage outcome for the anonymous usage record (no location below state):
+    covered | no_zoning | no_district | none."""
+    z = res.zoning
+    if not z:
+        return "none"
+    if z.get("no_zoning"):
+        return "no_zoning"
+    return "covered" if z.get("zones") else "no_district"
+
+
 def result_json(res: RunResult) -> str:
     return json.dumps({"flags": res.flags, "files": res.files, "timings": res.timings}, indent=2)

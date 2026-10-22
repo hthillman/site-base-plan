@@ -17,7 +17,7 @@ from matplotlib.patches import FancyArrow, PathPatch, Rectangle  # noqa: E402
 from matplotlib.path import Path as MPath  # noqa: E402
 from shapely.geometry import MultiPolygon, Polygon  # noqa: E402
 
-from .config import DISCLAIMER, Config  # noqa: E402
+from .config import DISCLAIMER, WATERMARK_LINES, Config  # noqa: E402
 from .crs import wkid_text  # noqa: E402
 
 PAGE = (17.0, 11.0)
@@ -75,7 +75,21 @@ def _map_axes(fig, clip, scale):
     for s in ax.spines.values():
         s.set_linewidth(0.8)
         s.set_color(INK)
+    _watermark(ax)
     return ax
+
+
+def _watermark(ax_or_fig, size: float = 46, alpha: float = 0.18):
+    """'NOT A SURVEY / NOT FOR PERMIT SUBMISSION' across the sheet, above everything (also lands in preview.png).
+    One text per line, stepped at right angles to the 28-degree slant so the lines don't overlap."""
+    is_ax = hasattr(ax_or_fig, "transAxes")
+    w_in, h_in = (MAP_BOX[2], MAP_BOX[3]) if is_ax else PAGE
+    ang, gap_in = np.radians(28), size * 1.6 / 72
+    for i, line in enumerate(WATERMARK_LINES):
+        off = (0.5 - i) * gap_in
+        x, y = 0.5 - np.sin(ang) * off / w_in, 0.5 + np.cos(ang) * off / h_in
+        ax_or_fig.text(x, y, line, transform=ax_or_fig.transAxes if is_ax else ax_or_fig.transFigure, rotation=28, fontsize=size,
+                       fontweight="bold", color=FLAG_COLORS["alert"], alpha=alpha, ha="center", va="center", zorder=100, clip_on=is_ax)
 
 
 def _scale_bar(ax, scale):
@@ -138,6 +152,8 @@ def _sidebar(fig, res, title, scale, legend: list[tuple], page_no, pages):
         f"Elevations: {site.units}, NAVD88",
         f"Prepared {date.today().isoformat()}" + (f" by {firm.get('prepared_by') or firm.get('name')}" if firm else " (automated)"),
     ]
+    t(y, " · ".join(WATERMARK_LINES), fontsize=8.5, fontweight="bold", color=FLAG_COLORS["alert"])
+    y -= 0.24
     for m in meta:
         t(y, m, fontsize=7.5, color=MUTED)
         y -= 0.19
@@ -447,6 +463,7 @@ def _summary_page(fig, res, cfg, opts, pages):
         fig.text(x / W, y / H, s, **{"fontsize": 8.5, "color": INK, "va": "top", **kw})
 
     t(0.6, 10.5, "SITE FINDINGS AND DATA SOURCES", fontsize=16, fontweight="bold")
+    _watermark(fig, size=64, alpha=0.07)
     firm = getattr(res, "firm", None)
     if firm:
         fig.text((W - 0.6) / W, 10.5 / H, (firm.get("name") or "")[:60] + (f"  |  {firm['project'][:60]}" if firm.get("project") else ""),

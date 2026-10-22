@@ -387,13 +387,15 @@ def write_kml(res, out: Path) -> str:
 
 def write_readme(res, files: dict[str, str]) -> str:
     """Plain-text guide to opening each file, written into every output folder."""
-    from .config import DISCLAIMER
+    from .config import DISCLAIMER, WATERMARK_LINES
     from .crs import wkid_text
 
     site = res.site
     bx, by = base_point(site.clip)
     have = {k for k in files} | {k for k in res.files}
     lines = [
+        " - ".join(WATERMARK_LINES) + ". Planning-level public data only; read the note at the end of this file.",
+        "",
         f"HOW TO OPEN THESE FILES  ({site.matched_address})",
         "",
         f"Coordinates: {site.crs_label} ({wkid_text(site.epsg)}), {site.units}. Elevations NAVD88, same units.",
