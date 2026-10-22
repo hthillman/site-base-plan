@@ -224,7 +224,7 @@ def _zoning_phrase() -> str:
     return f' Free zoning lookup in <a href="/zoning">{z["jurisdictions"]} cities and counties</a>.' if z else ""
 
 
-ZONING_LINK = ' · <a href="/zoning">Zoning by city</a>' if importlib.util.find_spec("sitekit.zoning.coverage_page") else ""
+ZONING_LINK = ' · <a href="/zoning">Zoning by city</a>' if importlib.util.find_spec("sitekit.zoning") else ""  # hosted build only
 
 DEFAULT_DESCRIPTION = ("Free planning-level site base plans from any US address: parcel lines, LiDAR contours, slopes, soils, "
                        "FEMA flood zones, wetlands and aerial, as DXF, SketchUp terrain, LandXML, GIS and PDF.")
