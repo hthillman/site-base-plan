@@ -721,6 +721,7 @@ Built for landscape architects, site designers and civil engineers doing early s
 - [About, coverage and FAQ]({base}/about): what it does, limits, state-by-state parcel coverage, common questions
 - [Data sources]({base}/sources): every public data source, with publisher and resolution
 - [Privacy]({base}/privacy)
+- [Use Basesheet in ChatGPT and Claude]({base}/guides/use-in-chatgpt-and-claude): add the MCP server as a custom connector (Claude Settings > Connectors; ChatGPT Developer mode); no auth or key
 - [MCP server]({base}/mcp): Streamable HTTP endpoint (no auth) with one tool, build_base_plan(site), for ChatGPT, Claude and other MCP clients; returns key facts, a preview map and a result page link
 - [Source code]({REPO_URL}): MIT-licensed Python core and the parcel source registry
 - [Free zoning lookup]({base}/zoning): every city and county where Basesheet finds the zoning district for an address, with rule summaries (setbacks, height, density, parking) where drafted; not a zoning determination

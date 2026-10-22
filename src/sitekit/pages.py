@@ -681,8 +681,10 @@ and isn't covered, you can add it: it's one small file. See the contributing gui
 The server address is <code>{SITE_URL or ""}/mcp</code>.</p>
 <ul>
 <li><b>Claude:</b> Settings → Connectors → Add custom connector, and paste the address. Then ask something like "Build a base plan for 123 Main St, Springfield, IL".</li>
+<li><b>ChatGPT:</b> turn on Developer mode (Settings → Apps &amp; Connectors → Advanced), then create a connector with the same address and no authentication.</li>
 <li><b>Other MCP clients</b> (Cursor, VS Code and others): add it as a remote MCP server over HTTP. No sign-in or key needed.</li>
 </ul>
+<p><a href="/guides/use-in-chatgpt-and-claude">Step-by-step setup and example questions</a>.</p>
 
 <h2 id="coverage">Coverage</h2>
 <p>Topography, soils, flood zones, wetlands and imagery cover all 50 states. Parcel lines come from free statewide parcel layers, which

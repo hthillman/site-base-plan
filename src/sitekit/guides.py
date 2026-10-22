@@ -335,6 +335,44 @@ concept design before a survey is ordered. See <a href="/guides/base-plan-vs-bou
         ("assessor-parcel-lines-vs-legal-boundaries", "lidar-contours-vs-survey-topo", "what-is-a-base-sheet"),
     ),
     Guide(
+        "use-in-chatgpt-and-claude", "howto",
+        "How to use Basesheet in ChatGPT and Claude (MCP connector setup)",
+        "How to use Basesheet in ChatGPT and Claude",
+        "Add Basesheet to Claude or ChatGPT as a custom MCP connector, then ask for a property's flood zone, parcel size, zoning and CAD files in chat. Free, no API key.",
+        "Add https://basesheet.site/mcp as a custom connector. In Claude: Settings, Connectors, Add custom connector, paste the "
+        "address. In ChatGPT: turn on Developer Mode, then create a connector with the same address and no authentication. "
+        "Then ask something like \"Site context for 500 Capitol Way S, Olympia, WA\". No sign-in or API key is needed.",
+        """
+<h2>Claude</h2>
+<ol>
+<li>Open <b>Settings → Connectors</b> (in the Claude apps or at claude.ai).</li>
+<li>Choose <b>Add custom connector</b>. Name it <code>Basesheet</code> and paste <code>https://basesheet.site/mcp</code> as the URL. Leave the authentication settings empty.</li>
+<li>In a chat, make sure Basesheet is switched on in the connectors menu, then ask for a property.</li>
+</ol>
+<p class="note">Custom connectors are in beta. Free plans can add one; on Team and Enterprise plans an owner adds the connector for the organization first.</p>
+<h2>ChatGPT</h2>
+<ol>
+<li>Open <b>Settings → Apps &amp; Connectors → Advanced settings</b> and turn on <b>Developer mode</b>.</li>
+<li>Back in <b>Apps &amp; Connectors</b>, choose <b>Create</b>. Name it <code>Basesheet</code>, paste <code>https://basesheet.site/mcp</code> as the server URL, and choose <b>No authentication</b>.</li>
+<li>Start a chat, add Basesheet from the tools menu in the message box, and ask for a property.</li>
+</ol>
+<p class="note">Developer mode is a beta, and which ChatGPT plans include it has changed over time; check OpenAI's help center if you don't see it.
+ChatGPT warns that custom connectors aren't reviewed by OpenAI; Basesheet's connector only reads public data and sends you a link.</p>
+<h2>Other MCP clients</h2>
+<p>Cursor, VS Code and other tools that support remote MCP servers over HTTP can add the same address. For clients that take JSON:</p>
+<pre><code>{"mcpServers": {"basesheet": {"url": "https://basesheet.site/mcp"}}}</code></pre>
+<h2>What to ask</h2>
+<ul>
+<li>"What's the flood zone and lot size at 3102 Birchwood Ave, Bellingham, WA? I need CAD files too."</li>
+<li>"Is 500 Capitol Way S, Olympia, WA in a wetland or on steep slopes? What's the zoning?"</li>
+<li>"Site context for parcel 78501500100 in Washington."</li>
+</ul>
+<p>The answer lists the key facts and a link to the result page, where you download DXF, SketchUp, Civil 3D, GIS and PDF files.
+Like everything Basesheet makes, it's public GIS data: not a survey, not a certified site plan and not for permit submission.</p>
+""",
+        ("site-base-plan-from-address", "when-you-need-a-surveyor", "base-plan-vs-boundary-survey"),
+    ),
+    Guide(
         "when-you-need-a-surveyor", "howto",
         "When you need a licensed land surveyor, and how to find one",
         "When you need a licensed land surveyor (and how to find one)",
