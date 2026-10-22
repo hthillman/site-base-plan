@@ -19,7 +19,7 @@ from ezdxf.enums import TextEntityAlignment
 from shapely.geometry import LineString, MultiPolygon, Polygon
 from shapely.geometry.base import BaseGeometry
 
-from .config import DISCLAIMER, WATERMARK_LINES, Config
+from .config import DISCLAIMER, PARCEL_NOTE, WATERMARK_LINES, Config
 from .crs import wkid_text
 
 DXF_VERSION = "R2013"  # opens in AutoCAD 2013+ and SketchUp Pro's importer
@@ -186,6 +186,9 @@ def write_dxf(res, cfg: Config, opts) -> dict[str, str]:
         else:
             for p in _polys(site.parcel.geom):
                 _add_poly(msp, p, cfg.layer("parcel").name)
+        # Say what the line is, on the line's own layer, so it travels with the geometry into any drawing.
+        c = site.parcel.geom.representative_point()
+        _label(msp, PARCEL_NOTE.upper(), (c.x, c.y), cfg.layer("parcel").name, txt_h * 0.8)
 
     # Existing building footprints (plan) and 3D massing blocks.
     bl = layers.get("buildings")

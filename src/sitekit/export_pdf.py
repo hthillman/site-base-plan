@@ -17,7 +17,7 @@ from matplotlib.patches import FancyArrow, PathPatch, Rectangle  # noqa: E402
 from matplotlib.path import Path as MPath  # noqa: E402
 from shapely.geometry import MultiPolygon, Polygon  # noqa: E402
 
-from .config import DISCLAIMER, WATERMARK_LINES, Config  # noqa: E402
+from .config import DISCLAIMER, PARCEL_NOTE, WATERMARK_LINES, Config  # noqa: E402
 from .crs import wkid_text  # noqa: E402
 
 PAGE = (17.0, 11.0)
@@ -356,14 +356,14 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         if not L["dem"].ok():
             _missing_stamp(ax, "TOPOGRAPHY FAILED TO LOAD")
         legend = [
-            ("line", "Tax parcel (assessor)", dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2)))),
+            ("line", PARCEL_NOTE, dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2)))),
             ("line", "Data extent", dict(color=MUTED, lw=0.6, linestyle="--")),
             ("line", f"Major contour, {opts.contour_interval * cfg.major_every:g} ft (derived from USGS data)", dict(color=CONTOUR, lw=0.8)),
             ("line", f"Minor contour, {opts.contour_interval:g} ft (derived from USGS data)", dict(color=CONTOUR, lw=0.3)),
             ("fill", "FEMA 1% floodplain (SFHA)", dict(facecolor=matplotlib.colors.to_rgba(FLOOD, 0.15), edgecolor=FLOOD, hatch="////")),
             ("line", "FEMA other zone boundary", dict(color=FLOOD, lw=0.5, linestyle=":")),
             ("fill", "NWI wetland / water", dict(facecolor=matplotlib.colors.to_rgba(WETLAND, 0.15), edgecolor=WETLAND, hatch="....")),
-            ("line", "Adjacent tax parcels", dict(color=ADJ, lw=0.6)),
+            ("line", "Neighboring assessor parcel lines (not surveyed)", dict(color=ADJ, lw=0.6)),
             ("line", "Road centerline (TIGER)", dict(color=ROAD, lw=0.8, linestyle=(0, (10, 3, 2, 3)))),
             ("fill", "Approx. right-of-way (between parcels)", dict(facecolor=matplotlib.colors.to_rgba("#bdbdb5", 0.3), edgecolor="none", hatch="..")),
         ]
@@ -397,7 +397,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         if not L["slope"].ok():
             _missing_stamp(ax, "SLOPE ANALYSIS UNAVAILABLE (DEM FAILED)")
         legend = [("fill", f"{lo:g}-{hi:g}% slope" if hi is not None else f"{lo:g}%+ slope", dict(facecolor=SLOPE_COLORS[i % len(SLOPE_COLORS)], alpha=0.7, edgecolor="none")) for i, (lo, hi, *_r) in enumerate(bands)]
-        legend += [("line", "Tax parcel (assessor)", dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2))))]
+        legend += [("line", PARCEL_NOTE, dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2))))]
         _sidebar(fig, res, "SLOPE ANALYSIS", scale, legend, 2, pages)
         pdf.savefig(fig)
         plt.close(fig)
@@ -422,7 +422,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         _parcel(ax, res)
         _scale_bar(ax, scale)
         legend = [("fill", f"Hydrologic group {k}", dict(facecolor=v, alpha=0.7, edgecolor="#5b4630")) for k, v in HSG_COLORS.items()]
-        legend += [("line", "Tax parcel (assessor)", dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2))))]
+        legend += [("line", PARCEL_NOTE, dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2))))]
         _sidebar(fig, res, "SOILS (SSURGO)", scale, legend, 3, pages)
         # Map-unit key under the map's top-left corner.
         if units:

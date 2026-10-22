@@ -11,13 +11,13 @@
 name = "SITE-PARCEL"
 color = 1          # red
 linetype = "PHANTOM"
-description = "Tax parcel boundary (WA statewide parcels). Not a survey."
+description = "Assessor (tax) parcel line from public GIS. Not a surveyed boundary; not a legal description."
 
 [layers.parcel_site]
 name = "SITE-PARCEL-ASSEMBLED"
 color = 1
 linetype = "CONTINUOUS"
-description = "Outer boundary of a multi-parcel site (only when several parcels are combined)."
+description = "Outer edge of a multi-parcel site, from assessor GIS lines. Not a surveyed boundary."
 
 [layers.clip]
 name = "SITE-EXTENT"
@@ -47,7 +47,7 @@ description = "Elevation labels on major contours."
 name = "SITE-PARCEL-ADJ"
 color = 8
 linetype = "CONTINUOUS"
-description = "Neighbouring tax parcels in the extent (assessor lines)."
+description = "Neighbouring assessor (tax) parcel lines in the extent. Not surveyed boundaries."
 
 [layers.parcel_adj_label]
 name = "SITE-PARCEL-ADJ-LABEL"

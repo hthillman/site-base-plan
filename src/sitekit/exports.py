@@ -21,6 +21,7 @@ import numpy as np
 from shapely.geometry import LineString, MultiPolygon, Polygon, mapping
 from shapely.geometry.base import BaseGeometry
 
+from .config import PARCEL_NOTE
 from .crs import reproject
 from .export_dxf import base_point
 
@@ -274,7 +275,7 @@ def write_gis(res, out: Path) -> dict[str, str]:
     gdir = out / "gis"
     gdir.mkdir(exist_ok=True)
     layers = {
-        "parcel": [(site.parcel.geom, _clean(site.parcel.props))] if site.parcel is not None else [],
+        "parcel": [(site.parcel.geom, {"note": PARCEL_NOTE, **_clean(site.parcel.props)})] if site.parcel is not None else [],
         "extent": [(site.clip, {"buffer_ft": site.buffer_ft})],
         "contours": [(f.geom, {"elev": f.props["elev"], "major": f.props["major"], "units": site.units}) for f in res.layers["contours"].features],
         "slope_bands": [(f.geom, {"lo_pct": f.props["lo"], "hi_pct": f.props["hi"]}) for f in res.layers["slope"].features],
@@ -282,7 +283,7 @@ def write_gis(res, out: Path) -> dict[str, str]:
     if res.layers.get("roads") is not None and res.layers["roads"].ok():
         layers["roads"] = [(f.geom, {"name": f.props.get("name"), "class": f.props.get("class")}) for f in res.layers["roads"].features]
     if res.layers.get("adjacent") is not None and res.layers["adjacent"].ok():
-        layers["adjacent_parcels"] = [(f.geom, {"apn": f.props.get("_APN"), "owner": f.props.get("_OWNER"), "deed": f.props.get("_DEED"),
+        layers["adjacent_parcels"] = [(f.geom, {"note": PARCEL_NOTE, "apn": f.props.get("_APN"), "owner": f.props.get("_OWNER"), "deed": f.props.get("_DEED"),
                                                 "plat": f.props.get("_PLAT"), "situs": f.props.get("_SITUS")}) for f in res.layers["adjacent"].features]
     if res.layers.get("row") is not None and res.layers["row"].ok():
         layers["row_approx"] = [(f.geom, {"note": "derived: area between tax parcels"}) for f in res.layers["row"].features]
@@ -345,7 +346,7 @@ def write_kml(res, out: Path) -> str:
             folders.append(f"<Folder><name>{escape(name)}</name>{pm}</Folder>")
 
     if site.parcel is not None:
-        folder("Tax parcel", "parcel", [(site.parcel.geom, ", ".join(site.parcel_ids) or "Parcel")])
+        folder(PARCEL_NOTE, "parcel", [(site.parcel.geom, (", ".join(site.parcel_ids) or "Parcel") + " (assessor line, not surveyed)")])
     from .sources.layers import is_sfha
 
     if res.layers["flood"].ok():

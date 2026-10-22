@@ -14,6 +14,7 @@ US_FT_PER_M = 3937 / 1200  # US survey foot
 
 # Stamped across every drawing (PDF sheets, preview, DXF) and shown on the result page.
 WATERMARK_LINES = ("NOT A SURVEY", "NOT FOR PERMIT SUBMISSION")
+PARCEL_NOTE = "Assessor parcel line, not a surveyed boundary"  # beside every parcel line, in every format
 
 DISCLAIMER = (
     "PLANNING-LEVEL DATA ONLY. Compiled from public GIS sources of varying "
