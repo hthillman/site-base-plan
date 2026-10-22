@@ -344,6 +344,7 @@ Not a survey. Free, no account.</p>
 </div>
 </form>
 {example}
+<p class="example">Also works in ChatGPT and Claude: <a href="/guides/use-in-chatgpt-and-claude" data-ev="ai_setup">set it up in a minute</a>.</p>
 
 <div id="out"></div>
 

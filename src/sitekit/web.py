@@ -440,7 +440,7 @@ def interest():
     return jsonify(ok=True)
 
 
-EVENT_NAMES = {"run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
+EVENT_NAMES = {"ai_setup", "run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
                "tip_click", "firms_click", "vote", "vote_email", "map_pick"}
 
 
