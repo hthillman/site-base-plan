@@ -465,10 +465,12 @@ COVER_IS = [
     "An automated compilation of public GIS data (assessor parcels, USGS elevation, FEMA, NWI, USDA soils, local zoning maps)",
     "For early design, feasibility and site context",
     "Approximate: every line and number comes from someone else's dataset, at that dataset's accuracy and date",
+    "Not presented as authoritative for boundaries, buildings or topography",
 ]
 COVER_IS_NOT = [
     "A boundary, topographic, ALTA/NSPS or any other survey",
     "A legal description, or a determination of property lines, easements, setbacks or rights-of-way",
+    "A location of buildings or other fixed works, or of where they sit relative to property lines",
     "A zoning, flood zone or wetland determination",
     "A site plan for a permit application, or construction documents",
     "Professional surveying, engineering, architecture or legal advice",
@@ -510,7 +512,7 @@ def _cover_page(fig, res, pages):
 
     block(0.9, 6.7, "WHAT THIS IS", COVER_IS)
     block(8.8, 6.7, "WHAT THIS IS NOT", COVER_IS_NOT)
-    block(0.9, 3.15, "BEFORE YOU RELY ON ANYTHING HERE", COVER_DO, numbered=True, width=130)
+    block(0.9, 2.9, "BEFORE YOU RELY ON ANYTHING HERE", COVER_DO, numbered=True, width=130)
 
     terms = os.environ.get("SITE_URL", "").rstrip("/")
     foot = DISCLAIMER + (f" Use is subject to the Basesheet Terms: {terms}/terms." if terms else "")
