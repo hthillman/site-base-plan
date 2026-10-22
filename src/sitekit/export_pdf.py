@@ -358,8 +358,8 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         legend = [
             ("line", "Tax parcel (assessor)", dict(color=PARCEL, lw=1.6, linestyle=(0, (8, 2, 2, 2)))),
             ("line", "Data extent", dict(color=MUTED, lw=0.6, linestyle="--")),
-            ("line", f"Major contour ({opts.contour_interval * cfg.major_every:g} ft)", dict(color=CONTOUR, lw=0.8)),
-            ("line", f"Minor contour ({opts.contour_interval:g} ft)", dict(color=CONTOUR, lw=0.3)),
+            ("line", f"Major contour, {opts.contour_interval * cfg.major_every:g} ft (derived from USGS data)", dict(color=CONTOUR, lw=0.8)),
+            ("line", f"Minor contour, {opts.contour_interval:g} ft (derived from USGS data)", dict(color=CONTOUR, lw=0.3)),
             ("fill", "FEMA 1% floodplain (SFHA)", dict(facecolor=matplotlib.colors.to_rgba(FLOOD, 0.15), edgecolor=FLOOD, hatch="////")),
             ("line", "FEMA other zone boundary", dict(color=FLOOD, lw=0.5, linestyle=":")),
             ("fill", "NWI wetland / water", dict(facecolor=matplotlib.colors.to_rgba(WETLAND, 0.15), edgecolor=WETLAND, hatch="....")),
@@ -374,7 +374,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
             legend.append(("fill", {"local": "Existing building (local outline)", "approximate": "Existing building (approx., machine-traced)",
                                     "rough": "Existing building (rough, FEMA)"}[acc],
                            dict(facecolor=matplotlib.colors.to_rgba("#9d9a90", 0.35), edgecolor="#7d7a72")))
-        _sidebar(fig, res, "BASE PLAN", scale, legend, 1, pages)
+        _sidebar(fig, res, "SITE CONTEXT (PUBLIC GIS DATA)", scale, legend, 1, pages)
         pdf.savefig(fig)
         try:  # small preview of the base plan sheet for the results page
             box = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())  # the map only, not the sidebar

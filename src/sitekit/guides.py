@@ -118,8 +118,8 @@ GUIDES: list[Guide] = [
     ),
     Guide(
         "parcel-boundary-into-autocad", "howto",
-        "How to get a parcel boundary into AutoCAD or Civil 3D (in the right coordinates)",
-        "How to get a parcel boundary into AutoCAD or Civil 3D",
+        "How to get assessor parcel lines into AutoCAD or Civil 3D (in the right coordinates)",
+        "How to get assessor parcel lines into AutoCAD or Civil 3D",
         "Bring a property's parcel lines from county or state GIS into AutoCAD or Civil 3D in State Plane feet: where to get the data, MAPIMPORT for Civil 3D, a QGIS-to-DXF route for plain AutoCAD, and the unit traps.",
         "Download the parcel polygon from your state or county GIS (as a shapefile or GeoJSON), reproject it to your State Plane "
         "zone in feet, then import it: Civil 3D and Map 3D read shapefiles directly with MAPIMPORT; plain AutoCAD needs a DXF, "

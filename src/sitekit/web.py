@@ -78,6 +78,13 @@ try:  # /zoning coverage page (hosted site only: the zoning registry isn't in th
 except ImportError:
     ZONING_PAGE = False
 
+try:  # IndexNow key file (hosted site only)
+    from .indexnow import bp as _indexnow_bp
+
+    app.register_blueprint(_indexnow_bp)
+except ImportError:
+    pass
+
 try:  # one-time setup endpoints (hosted site only; removed after use)
     from .admin_setup import bp as _admin_bp
 

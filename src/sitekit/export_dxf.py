@@ -302,7 +302,7 @@ def _notes(msp, res, cfg: Config, txt_h: float):
     site = res.site
     x0, y0, x1, y1 = site.clip.bounds
     lines = [
-        "SITE BASE PLAN - PLANNING LEVEL. " + " - ".join(WATERMARK_LINES) + ".",
+        "SITE CONTEXT - PUBLIC GIS DATA COMPILATION, PLANNING LEVEL. " + " - ".join(WATERMARK_LINES) + ".",
         f"{site.matched_address}",
         f"County: {site.county}   APN: {', '.join(site.parcel_ids) or 'not resolved'}",
         f"Coordinates: {site.crs_label}, {wkid_text(site.epsg)}. Elevations: {site.units} NAVD88.",

@@ -589,6 +589,10 @@ def faq_items() -> list[tuple[str, str]]:
          "No. It's planning-level data for early site work. Parcel lines are assessor tax lines, often 5 to 50 ft from the legal "
          "boundary, and wetlands and flood zones are screening maps. Use a licensed land surveyor and the appropriate specialists "
          "before design decisions that depend on exact boundaries or conditions."),
+        ("Can I use it for a permit application?",
+         "No. Basesheet doesn't make site plans for permits, and its files are marked not for permit submission. Where a permit "
+         "needs a site plan, use a survey or a plan from the licensed professional your jurisdiction requires. Basesheet is for "
+         "early design, feasibility and context before that work."),
         ("Which states have parcel lines?",
          f"{n} states publish a free statewide parcel layer it can use. In {cstates} more states it uses county layers: "
          f"{counties} counties so far, mostly the larger metro areas. Elsewhere the plan is drawn around the address without a "

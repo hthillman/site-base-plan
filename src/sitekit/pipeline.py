@@ -63,6 +63,12 @@ class RunResult:
     envelope: dict | None = None  # zoning envelope for massing: {geom, height_ft, zone, label}
 
 
+
+def approx_sqft(a: float) -> str:
+    """GIS areas aren't measured: round to 2-3 significant figures (3,618 -> 3,600; 55,508 -> 55,500)."""
+    step = 10 if a < 1000 else 100 if a < 100_000 else 1000
+    return f"{round(a / step) * step:,.0f}"
+
 def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")[:60] or "site"
 
@@ -346,8 +352,8 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
         add("alert" if "NO PARCEL FOUND" in w else "info" if w.startswith("Combined site:") else "caution", w)
 
     if parcel is not None:
-        add("info", f"Parcel area {parcel.area:,.0f} sq ft ({parcel.area / 43560:.2f} ac) per assessor GIS geometry.")
-        flags.fact("parcel", "Parcel", f"{parcel.area / 43560:.2f} ac", f"{parcel.area:,.0f} sq ft · assessor lines", "info")
+        add("info", f"Parcel area about {approx_sqft(parcel.area)} sq ft ({parcel.area / 43560:.2f} ac) from assessor GIS lines, not a surveyed area.")
+        flags.fact("parcel", "Parcel", f"≈{parcel.area / 43560:.2f} ac", f"≈{approx_sqft(parcel.area)} sq ft · assessor GIS, not surveyed", "info")
         pp = site.parcel.props
         rec = [x for x in (f"owner of record {pp['_OWNER']}" if pp.get("_OWNER") else "", pp.get("_DEED"), f"plat {pp['_PLAT']}" if pp.get("_PLAT") else "",
                            f"subdivision {pp['_SUBDIV']}" if pp.get("_SUBDIV") else "") if x]
@@ -407,7 +413,7 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
         z = stats_within(grid, area_ref)
         if z.size:
             add("info", f"Elevation on {where}: {z.min():,.1f} to {z.max():,.1f} ft NAVD88 (relief {z.max() - z.min():,.1f} ft).")
-            flags.fact("elev", "Elevation", f"{z.min():,.0f} to {z.max():,.0f} ft", f"{z.max() - z.min():,.1f} ft of relief · NAVD88", "info")
+            flags.fact("elev", "Elevation", f"≈{z.min():,.0f} to {z.max():,.0f} ft", f"{z.max() - z.min():,.1f} ft of relief · USGS data, NAVD88", "info")
         s = stats_within(grid, area_ref, slope)
         if s.size:
             steep_break = cfg.slope_breaks[-1]
