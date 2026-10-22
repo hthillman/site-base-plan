@@ -510,8 +510,14 @@ def _cover_page(fig, res, pages):
             y -= 0.27 * len(lines) + 0.14
         return y
 
-    block(0.9, 6.7, "WHAT THIS IS", COVER_IS)
-    block(8.8, 6.7, "WHAT THIS IS NOT", COVER_IS_NOT)
+    from .config import NO_BOUNDARY_STATES
+
+    dy = 0.0
+    if site.state in NO_BOUNDARY_STATES:
+        t(W / 2, 7.15, "\n".join(textwrap.wrap(NO_BOUNDARY_STATES[site.state], 165)), fontsize=9.5, color=red, ha="center", linespacing=1.3)
+        dy = 0.25
+    block(0.9, 6.7 - dy, "WHAT THIS IS", COVER_IS)
+    block(8.8, 6.7 - dy, "WHAT THIS IS NOT", COVER_IS_NOT)
     block(0.9, 2.9, "BEFORE YOU RELY ON ANYTHING HERE", COVER_DO, numbered=True, width=130)
 
     terms = os.environ.get("SITE_URL", "").rstrip("/")

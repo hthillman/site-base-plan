@@ -16,6 +16,14 @@ US_FT_PER_M = 3937 / 1200  # US survey foot
 WATERMARK_LINES = ("NOT A SURVEY", "NOT FOR PERMIT SUBMISSION")
 PARCEL_NOTE = "Assessor parcel line, not a surveyed boundary"  # beside every parcel line, in every format
 
+# States where plans leave out property lines, neighbouring parcels, buildings and massing, and why.
+NO_BOUNDARY_STATES = {
+    "CA": ("In California, Basesheet doesn't draw property lines, neighboring parcels or buildings. California's land surveying "
+           "board treats drawings that show property lines and buildings as land surveying, which only a licensed surveyor may do: "
+           "it cited an online site-plan service on that basis, and the courts upheld it (Crownholm v. Moore, 2024). Contours, slope, "
+           "flood zones, wetlands, soils, aerial imagery and the zoning district are still included."),
+}
+
 DISCLAIMER = (
     "PLANNING-LEVEL DATA ONLY. Compiled from public GIS sources of varying "
     "resolution and vintage. Not a substitute for a boundary or topographic "

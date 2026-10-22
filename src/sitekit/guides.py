@@ -504,6 +504,10 @@ def parcel_state_page(slug: str) -> str | None:
             f"<h3>{escape(c.county)} County</h3>{_source_table(c)}" + (f'<p class="note">{escape(c.notes)}</p>' if c.notes else "")
             for c in listed) + HOW_TO_USE
         desc = f"Free {name} parcel data by county: {len(listed)} county GIS parcel services with coverage, vintage, fields and REST endpoints."
+    from .config import NO_BOUNDARY_STATES
+
+    st_code = next((k for k, v in STATES.items() if v == name), "")
+    withheld_note = f'<p class="note"><b>Not drawn in Basesheet plans.</b> {escape(NO_BOUNDARY_STATES[st_code])}</p>' if st_code in NO_BOUNDARY_STATES else ""
     body = f"""
 <p class="crumbs"><a href="/parcels">Parcel data by state</a></p>
 <h1>Free parcel data in {escape(name)}</h1>
@@ -511,7 +515,8 @@ def parcel_state_page(slug: str) -> str | None:
 {detail}
 <p class="note">Assessor parcel lines are for taxation and are often 5 to 50 ft off the legal boundary.
 <a href="/guides/assessor-parcel-lines-vs-legal-boundaries">Why</a>.</p>
-{_cta(f"Basesheet uses this to draw the parcel line on a base plan for any {name} address, with LiDAR contours, soils, flood zones and wetlands." if (s or counties) else f"Basesheet still builds a base plan for any {name} address, with contours, soils, flood zones and wetlands; it just can't draw the parcel line.")}
+{withheld_note}
+{_cta(f"Basesheet builds site context for any {name} address with contours, soils, flood zones and wetlands, without property lines or buildings." if withheld_note else f"Basesheet uses this to draw the parcel line on a base plan for any {name} address, with LiDAR contours, soils, flood zones and wetlands." if (s or counties) else f"Basesheet still builds a base plan for any {name} address, with contours, soils, flood zones and wetlands; it just can't draw the parcel line.")}
 """
     title = f"{name} parcel data: free statewide GIS layer and REST endpoint" if s else f"{name} parcel data: where to get it free"
     return layout(f"{title} · Basesheet", path, body, description=desc,

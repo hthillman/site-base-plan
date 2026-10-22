@@ -8,6 +8,7 @@ import os
 from html import escape
 from pathlib import Path
 
+from .config import NO_BOUNDARY_STATES
 from .config import DISCLAIMER
 from .geocode import STATES
 from .plugins import testfit_available
@@ -589,6 +590,7 @@ def faq_items() -> list[tuple[str, str]]:
          "No. It's planning-level data for early site work. Parcel lines are assessor tax lines, often 5 to 50 ft from the legal "
          "boundary, and wetlands and flood zones are screening maps. Use a licensed land surveyor and the appropriate specialists "
          "before design decisions that depend on exact boundaries or conditions."),
+        ("Why doesn't it show property lines in California?", NO_BOUNDARY_STATES["CA"]),
         ("Can I use it for a permit application?",
          "No. Basesheet doesn't make site plans for permits, and its files are marked not for permit submission. Where a permit "
          "needs a site plan, use a survey or a plan from the licensed professional your jurisdiction requires. Basesheet is for "

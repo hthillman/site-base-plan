@@ -6,7 +6,7 @@ import json
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 from pathlib import Path
 from typing import Callable
@@ -15,7 +15,8 @@ import numpy as np
 from shapely.geometry import Point, box
 
 from . import crs as crs_mod
-from .config import Config, load_config
+from .config import NO_BOUNDARY_STATES, Config, load_config
+from .geocode import STATES as STATE_NAMES
 from .geocode import GeocodeError, geocode
 from .model import Feature, LayerResult, Site, now_iso
 from .parcel import looks_like_apn, parcel_at_point, parcel_by_apn, parcel_by_situs, source_for
@@ -311,7 +312,10 @@ def _parcel_layer(site: Site) -> LayerResult:
           + ([f"Terms of use: {src.terms}"] if from_state and src.terms else []),
         retrieved_at=now_iso(),
     )
-    if site.parcel is None and src is None:
+    if site.parcel is None and site.state in NO_BOUNDARY_STATES:
+        r.status = "skipped"
+        r.error = f"Not drawn in {STATE_NAMES.get(site.state, site.state)} (see the note on this plan)."
+    elif site.parcel is None and src is None:
         r.status = "skipped"
         r.error = f"No free statewide parcel layer for {site.state or 'this state'} yet; boundary not drawn."
     elif site.parcel is None and src.covers_county(site.county) is False:
@@ -362,6 +366,8 @@ def compute_flags(site: Site, layers: dict[str, LayerResult], grid: Grid | None,
         note = f" Not published in this parcel data: {', '.join(missing)}." if missing else ""
         if rec or note:
             add("info", ("Assessor record: " + "; ".join(rec) + "." if rec else "Assessor record:") + note)
+    elif site.state in NO_BOUNDARY_STATES:
+        flags.fact("parcel", "Parcel", "Not drawn", f"Property lines aren't shown in {STATE_NAMES.get(site.state, site.state)}", "info")
     else:
         flags.fact("parcel", "Parcel", "No parcel line", "Plan drawn around the address", "warn")
 
@@ -481,6 +487,12 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         site = combine_sites(site, opts.extra_queries, opts, log)
     timings["resolve"] = time.time() - t0
     log(f"Site: {site.matched_address} | {site.county} County, {site.state} | {site.crs_label}")
+    withheld = site.state in NO_BOUNDARY_STATES
+    if withheld:  # no property lines, neighbours, buildings or massing here (see config.NO_BOUNDARY_STATES)
+        log("Leaving out property lines and buildings in this state")
+        site = replace(site, parcel=None, parcels=[], warnings=[NO_BOUNDARY_STATES[site.state]]
+                       + [w for w in site.warnings if "parcel" not in w.lower()])
+        opts = replace(opts, skip=set(opts.skip) | {"massing", "adjacent"}, testfit=False)
 
     t1 = time.time()
     log("Fetching layers in parallel: DEM, imagery, soils, flood, wetlands, buildings")
@@ -515,7 +527,8 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
     ex.shutdown(wait=False, cancel_futures=True)
     for k in sorted(skip_keys):
         fetched[k] = LayerResult(k, titles[k], "", "", status="skipped", retrieved_at=now_iso(),
-                                 error="Left out: unchecked under Options.")
+                                 error=f"Not drawn in {STATE_NAMES.get(site.state, site.state)} (see the note on this plan)." if withheld and k in ("adjacent", "buildings")
+                                 else "Left out: unchecked under Options.")
     for k, lr in fetched.items():
         log(f"  {lr.title}: {lr.status}" + (f" ({lr.error})" if lr.error else f", {len(lr.features)} features" if lr.features else ""))
     timings["fetch"] = time.time() - t1
