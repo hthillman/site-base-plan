@@ -178,7 +178,7 @@ def build(args: dict) -> dict:
     record_usage({**base, "outcome": "ok", "state": res.site.state, "parcel": res.site.parcel is not None, "zoning": zoning_coverage(res),
                   "seconds": round(time.time() - t0, 1), "t": {k: round(v, 1) for k, v in res.timings.items()},
                   "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed")})
-    link = f"{_site_url()}/r/{run_id}"
+    link = f"{_site_url()}/r/{run_id}?via=ai"
     content = [{"type": "text", "text": _result_text(rj, link)}]
     thumb = _thumbnail(res.files.get("preview"))
     if thumb:

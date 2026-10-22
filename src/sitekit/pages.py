@@ -507,11 +507,12 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-ev]');if(a
 const PRO=__PRO__;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 // Third plan from this browser: one invitation to hear about new features (once; never after sending or dismissing).
-function wireAsk(){const box=document.getElementById('ask');if(!box||!PRO||LS.get('sitekit-ask')||+(LS.get('sitekit-plans')||0)<3)return;
+function wireAsk(){const box=document.getElementById('ask'),viaAi=new URLSearchParams(location.search).get('via')==='ai';
+ if(!box||!PRO||LS.get('sitekit-ask')||(!viaAi&&+(LS.get('sitekit-plans')||0)<3))return;  // assistant visitors are asked on their first visit
  box.hidden=false;track('ask_shown');const done=v=>LS.set('sitekit-ask',v);
  document.getElementById('askx').onclick=()=>{done('dismissed');box.hidden=true};
  document.getElementById('askf').onsubmit=async e=>{e.preventDefault();const f=e.target;
-  const r=await fetch('/api/firms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:f.email.value,website:f.website.value,source:'third_plan'})});
+  const r=await fetch('/api/firms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:f.email.value,website:f.website.value,source:viaAi?'assistant':'third_plan'})});
   if(r.ok){done('sent');track('ask_sent');box.innerHTML='<span class="ok">Thanks! We\\'ll be in touch.</span>'}
   else{const k=await r.json().catch(()=>({}));f.insertAdjacentHTML('afterend','<span class="err">'+esc(k.error||'Something went wrong.')+'</span>')}}}
 function wireDl(){const a=out.querySelector('[data-ev=download_zip]'),w=document.getElementById('dlwarn'),go=document.getElementById('dlgo');if(!a||!w||!go)return;

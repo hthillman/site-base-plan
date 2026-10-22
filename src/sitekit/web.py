@@ -499,9 +499,9 @@ def firm_interest():
         return jsonify(error="That doesn't look like an email address."), 400
     want = [w for w in (d.get("want") or []) if w in FIRM_WANTS]
     use = str(d.get("use") or d.get("notes") or "").strip()[:2000]  # the short form asks only for email, a use line and interests
-    source = "third_plan" if d.get("source") == "third_plan" else "firms_page"
+    source = d.get("source") if d.get("source") in ("third_plan", "assistant") else "firms_page"
     private_put("firms", {"email": email, "use": use, "want": want, "source": source, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-    where = "after their third plan" if source == "third_plan" else "on the For firms page"
+    where = {"third_plan": "after their third plan", "assistant": "from a ChatGPT/Claude result"}.get(source, "on the For firms page")
     notify(f"New early-access email {where}: {email}; wants {', '.join(want) or 'nothing picked'}; use: {use[:200] or '-'}")
     return jsonify(ok=True)
 
