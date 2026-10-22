@@ -141,6 +141,7 @@ ul{padding-left:20px}li{margin:5px 0}
 .rhead{display:grid;gap:2px}.rhead h3{font-size:20px;margin:0}
 .dlwarn{margin:8px 0;padding:10px 12px;border:1px solid var(--alert);border-radius:8px;font-size:14px}.dlwarn .btns{display:inline-block;margin-top:8px}
 .nsurvey{margin:10px 0 0;padding:8px 12px;border-left:4px solid var(--alert);background:color-mix(in srgb,var(--alert) 7%,transparent);font-size:14px}
+.nsurvey p{margin:0 0 6px}.nsurvey ul{margin:0;padding-left:18px}.nsurvey li{margin:3px 0}
 .rtop{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;margin-top:14px;align-items:start}
 .rtop.nopv{grid-template-columns:1fr}
 @media(max-width:640px){.rtop{grid-template-columns:1fr}}

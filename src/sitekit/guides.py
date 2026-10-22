@@ -37,7 +37,7 @@ def _abs(path: str) -> str:
 
 
 def _cta(text: str = "Basesheet does all of this for any US address in about 30 seconds, free, with no account.") -> str:
-    return f'<div class="cta"><p>{escape(text)}</p><a class="btn" href="/">Build a base plan</a></div>'
+    return f'<div class="cta"><p>{escape(text)}</p><a class="btn" href="/">Try it free</a></div>'
 
 
 LIMITS = ('<p class="note">Everything here is planning-level public data. Confirm boundaries, topography, wetlands and '
