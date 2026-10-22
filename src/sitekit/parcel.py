@@ -23,7 +23,8 @@ from .http import get_json
 from .model import Feature
 from .sources.arcgis import query_features
 
-PARCEL_TIMEOUT_S = 12  # per request; a stalled parcel server gets one fresh try (see query_features stall_retries)
+PARCEL_TIMEOUT_S = 18  # per request for the site's own parcel: some servers answer in 1 s, stall 8-40 s at random
+PARCEL_STALL_RETRIES = 2  # fresh tries after a stall (see query_features stall_retries); the parcel line is the core of a plan
 
 SOURCES_DIR = Path(__file__).resolve().parent / "data" / "parcels"
 
@@ -267,7 +268,7 @@ def parcel_at_point(lon: float, lat: float, out_sr: int, state: str | None = Non
         errors.append(f"No parcel source for {county + ' County, ' if county else ''}{state or 'this state'} yet.")
     else:
         try:
-            feats = [_normalise(f, src) for f in query_features(src.url, geometry=pt_ll, in_sr=4326, out_sr=out_sr, timeout=PARCEL_TIMEOUT_S, stall_retries=1)]
+            feats = [_normalise(f, src) for f in query_features(src.url, geometry=pt_ll, in_sr=4326, out_sr=out_sr, timeout=PARCEL_TIMEOUT_S, stall_retries=PARCEL_STALL_RETRIES)]
             best, ids = _pick(feats, pt)
             if best:
                 return best, src.label, ids, errors
@@ -276,7 +277,7 @@ def parcel_at_point(lon: float, lat: float, out_sr: int, state: str | None = Non
             errors.append(f"{src.name}: {e}")
     for county, cfg in COUNTY_FALLBACKS.get((state or "").upper(), {}).items():
         try:
-            feats = query_features(cfg["url"], geometry=pt_ll, in_sr=4326, out_sr=out_sr, timeout=PARCEL_TIMEOUT_S, stall_retries=1)
+            feats = query_features(cfg["url"], geometry=pt_ll, in_sr=4326, out_sr=out_sr, timeout=PARCEL_TIMEOUT_S, stall_retries=PARCEL_STALL_RETRIES)
             for f in feats:
                 f.props.update(_APN=str(f.props.get(cfg["apn_field"]) or ""), _SITUS="", _CITY="", _COUNTY=county)
             best, ids = _pick(feats, pt)

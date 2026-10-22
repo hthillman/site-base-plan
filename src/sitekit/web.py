@@ -495,17 +495,12 @@ def firm_interest():
     if d.get("website"):
         return jsonify(ok=True)
     email = str(d.get("email") or "").strip()[:254]
-    firm = str(d.get("firm") or "").strip()[:120]
     if not EMAIL_RE.match(email):
         return jsonify(error="That doesn't look like an email address."), 400
-    if not firm:
-        return jsonify(error="Add your firm's name."), 400
     want = [w for w in (d.get("want") or []) if w in FIRM_WANTS]
-    private_put("firms", {"firm": firm, "role": str(d.get("role") or "").strip()[:80], "sites": str(d.get("sites") or "")[:10],
-                          "want": want, "places": str(d.get("places") or "").strip()[:300], "notes": str(d.get("notes") or "").strip()[:2000],
-                          "email": email, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-    notify(f"New firm on the For firms page: {firm} ({str(d.get('role') or '')[:80]}), {str(d.get('sites') or '?')[:10]} sites/mo, "
-           f"wants {', '.join(want) or 'nothing picked'}; works in {str(d.get('places') or '-')[:120]}")
+    use = str(d.get("use") or d.get("notes") or "").strip()[:2000]  # the short form asks only for email, a use line and interests
+    private_put("firms", {"email": email, "use": use, "want": want, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    notify(f"Early access request on the For firms page: {email}; wants {', '.join(want) or 'nothing picked'}; use: {use[:200] or '-'}")
     return jsonify(ok=True)
 
 

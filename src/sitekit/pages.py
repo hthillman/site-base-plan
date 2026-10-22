@@ -947,6 +947,20 @@ def firms() -> str:
 <p class="lede">Basesheet is free and <a href="{REPO_URL}">open source</a>, and it stays that way. A few offices that run regular
 site studies have asked for firm-specific features, so I'm working with them to improve the tool for professional usage.</p>
 
+<form id="ff" class="ffshort">
+<label>Email<input name="email" type="email" required maxlength="254" placeholder="you@office.com"></label>
+<label>What would you use it for? (optional)<input name="use" maxlength="300" placeholder="e.g. quick test fits for multifamily sites in Columbus"></label>
+<fieldset class="checks"><legend>Interested in (optional)</legend>
+<label><input type="checkbox" name="want" value="zoning"> Test fits for my jurisdictions</label>
+<label><input type="checkbox" name="want" value="standards"> Our title block and CAD layers</label>
+<label><input type="checkbox" name="want" value="batch"> Batch runs</label>
+<label><input type="checkbox" name="want" value="coverage"> Parcel lines where I work</label>
+</fieldset>
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<div><button>Get early access</button> <span class="fine" id="ffmsg"></span></div>
+<p class="fine">I'll only use this to reply to you. See <a href="/privacy">Privacy</a>.</p>
+</form>
+
 <h2>Free forever</h2>
 <ul>
 <li>Base plans from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
@@ -962,29 +976,6 @@ site studies have asked for firm-specific features, so I'm working with them to 
 <li><b>Parcel lines where you work,</b> including counties the free tool doesn't cover yet.</li>
 </ul>
 
-<h2>Tell me what your office needs</h2>
-<p>If any of this would help, a few details go a long way.</p>
-<form id="ff">
-<div class="grid2">
-<label>Firm<input name="firm" maxlength="120" required></label>
-<label>Your role<input name="role" maxlength="80" placeholder="e.g. landscape architect, principal" required></label>
-</div>
-<label>Roughly how many sites do you look at a month?
-<select name="sites" required><option value="">Choose</option><option>1-2</option><option>3-10</option><option>11-30</option><option>30+</option></select></label>
-<fieldset class="checks"><legend>What would matter most? (pick any)</legend>
-<label><input type="checkbox" name="want" value="zoning"> Test fits</label>
-<label><input type="checkbox" name="want" value="standards"> Title block and CAD standards</label>
-<label><input type="checkbox" name="want" value="batch"> Batch runs</label>
-<label><input type="checkbox" name="want" value="coverage"> Parcel lines where I work</label>
-<label><input type="checkbox" name="want" value="massing"> 3D massing</label>
-</fieldset>
-<label>Which cities or counties do you work in most?<input name="places" maxlength="300" placeholder="e.g. Columbus OH, Franklin County"></label>
-<label>Anything else? (optional)<textarea name="notes" maxlength="2000"></textarea></label>
-<label>Email<input name="email" type="email" required maxlength="254"></label>
-<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-<div><button>Send</button> <span class="fine" id="ffmsg"></span></div>
-<p class="fine">I'll only use this to reply to you. See <a href="/privacy">Privacy</a>.</p>
-</form>
 """
     script = """<script>
 document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.target,m=document.getElementById('ffmsg');
