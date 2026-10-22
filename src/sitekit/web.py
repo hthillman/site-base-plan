@@ -713,7 +713,7 @@ def llms_txt():
     cstates = ", ".join(sorted(county_sources()))
     text = f"""# Basesheet
 
-> Basesheet is a free web tool that builds a planning-level site base plan from any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files, plus the zoning district and its rules in covered cities and counties. Outputs are not a survey and not for permit submission. No account. Open source (MIT).
+> Basesheet is a free web tool that builds planning-level site context from public data for any US street address or parcel number: parcel lines, LiDAR contours, slopes, soils, FEMA flood zones, wetlands, roads and aerial imagery, delivered as CAD, 3D, GIS and PDF files, plus the zoning district and its rules in covered cities and counties. Outputs are not a survey and not for permit submission. No account. Open source (MIT).
 
 Built for landscape architects, site designers and civil engineers doing early site studies, feasibility and concept design. It replaces the hour or two of pulling public GIS layers into CAD by hand. It is not a survey.
 

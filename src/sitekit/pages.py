@@ -226,7 +226,7 @@ def _zoning_phrase() -> str:
 
 ZONING_LINK = ' · <a href="/zoning">Zoning by city</a>' if importlib.util.find_spec("sitekit.zoning") else ""  # hosted build only
 
-DEFAULT_DESCRIPTION = ("Free planning-level site base plans from any US address: parcel lines, LiDAR contours, slopes, soils, "
+DEFAULT_DESCRIPTION = ("Free planning-level site context from public data for any US address: parcel lines, LiDAR contours, slopes, soils, "
                        "FEMA flood zones, wetlands and aerial, as DXF, SketchUp terrain, LandXML, GIS and PDF.")
 
 
@@ -292,9 +292,9 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
     if TIP_URL:
         actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
-<h1>A site base plan from any US address</h1>
-<p class="lede">Parcel line, contours, slopes, soils, flood zones, wetlands, aerial and 3D building massing, ready for AutoCAD, SketchUp, Civil 3D and GIS.{_zoning_phrase()}
-Free, no account.</p>
+<h1>Site context from any US address</h1>
+<p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.{_zoning_phrase()}
+Not a survey. Free, no account.</p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
@@ -555,7 +555,7 @@ if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="err
         "author": {"@type": "Person", "name": "Hunter Hillman"},
         "license": "https://opensource.org/licenses/MIT", "sameAs": [REPO_URL],
     }
-    return layout("Basesheet: free site base plans from any US address (DXF, SketchUp, Civil 3D, GIS)", "/", body, script,
+    return layout("Basesheet: free site context from any US address (DXF, SketchUp, Civil 3D, GIS)", "/", body, script,
                   jsonld=[app_ld, {"@context": "https://schema.org", "@type": "WebSite", "name": "Basesheet", "url": SITE_URL or "/"}])
 
 
