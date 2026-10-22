@@ -152,6 +152,7 @@ ul{padding-left:20px}li{margin:5px 0}
 .ract .note{margin:0}.linkbtn.inl{padding:0;font-size:inherit}
 .ract .contents{margin:0}
 .keep{padding:12px;border:1px solid var(--line);border-radius:8px;font-size:14px;display:grid;gap:8px;color:var(--muted);background:var(--field)}
+.keep.ask{position:relative;color:var(--ink);padding-right:34px}.askx{position:absolute;top:6px;right:8px;font-size:18px;line-height:1;padding:2px 6px;color:var(--muted)}
 .keep .quiet{justify-self:start;padding:8px 14px}
 .keep .savef{display:flex;gap:8px;flex-wrap:wrap}
 .sh{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 8px;font-weight:600}
@@ -464,6 +465,10 @@ function render(j){
    '<li><b>Google Earth</b> · site.kml</li>'+
    '<li><b>Everyone</b> · site-summary.pdf, provenance.md, HOW-TO-OPEN.txt</li></ul>'+
    '<div class="keep" id="savebox"><span>Download links expire in 2 days.</span></div>'+
+   '<div class="keep ask" id="ask" hidden><button type="button" class="linkbtn askx" id="askx" aria-label="Dismiss">×</button>'+
+    '<span><b>Enjoying Basesheet?</b> We\\'re building a few new features and would love your input.</span>'+
+    '<form class="savef" id="askf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
+    '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Keep me posted</button></form></div>'+
   '</div></div>'+
  (warn.length?'<h4 class="sh">Needs a look</h4><ul class="callouts">'+warn.map(x=>'<li class="co '+x.level+'">'+esc(x.text)+'</li>').join('')+'</ul>':'')+
  (facts?'<h4 class="sh">At a glance</h4><div class="facts">'+facts+'</div>':'')+
@@ -476,7 +481,7 @@ function render(j){
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
  RUN_STATE=j.state||'';track('run_done');
- wireNext(j.state);wireSave(j);wireDl();
+ wireNext(j.state);wireSave(j);wireDl();wireAsk();
  try{out.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}catch(e){}}
 const TIP_URL="__TIP_URL__";
 function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,bad)=>{
@@ -501,6 +506,14 @@ function track(name,extra){const data={state:RUN_STATE,...(extra||{})};
 document.addEventListener('click',e=>{const a=e.target.closest('[data-ev]');if(a)track(a.dataset.ev)},true);
 const PRO=__PRO__;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+// Third plan from this browser: one invitation to hear about new features (once; never after sending or dismissing).
+function wireAsk(){const box=document.getElementById('ask');if(!box||!PRO||LS.get('sitekit-ask')||+(LS.get('sitekit-plans')||0)<3)return;
+ box.hidden=false;track('ask_shown');const done=v=>LS.set('sitekit-ask',v);
+ document.getElementById('askx').onclick=()=>{done('dismissed');box.hidden=true};
+ document.getElementById('askf').onsubmit=async e=>{e.preventDefault();const f=e.target;
+  const r=await fetch('/api/firms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:f.email.value,website:f.website.value,source:'third_plan'})});
+  if(r.ok){done('sent');track('ask_sent');box.innerHTML='<span class="ok">Thanks! We\\'ll be in touch.</span>'}
+  else{const k=await r.json().catch(()=>({}));f.insertAdjacentHTML('afterend','<span class="err">'+esc(k.error||'Something went wrong.')+'</span>')}}}
 function wireDl(){const a=out.querySelector('[data-ev=download_zip]'),w=document.getElementById('dlwarn'),go=document.getElementById('dlgo');if(!a||!w||!go)return;
  a.addEventListener('click',e=>{if(LS.get('sitekit-dlwarn'))return;e.preventDefault();e.stopImmediatePropagation();w.hidden=false;go.focus()},true);
  go.addEventListener('click',()=>{LS.set('sitekit-dlwarn','1');w.hidden=true})}

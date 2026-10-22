@@ -440,7 +440,7 @@ def interest():
     return jsonify(ok=True)
 
 
-EVENT_NAMES = {"ai_setup", "run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
+EVENT_NAMES = {"ai_setup", "ask_shown", "ask_sent", "run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
                "tip_click", "firms_click", "vote", "vote_email", "map_pick"}
 
 
@@ -499,8 +499,10 @@ def firm_interest():
         return jsonify(error="That doesn't look like an email address."), 400
     want = [w for w in (d.get("want") or []) if w in FIRM_WANTS]
     use = str(d.get("use") or d.get("notes") or "").strip()[:2000]  # the short form asks only for email, a use line and interests
-    private_put("firms", {"email": email, "use": use, "want": want, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-    notify(f"Early access request on the For firms page: {email}; wants {', '.join(want) or 'nothing picked'}; use: {use[:200] or '-'}")
+    source = "third_plan" if d.get("source") == "third_plan" else "firms_page"
+    private_put("firms", {"email": email, "use": use, "want": want, "source": source, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    where = "after their third plan" if source == "third_plan" else "on the For firms page"
+    notify(f"New early-access email {where}: {email}; wants {', '.join(want) or 'nothing picked'}; use: {use[:200] or '-'}")
     return jsonify(ok=True)
 
 
