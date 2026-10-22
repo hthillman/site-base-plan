@@ -115,6 +115,9 @@ CONTENT_TYPES = {".pdf": "application/pdf", ".dxf": "application/dxf", ".dwg": "
 def _zip_bytes(folder: Path) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        from .config import FILE_NOTICE
+
+        z.comment = FILE_NOTICE.encode()  # shown by most unzip tools
         for p in sorted(folder.rglob("*")):
             if p.is_file():
                 z.write(p, f"{folder.name}/{p.relative_to(folder)}")

@@ -20,7 +20,8 @@ CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # hosted site only; kept ou
 TERMS_ON = importlib.util.find_spec("sitekit.terms") is not None and importlib.import_module("sitekit.terms").READY
 TERMS_LINK = ' · <a href="/terms">Terms</a>' if TERMS_ON else ""
 TERMS_VERSION = importlib.import_module("sitekit.terms").TERMS_VERSION if TERMS_ON else ""
-TERMS_GATE_TEXT = 'Basesheet does not provide professional advice. Verify important information with surveyors and your jurisdiction before you rely on it for design, permitting, purchase, financing, construction or any other decision. (<a href="/terms" target="_blank">Terms</a>)'
+GATE_VERSION = f"{TERMS_VERSION}.2" if TERMS_ON else ""  # bump to show the first-build checkbox again after its wording changes
+TERMS_GATE_TEXT = 'Basesheet does not provide professional advice, and its maps are not surveys or certified site plans. Verify important information with surveyors and your jurisdiction before you rely on it for design, permitting, purchase, financing, construction or any other decision. (<a href="/terms" target="_blank">Terms</a>)'
 CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>' if CONTACT_EMAIL else ""
 FIRMS_FOOTER = ' · <a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
 
@@ -138,6 +139,7 @@ ul{padding-left:20px}li{margin:5px 0}
 @media(max-width:560px){#pickmap{height:300px}}
 .tipline{margin:0;font-size:14px;color:var(--muted)}.tipline a{font-weight:600}
 .rhead{display:grid;gap:2px}.rhead h3{font-size:20px;margin:0}
+.dlwarn{margin:8px 0;padding:10px 12px;border:1px solid var(--alert);border-radius:8px;font-size:14px}.dlwarn .btns{display:inline-block;margin-top:8px}
 .nsurvey{margin:10px 0 0;padding:8px 12px;border-left:4px solid var(--alert);background:color-mix(in srgb,var(--alert) 7%,transparent);font-size:14px}
 .rtop{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;margin-top:14px;align-items:start}
 .rtop.nopv{grid-template-columns:1fr}
@@ -444,11 +446,12 @@ function render(j){
  const facts=(j.facts||[]).map(f=>'<div class="fact '+esc(f.tone)+'"><span class="fl">'+esc(f.label)+'</span><span class="fv">'+esc(f.value)+'</span>'+(f.sub?'<span class="fs">'+esc(f.sub)+'</span>':'')+'</div>').join('');
  out.innerHTML='<div class="result">'+
  '<div class="rhead"><h3>Base plan ready</h3><span class="note">'+esc(j.title||'')+' · built in '+j.seconds+' s</span></div>'+
-  '<p class="nsurvey"><b>Not a survey. Not for permit submission.</b> Planning-level public data: parcel lines are assessor tax lines. Check everything with a licensed surveyor and the jurisdiction before relying on it.</p>'+
+  '<p class="nsurvey"><b>Not a survey or a certified site plan. Not for permit submission.</b> Parcel lines are assessor tax lines, not property boundaries, and areas are approximate. Before relying on any line, area or elevation, <a href="/guides/when-you-need-a-surveyor">hire a licensed land surveyor</a>, and confirm zoning and flood zones with the jurisdiction.</p>'+
  '<div class="rtop'+(pv?'':' nopv')+'">'+
   (pv?'<a class="preview" href="'+esc(pdf||pv)+'" target="_blank" rel="noopener" title="Open the PDF" data-ev="open_pdf"><img src="'+esc(pv)+'" alt="Preview of the base plan sheet"></a>':'')+
   '<div class="ract">'+
    '<a class="btnp" href="'+esc(j.files.zip)+'" data-ev="download_zip">Download files (.zip)</a>'+
+   '<p class="dlwarn" id="dlwarn" hidden><b>Before you download:</b> these CAD and GIS files are not survey data or a certified site plan. Lines and areas come from public GIS and can be tens of feet off. Get a survey before design, fencing, grading or permits that depend on them. <a class="btns" id="dlgo" href="'+esc(j.files.zip)+'">I understand, download</a></p>'+
    (pdf?'<a class="btns" href="'+esc(pdf)+'" target="_blank" rel="noopener" data-ev="open_pdf">Open the PDF</a>':'')+
    (TIP_URL?'<p class="tipline">Saved you an hour? <a href="'+TIP_URL+'" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a></p>':'')+
    '<p class="note">CAD, SketchUp, Civil 3D, GIS and PDF in one zip. <button type="button" class="linkbtn inl" id="whatsin" aria-expanded="false" aria-controls="contents">What’s inside</button></p>'+
@@ -472,7 +475,7 @@ function render(j){
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
  RUN_STATE=j.state||'';track('run_done');
- wireNext(j.state);wireSave(j);
+ wireNext(j.state);wireSave(j);wireDl();
  try{out.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}catch(e){}}
 const TIP_URL="__TIP_URL__";
 function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,bad)=>{
@@ -497,6 +500,9 @@ function track(name,extra){const data={state:RUN_STATE,...(extra||{})};
 document.addEventListener('click',e=>{const a=e.target.closest('[data-ev]');if(a)track(a.dataset.ev)},true);
 const PRO=__PRO__;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function wireDl(){const a=out.querySelector('[data-ev=download_zip]'),w=document.getElementById('dlwarn'),go=document.getElementById('dlgo');if(!a||!w||!go)return;
+ a.addEventListener('click',e=>{if(LS.get('sitekit-dlwarn'))return;e.preventDefault();e.stopImmediatePropagation();w.hidden=false;go.focus()},true);
+ go.addEventListener('click',()=>{LS.set('sitekit-dlwarn','1');w.hidden=true})}
 async function wireSave(j){const box=document.getElementById('savebox');if(!box||!j.run_id)return;
  let me={};try{me=await (await fetch('/api/me')).json()}catch(e){return}
  if(!me.email&&!me.can_sign_up)return;
@@ -543,7 +549,7 @@ document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/ap
 const PRELOAD=__PRELOAD__;
 if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
  else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
-</script>""".replace("__TERMS_VERSION__", TERMS_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
+</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",

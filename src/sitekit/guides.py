@@ -335,6 +335,48 @@ concept design before a survey is ordered. See <a href="/guides/base-plan-vs-bou
         ("assessor-parcel-lines-vs-legal-boundaries", "lidar-contours-vs-survey-topo", "what-is-a-base-sheet"),
     ),
     Guide(
+        "when-you-need-a-surveyor", "howto",
+        "When you need a licensed land surveyor, and how to find one",
+        "When you need a licensed land surveyor (and how to find one)",
+        "Free GIS maps and site context are not surveys. When you need a licensed land surveyor, which kind of survey to ask for, and how to check a surveyor's license.",
+        "Hire a licensed land surveyor before you rely on where a property line is, how big a lot is, or exact ground "
+        "elevations: building, adding on, fencing, grading, buying or selling, splitting a lot, or applying for most permits. "
+        "Free GIS maps, including Basesheet's, show assessor tax lines that are often 5 to 50 ft off the legal boundary. "
+        "They are not surveys and not certified site plans. Find a surveyor licensed in your state and check the license "
+        "with your state's board.",
+        """
+<h2>Situations that need a survey</h2>
+<ul>
+<li>Building anything new, or adding on, near a setback or property line</li>
+<li>A fence, wall, driveway or landscaping on or near the line</li>
+<li>Most building, grading and land-use permits that ask for a site plan</li>
+<li>Buying, selling or financing property, especially if the lender or title company asks</li>
+<li>Splitting, combining or adjusting lots</li>
+<li>Grading and drainage work that depends on real spot elevations</li>
+<li>Any disagreement with a neighbor about where the line is</li>
+</ul>
+<h2>Which survey to ask for</h2>
+<ul>
+<li><b>Boundary survey:</b> finds and marks the legal property lines and corners.</li>
+<li><b>Topographic survey:</b> adds ground elevations, contours and features such as trees, walls and utilities. Designers usually want this with the boundary.</li>
+<li><b>ALTA/NSPS Land Title Survey:</b> the detailed national standard used in most commercial transactions.</li>
+<li><b>Plot plan or certified site plan:</b> many permit offices want a plan prepared or certified by a licensed professional. Ask your permit office exactly what it needs.</li>
+</ul>
+<h2>How to find and check a surveyor</h2>
+<ol>
+<li>Ask your permit office, title company, architect or neighbors who they use locally.</li>
+<li>Check the license with your state's board. The <a href="https://ncees.org/licensing-boards/" rel="noopener" target="_blank">NCEES directory of licensing boards</a> links to each state's board, and most boards have a license lookup.</li>
+<li>Get two or three quotes. Price depends on lot size, terrain, records and how many corners need to be set, so it varies widely.</li>
+</ol>
+<h2>What to have ready</h2>
+<ul><li>The address and parcel number</li><li>Your deed and any old survey or plat</li><li>What you're planning to do, so the surveyor quotes the right scope</li></ul>
+<h2>Where Basesheet fits</h2>
+<p>Basesheet compiles public GIS data for early design and feasibility: deciding whether a site is worth pursuing,
+and what survey scope to order. It is not a survey, not a certified site plan and not for permit submission.</p>
+""",
+        ("base-plan-vs-boundary-survey", "assessor-parcel-lines-vs-legal-boundaries", "lidar-contours-vs-survey-topo"),
+    ),
+    Guide(
         "lidar-contours-vs-survey-topo", "compare",
         "How accurate are LiDAR contours? USGS 3DEP vs a topographic survey",
         "LiDAR contours vs a topographic survey",

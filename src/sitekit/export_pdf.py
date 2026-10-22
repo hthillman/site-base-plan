@@ -17,7 +17,7 @@ from matplotlib.patches import FancyArrow, PathPatch, Rectangle  # noqa: E402
 from matplotlib.path import Path as MPath  # noqa: E402
 from shapely.geometry import MultiPolygon, Polygon  # noqa: E402
 
-from .config import DISCLAIMER, PARCEL_NOTE, WATERMARK_LINES, Config  # noqa: E402
+from .config import DISCLAIMER, FILE_NOTICE, PARCEL_NOTE, WATERMARK_LINES, Config  # noqa: E402
 from .crs import wkid_text  # noqa: E402
 
 PAGE = (17.0, 11.0)
@@ -384,7 +384,7 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         pdf.savefig(fig)
         try:  # small preview of the base plan sheet for the results page
             box = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())  # the map only, not the sidebar
-            fig.savefig(res.out_dir / "preview.png", dpi=110, bbox_inches=box)
+            fig.savefig(res.out_dir / "preview.png", dpi=110, bbox_inches=box, metadata={"Description": FILE_NOTICE})
         except Exception as e:  # noqa: BLE001
             print(f"WARN preview failed: {e}", flush=True)
         plt.close(fig)
@@ -450,8 +450,9 @@ def write_pdf(res, cfg: Config, opts) -> Path:
         plt.close(fig)
 
         d = pdf.infodict()
-        d["Title"] = f"Site base plan - {res.site.matched_address}"
-        d["Subject"] = "Planning-level site analysis. Not a survey."
+        d["Title"] = f"Site context (public GIS data, not a survey) - {res.site.matched_address}"
+        d["Subject"] = FILE_NOTICE
+        d["Keywords"] = "not a survey; not a certified site plan; not for permit submission; public GIS data; planning level"
     return path
 
 
@@ -472,11 +473,11 @@ COVER_IS_NOT = [
     "A legal description, or a determination of property lines, easements, setbacks or rights-of-way",
     "A location of buildings or other fixed works, or of where they sit relative to property lines",
     "A zoning, flood zone or wetland determination",
-    "A site plan for a permit application, or construction documents",
+    "A certified site plan, a site plan for a permit application, or construction documents",
     "Professional surveying, engineering, architecture or legal advice",
 ]
 COVER_DO = [
-    "Have a land surveyor licensed in this state survey the property before any design, purchase or permit decision that depends on lines, areas, elevations or setbacks.",
+    "Hire a land surveyor licensed in this state before any design, purchase, fence, grading or permit decision that depends on lines, areas, elevations or setbacks. How to find one: {site}/guides/when-you-need-a-surveyor",
     "Confirm zoning, setbacks, flood zones and wetlands directly with the jurisdiction and the responsible agencies.",
     "Keep this cover and the sheet notes with any copy you share. Don't submit these sheets to any agency.",
 ]
@@ -518,7 +519,8 @@ def _cover_page(fig, res, pages):
         dy = 0.25
     block(0.9, 6.7 - dy, "WHAT THIS IS", COVER_IS)
     block(8.8, 6.7 - dy, "WHAT THIS IS NOT", COVER_IS_NOT)
-    block(0.9, 2.9, "BEFORE YOU RELY ON ANYTHING HERE", COVER_DO, numbered=True, width=130)
+    site_url = os.environ.get("SITE_URL", "https://basesheet.site").rstrip("/")
+    block(0.9, 2.9, "BEFORE YOU RELY ON ANYTHING HERE", [x.replace("{site}", site_url) for x in COVER_DO], numbered=True, width=130)
 
     terms = os.environ.get("SITE_URL", "").rstrip("/")
     foot = DISCLAIMER + (f" Use is subject to the Basesheet Terms: {terms}/terms." if terms else "")

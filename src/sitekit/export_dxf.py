@@ -19,7 +19,7 @@ from ezdxf.enums import TextEntityAlignment
 from shapely.geometry import LineString, MultiPolygon, Polygon
 from shapely.geometry.base import BaseGeometry
 
-from .config import DISCLAIMER, PARCEL_NOTE, WATERMARK_LINES, Config
+from .config import DISCLAIMER, FILE_NOTICE, PARCEL_NOTE, WATERMARK_LINES, Config
 from .crs import wkid_text
 
 DXF_VERSION = "R2013"  # opens in AutoCAD 2013+ and SketchUp Pro's importer
@@ -70,6 +70,7 @@ def write_dxf(res, cfg: Config, opts) -> dict[str, str]:
     doc.units = ezdxf.units.FT
     doc.header["$INSUNITS"] = 2  # feet (State Plane values; which foot is noted in SITE-NOTES)
     doc.header["$MEASUREMENT"] = 0
+    doc.header.custom_vars.append("Notice", FILE_NOTICE)  # shows in CAD drawing properties, survives layer deletes
     doc.styles.add("SITE", font="arial.ttf")
     msp = doc.modelspace()
 

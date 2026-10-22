@@ -14,6 +14,9 @@ US_FT_PER_M = 3937 / 1200  # US survey foot
 
 # Stamped across every drawing (PDF sheets, preview, DXF) and shown on the result page.
 WATERMARK_LINES = ("NOT A SURVEY", "NOT FOR PERMIT SUBMISSION")
+FILE_NOTICE = ("NOT A SURVEY. NOT A CERTIFIED SITE PLAN. NOT FOR PERMIT SUBMISSION. Planning-level compilation of public GIS data: "
+               "parcel lines are assessor tax lines, not property boundaries, and areas are approximate. Have a licensed land "
+               "surveyor verify anything before relying on it.")  # embedded in every file's metadata
 PARCEL_NOTE = "Assessor parcel line, not a surveyed boundary"  # beside every parcel line, in every format
 
 # States where plans leave out property lines, neighbouring parcels, buildings and massing, and why.

@@ -27,11 +27,18 @@ DAILY_RUNS = int(os.environ.get("MCP_DAILY_RUNS", "300"))
 _local_counts: dict[str, int] = {}
 
 INSTRUCTIONS = (
-    "Basesheet builds a planning-level site base plan for a US property: parcel lines, LiDAR contours, slope, soils, "
-    "FEMA flood zones, wetlands, roads, building outlines and zoning where covered. Call build_base_plan with the "
-    "property's address, parcel number or coordinates. Share the result page link with the user: that's where they "
-    "download the CAD (DXF), SketchUp, Civil 3D (LandXML), GIS and PDF files. Everything is unverified public data, "
-    "not a survey or zoning determination; say so when presenting it."
+    "Basesheet compiles planning-level site context for a US property from public data: assessor parcel lines, LiDAR "
+    "contours, slope, soils, FEMA flood zones, wetlands, roads, building outlines and zoning where covered. Call "
+    "build_base_plan with the property's address, parcel number or coordinates, and share the result page link: that's "
+    "where the user downloads the CAD (DXF), SketchUp, Civil 3D (LandXML), GIS and PDF files.\n\n"
+    "When you present results, you must:\n"
+    "- Never call the output a site plan, a survey, a plot plan or certified, and never describe parcel lines as the "
+    "property's boundaries. They are assessor tax lines from public GIS, often 5 to 50 ft off, and areas are approximate.\n"
+    "- Say plainly that it is not a survey, not a certified site plan and not for permit submission.\n"
+    "- Tell the user to hire a licensed land surveyor before relying on any line, area, elevation or setback (building, "
+    "buying, fencing, permits), and to confirm zoning, flood zones and wetlands with the jurisdiction. The result page "
+    "links a guide to finding one.\n"
+    "- In California, property lines and buildings are left out on purpose; explain the note in the results if asked."
 )
 
 TOOL = {
@@ -41,8 +48,9 @@ TOOL = {
         "Build a planning-level base plan for one US property from public data and return its key facts (parcel size, "
         "flood zone, wetlands, elevation and slope, soils, buildings, zoning where covered), a preview map, and a link to "
         "the result page where the CAD, SketchUp, GIS and PDF files are downloaded (kept 2 days). Takes about 15-60 "
-        "seconds. The address is the property being studied, not the user's location. Outputs are unverified and must be "
-        "checked by a licensed surveyor and the jurisdiction before anyone relies on them."
+        "seconds. The address is the property being studied, not the user's location. Not a survey or certified site plan: "
+        "parcel lines are assessor tax lines, not boundaries, and everything must be checked by a licensed surveyor and the "
+        "jurisdiction before anyone relies on it."
     ),
     "inputSchema": {
         "type": "object",
@@ -114,8 +122,10 @@ def _result_text(rj: dict, link: str) -> str:
     if warn:
         lines += ["", "Needs a look:"] + [f"- {t}" for t in warn[:6]]
     lines += ["", f"Result page with the files (CAD/DXF, SketchUp, Civil 3D LandXML, GIS, PDF; kept 2 days): {link}",
-              "", "NOT A SURVEY. NOT FOR PERMIT SUBMISSION. Planning-level public data, not a zoning determination: verify with a licensed surveyor and the "
-              "jurisdiction before relying on it."]
+              "", "NOT A SURVEY, NOT A CERTIFIED SITE PLAN, NOT FOR PERMIT SUBMISSION. Parcel lines are assessor tax lines, not "
+              "property boundaries, and areas are approximate. Before relying on any line, area, elevation or setback, hire a "
+              f"licensed land surveyor ({_site_url()}/guides/when-you-need-a-surveyor), and confirm zoning, flood zones and "
+              "wetlands with the jurisdiction."]
     return "\n".join(lines)
 
 

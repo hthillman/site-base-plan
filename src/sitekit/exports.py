@@ -21,7 +21,7 @@ import numpy as np
 from shapely.geometry import LineString, MultiPolygon, Polygon, mapping
 from shapely.geometry.base import BaseGeometry
 
-from .config import PARCEL_NOTE
+from .config import FILE_NOTICE, PARCEL_NOTE
 from .crs import reproject
 from .export_dxf import base_point
 
@@ -111,7 +111,7 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
     # ---- OBJ
     with open(out / "terrain.obj", "w") as f:
         f.write(f"# Terrain mesh, {site.units}, origin at base point E {bx:.0f} N {by:.0f} ({site.crs_label}); Z = elevation NAVD88\n")
-        f.write("# Planning-level data only; not a survey.\n")
+        f.write(f"# {FILE_NOTICE}\n")
         if tex or groups:
             f.write("mtllib terrain.mtl\n")
         f.writelines(f"v {x:.2f} {y:.2f} {z:.2f}\n" for x, y, z in V)
@@ -186,7 +186,7 @@ def write_terrain(res, grid, out: Path) -> dict[str, str]:
               if tex else '<effect id="aerial-fx"><profile_COMMON><technique sid="t"><lambert><diffuse><color>0.6 0.55 0.45 1</color></diffuse></lambert></technique></profile_COMMON></effect>')
     dae = f"""<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-  <asset><contributor><authoring_tool>Basesheet (basesheet.site)</authoring_tool><comments>{escape(f"Terrain, origin at base point E {bx:.0f} N {by:.0f}, {site.crs_label}. Elevations NAVD88 {site.units}. Planning-level data only; not a survey.")}</comments></contributor>
+  <asset><contributor><authoring_tool>Basesheet (basesheet.site)</authoring_tool><comments>{escape(f"Terrain, origin at base point E {bx:.0f} N {by:.0f}, {site.crs_label}. Elevations NAVD88 {site.units}. {FILE_NOTICE}")}</comments></contributor>
     <unit name="foot" meter="0.3048"/><up_axis>Z_UP</up_axis></asset>
   {'<library_images><image id="tex-img"><init_from>' + tex + '</init_from></image></library_images>' if tex else ''}
   <library_effects>{effect}
@@ -233,7 +233,7 @@ def write_landxml(res, grid, out: Path) -> str:
 <LandXML xmlns="http://www.landxml.org/schema/LandXML-1.2" version="1.2" date="{__import__('datetime').date.today().isoformat()}" time="00:00:00">
   <Units><Imperial areaUnit="squareFoot" linearUnit="{unit}" volumeUnit="cubicFeet" temperatureUnit="fahrenheit" pressureUnit="inHG" angularUnit="decimal degrees" directionUnit="decimal degrees"/></Units>
   <CoordinateSystem name="{escape(site.crs_label)}" desc="{wkid_text(site.epsg)}; vertical NAVD88"/>
-  <Application name="Basesheet" desc="Planning-level data only; not a survey"/>
+  <Application name="Basesheet" desc="{escape(FILE_NOTICE)}"/>
   <Surfaces>
     <Surface name="Existing ground (3DEP)" desc="{escape(res.layers['dem'].vintage or '3DEP DEM')}; {spacing:.1f} ft grid">
       <Definition surfType="TIN" elevMin="{np.nanmin(zs):.3f}" elevMax="{np.nanmax(zs):.3f}">
@@ -309,7 +309,7 @@ def write_gis(res, out: Path) -> dict[str, str]:
     for name, feats in layers.items():
         if not feats:
             continue
-        fc = {"type": "FeatureCollection",
+        fc = {"type": "FeatureCollection", "notice": FILE_NOTICE,
               "name": name,
               "features": [{"type": "Feature", "properties": p, "geometry": mapping(_to_ll(g, site.epsg))} for g, p in feats if not g.is_empty]}
         path = gdir / f"{name}.geojson"
@@ -379,7 +379,7 @@ def write_kml(res, out: Path) -> str:
         extruded("Zoning envelope (3D)", "envelope", [(env["geom"], env["height_ft"], env["label"])])
     kml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>{escape(site.matched_address)}</name>
-<description>Planning-level data only; not a survey. Sources and dates in provenance.md.</description>{head}{''.join(folders)}</Document></kml>
+<description>{escape(FILE_NOTICE)} Sources and dates in provenance.md.</description>{head}{''.join(folders)}</Document></kml>
 """
     path = out / "site.kml"
     path.write_text(kml)
