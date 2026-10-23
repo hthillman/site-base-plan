@@ -85,6 +85,13 @@ try:  # IndexNow key file (hosted site only)
 except ImportError:
     pass
 
+try:  # hello@basesheet.site forwarding (hosted site only)
+    from .inbound import bp as _inbound_bp
+
+    app.register_blueprint(_inbound_bp)
+except ImportError:
+    pass
+
 try:  # one-time setup endpoints (hosted site only; removed after use)
     from .admin_setup import bp as _admin_bp
 

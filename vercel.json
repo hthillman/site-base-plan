@@ -7,5 +7,11 @@
       "excludeFiles": "{out/**,.venv/**}"
     }
   },
-  "crons": [{ "path": "/api/cleanup", "schedule": "0 9 * * *" }]
+  "crons": [
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 9 * * *"
+    }
+  ],
+  "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- src app.py vercel.json requirements.txt pyproject.toml uv.lock config public"
 }
