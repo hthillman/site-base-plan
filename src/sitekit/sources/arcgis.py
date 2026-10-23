@@ -7,6 +7,7 @@ from typing import Any
 
 import requests
 
+from shapely import STRtree
 from shapely.geometry import LinearRing, MultiPolygon, Polygon, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.validation import make_valid
@@ -27,10 +28,14 @@ def esri_polygon(rings: list[list[list[float]]]) -> BaseGeometry | None:
     if not shells and holes:  # some services ignore the convention
         shells, holes = holes, []
     polys = []
+    # Each hole goes to every shell that contains its representative point. A spatial index over those
+    # points keeps this fast for zoning layers whose polygons have thousands of rings.
+    pts = [Polygon(h).representative_point() for h in holes]
+    tree = STRtree(pts) if pts else None
     for s in shells:
         sp = Polygon(s)
-        mine = [h for h in holes if sp.contains(Polygon(h).representative_point())]
-        polys.append(Polygon(s, mine))
+        idx = sorted(tree.query(sp, predicate="contains")) if tree is not None else []
+        polys.append(Polygon(s, [holes[i] for i in idx]))
     if not polys:
         return None
     g = polys[0] if len(polys) == 1 else MultiPolygon(polys)
