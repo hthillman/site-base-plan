@@ -73,7 +73,8 @@ button.quiet{background:transparent;color:var(--accent);border:1px solid var(--l
 .opts input,.opts select{padding:4px 8px;font-size:14px;border-radius:6px}
 .opts input[type=number]{width:72px}
 .opts .check{color:var(--ink)}
-.quota{font-size:13px;color:var(--muted);margin:6px 0 0}.quota a{color:inherit}
+.quota{font-size:13px;color:var(--muted);margin:6px 0 0;text-align:right}.quota a{color:inherit}
+@media(max-width:560px){.quota{text-align:center}}  /* under the button: right edge on desktop, centred under the full-width button on phones */
 .lede2{font-size:14.5px;color:var(--muted);margin:-6px 0 18px}.lede2 span{white-space:nowrap}
 .example{font-size:14px;color:var(--muted);margin:10px 0 0}
 .meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:12px;font-size:14px}
