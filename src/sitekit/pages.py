@@ -182,6 +182,7 @@ details.files summary{cursor:pointer;color:var(--accent);font-size:14px;margin-b
 .plan{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
 .caps{font-size:12.5px;line-height:1.55}
 .tgate{margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}.tgate label{align-items:flex-start;gap:8px}.tgate input{margin-top:3px;flex:none}
+.ivs{display:flex;gap:18px;flex-wrap:wrap;font-size:20px;font-weight:600;margin:0 0 4px}.ivs input{margin-right:6px}
 .procard{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:18px 0}.procard .price{font-size:22px;font-weight:700;margin:0 0 6px}
 .btab{width:100%;border-collapse:collapse;font-size:13px;display:block;overflow-x:auto;margin-top:8px}.btab th,.btab td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
 .firmf{display:grid;gap:10px;max-width:560px}.firmf label{display:grid;gap:4px;font-size:14px}.firmf input,.firmf textarea,.firmf select{font-size:15px}
@@ -367,7 +368,7 @@ const f=document.getElementById('f'),out=document.getElementById('out'),go=docum
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const NEEDS_CODE=__NEEDS_CODE__;
 const TESTFIT=__TESTFIT__;
-const PRO_LIVE=__PROLIVE__;let IS_PRO=false;
+const PRO_LIVE=__PROLIVE__;let IS_PRO=false;const REPO='__REPO__';
 if(TESTFIT&&(PRO_LIVE||new URLSearchParams(location.search).has('beta')))document.getElementById('tfwrap').hidden=false;
 if(TESTFIT&&PRO_LIVE){document.getElementById('tftag').textContent='(experimental, Pro)';
  fetch('/api/billing/status').then(r=>r.json()).then(s=>{IS_PRO=!!s.pro}).catch(()=>{});
@@ -412,7 +413,8 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
   if(await tryCode(c))unlock(c);else document.getElementById('gateerr').hidden=false}}
 // Monthly allowance reached: explain, and offer the free sign-in (no account) or what's next (account).
 function showLimit(err){track('limit_hit');const i=err.info||{};
- const pro=PRO_LIVE?'<a href="/pro">Pro</a> includes unlimited plans.':'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.';
+ const self=' Or <a href="'+REPO+'">run the open-source version</a> yourself, with no limits.';
+ const pro=(PRO_LIVE?'<a href="/pro">Pro</a> includes unlimited plans.':'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
  out.innerHTML='<div class="result"><div class="keep ask limitbox"><span><b>'+esc(err.message)+'</b></span>'+
   (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
  const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
@@ -577,7 +579,7 @@ document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/ap
 const PRELOAD=__PRELOAD__;
 if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
  else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
-</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false")
+</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL)
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -700,7 +702,7 @@ data came from. It's built for landscape architects, civil engineers, architects
 <p class="note">{escape(DISCLAIMER)}</p>
 
 <h2>Open source</h2>
-<p>The base plan code and the parcel source list are open source (MIT) at
+<p>The core tool and the parcel source list are open source (MIT), so you can always run your own copy with no limits. They're at
 <a href="https://github.com/hthillman/site-base-plan">github.com/hthillman/site-base-plan</a>. If your county publishes parcels
 and isn't covered, you can add it: it's one small file. See the contributing guide there.</p>
 
@@ -891,7 +893,7 @@ async function proBar(tries){
   document.getElementById('plede').textContent='Base plans you\\'ve saved, up to 500 with Pro. Files stay here until you delete them.';
   if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits, batch runs and office settings are on.</span>';return}
  if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
- if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+'</b><span class="note">Unlimited plans, batch runs, office standards, experimental test fits, 500 saved plans.</span>'+
+ if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+(s.prices&&s.prices.year?' or '+esc(s.prices.year.label):'')+'</b><span class="note">Unlimited plans, batch runs, office standards, experimental test fits, 500 saved plans.</span>'+
    '<a href="/pro">Details</a><label class="check fine"><input type="checkbox" id="agree"> I agree to the <a href="/terms" target="_blank">Terms</a> and will have everything checked by a licensed surveyor and the jurisdiction</label><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
   document.getElementById('getpro').onclick=async()=>{if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
    const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:s.terms_version})});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
@@ -923,14 +925,21 @@ def pro_live() -> bool:
     return live()
 
 
-def pro(price: dict | None) -> str:
-    label = escape(price["label"]) if price else ""
+def pro(prices: dict | None) -> str:
+    m, y = (prices or {}).get("month"), (prices or {}).get("year")
+    if m and y:  # choose monthly or yearly
+        save = f" (save {y['saving_pct']}%)" if y.get("saving_pct") else ""
+        choice = (f'<div class="ivs"><label class="check"><input type="radio" name="iv" value="month" checked> {escape(m["label"])}</label>'
+                  f'<label class="check"><input type="radio" name="iv" value="year"> {escape(y["label"])}{escape(save)}</label></div>')
+    else:
+        choice = f'<p class="price">{escape(m["label"]) if m else "Monthly"}</p>'
+
     body = f"""
 <h1>Basesheet Pro</h1>
 <p class="lede">Basesheet is free for everyday use. Pro is for offices that run regular site studies: no monthly limit, plus
 the features that take real work to build and keep accurate. It also pays for the zoning research behind them.</p>
 <div class="procard">
-<p class="price">{label or "Monthly"}<span class="note"> · cancel any time</span></p>
+{choice}<p class="note">Cancel any time.</p>
 <ul>
 <li><b>Unlimited plans:</b> no monthly limit for anyone on your account.</li>
 <li><b>Your office standards:</b> your firm name, address and logo in a title block on every PDF sheet, and your CAD layer names on every run.</li>
@@ -947,6 +956,7 @@ parking layout you can open in CAD, where draft zoning rule sheets exist. A star
 <ul>
 <li>Test fits are planning-level, from rule sheets that cite the zoning code. Each one says whether it's been checked by a professional. Confirm with the jurisdiction before relying on it.</li>
 <li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews monthly; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
+<li>Prefer to run it yourself? The core tool is open source (MIT) and <a href="{REPO_URL}">always available on GitHub</a>, with no limits. The hosted zoning lookup and Pro features aren't part of it.</li>
 <li>Questions or a firm with several people? {CONTACT_HTML}</li>
 </ul>
 """
@@ -965,7 +975,8 @@ fetch('/api/billing/status').then(r=>r.json()).then(s=>{
 let TV='';
 async function startCheckout(){if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
  msg.textContent='Opening checkout…';
- const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:TV})});const k=await r.json().catch(()=>({}));
+ const iv=(document.querySelector('input[name=iv]:checked')||{}).value||'month';
+ const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:TV,interval:iv})});const k=await r.json().catch(()=>({}));
  if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}
 </script>"""
     return layout("Basesheet Pro", "/pro", body, script,
@@ -997,6 +1008,7 @@ site studies have asked for firm-specific features, so I'm working with them to 
 <li>Site context from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
 <li>Every export: DXF, SketchUp terrain, LandXML, GIS, KML and the PDF summary.</li>
 <li>Multi-parcel sites, your own CAD layer names, and the zoning lookup where it's available.</li>
+<li>Open source: the core tool is MIT-licensed, so you can always <a href="{REPO_URL}">run your own copy</a> with no limits.</li>
 </ul>
 
 <h2>What I'm working on with firms</h2>

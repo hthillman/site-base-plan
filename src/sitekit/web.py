@@ -692,7 +692,7 @@ def pro_page():
         return redirect("/firms", code=302)
     from .pages import pro
 
-    return pro(billing.price())
+    return pro(billing.prices())
 
 
 @app.get("/firms")
