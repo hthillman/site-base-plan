@@ -27,7 +27,12 @@ TERMS_VERSION = importlib.import_module("sitekit.terms").TERMS_VERSION if TERMS_
 GATE_VERSION = f"{TERMS_VERSION}.2" if TERMS_ON else ""  # bump to show the first-build checkbox again after its wording changes
 TERMS_GATE_TEXT = 'Basesheet does not provide professional advice, and its maps are not surveys or certified site plans. Verify important information with surveyors and your jurisdiction before you rely on it for design, permitting, purchase, financing, construction or any other decision. (<a href="/terms" target="_blank">Terms</a>)'
 CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>' if CONTACT_EMAIL else ""
-FIRMS_FOOTER = ' · <a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false") else ""
+def firms_link() -> str:
+    """Footer link for firms: Basesheet Pro once it's on sale, the early-access page before that."""
+    if pro_live():
+        return '<a href="/pro" data-ev="firms_click">Basesheet Pro</a>'
+    on = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")
+    return '<a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if on else ""
 
 CSS = """
 :root{--bg:#fbfaf7;--ink:#1c1c1a;--muted:#6a6963;--faint:#9a988f;--line:#e4e1d8;--field:#fff;--accent:#2f5d50;--accent-ink:#fff;
@@ -269,7 +274,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if tip_url() else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if tip_url() else "") + (' · ' + firms_link() if firms_link() else '') + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -298,13 +303,13 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
     county_txt = f" + {sum(len(v) for v in _cs.values())} counties in {len(_cs)} more" if _cs else ""
     actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
     if FIRMS_PAGE:
-        actions.append('<a href="/firms" data-ev="firms_click">Using this at a firm?</a>')
+        actions.append(firms_link())
     if tip_url():
         actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
 <h1>Site context from any US address</h1>
 <p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.{_zoning_phrase()}
-Not a survey. Free, no account.</p>
+Not a survey. Free for everyday use, no account needed.</p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
@@ -496,7 +501,7 @@ function render(j){
   info.map(x=>'<li class="flag plain"><span>'+esc(x.text)+'</span></li>').join('')+
   '</ul><p class="note">Every layer’s source, date and limits are in provenance.md inside the zip.</p></details>'+
  '<div class="rfoot">'+nextRow(j.zoning)+
-  (PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
+  (PRO_LIVE?'<p class="note firmline">Using this at a firm? <a href="/pro" data-ev="firms_click">Basesheet Pro</a> adds batch runs, your title block on every sheet and experimental test fits.</p>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
  RUN_STATE=j.state||'';track('run_done');
@@ -945,7 +950,7 @@ the features that take real work to build and keep accurate. It also pays for th
 <div class="procard">
 {choice}<p class="note">Cancel any time.</p>
 <ul>
-<li><b>Unlimited plans:</b> no monthly limit for anyone on your account.</li>
+<li><b>Unlimited plans:</b> no monthly limit.</li>
 <li><b>Your office standards:</b> your firm name, address and logo in a title block on every PDF sheet, and your CAD layer names on every run.</li>
 <li><b>Batch runs:</b> up to 50 sites at once, with a summary table (parcel size, flood zone, slope, wetlands, soils, zoning) and every plan in one download.</li>
 <li><b>500 saved plans</b> instead of 25.</li>
