@@ -235,9 +235,9 @@ def zoning_counts() -> dict | None:
     return counts()
 
 
-def _zoning_chip() -> str:
-    z = zoning_counts()
-    return f'<span>Free zoning lookup in <a href="/zoning">{z["jurisdictions"]} cities and counties</a></span> · ' if z else ""
+def _zoning_words() -> str:
+    """'zoning where covered, ' in the homepage feature list (hosted build only), linked to the coverage list."""
+    return '<a href="/zoning">zoning</a> where covered, ' if zoning_counts() else ""
 
 
 ZONING_LINK = ' · <a href="/zoning">Zoning by city</a>' if importlib.util.find_spec("sitekit.zoning") else ""  # hosted build only
@@ -309,8 +309,8 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
         actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
 <h1>Site context from any US address</h1>
-<p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.</p>
-<p class="lede2">{_zoning_chip()}<span>Free for everyday use</span> · <span>No account needed</span> · <span>Not a survey</span></p>
+<p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, {_zoning_words()}aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.</p>
+<p class="lede2"><span>Free for everyday use</span> · <span>No account needed</span> · <span>Not a survey</span></p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
