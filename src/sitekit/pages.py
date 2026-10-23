@@ -45,7 +45,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system
 a{color:var(--accent);text-underline-offset:2px}
 .wrap{max-width:720px;margin:0 auto;padding:0 16px}
 header .wrap{display:flex;align-items:baseline;gap:20px;padding-top:22px;padding-bottom:6px;flex-wrap:wrap}
-.brand{font-weight:650;color:var(--ink);text-decoration:none;letter-spacing:-.01em;margin-right:auto}
+.brand{font-weight:650;color:var(--ink);text-decoration:none;letter-spacing:-.01em;margin-right:auto;display:inline-flex;align-items:center;gap:8px}.brand svg{flex:none;border-radius:5px}
 header nav{display:flex;gap:18px}header nav a{color:var(--muted);text-decoration:none;font-size:14px}
 header nav a:hover,header nav a.on{color:var(--ink)}
 header nav{align-items:center}header a.gh{display:inline-flex;align-items:center;padding:2px;color:var(--muted)}header a.gh:hover{color:var(--ink)}
@@ -73,6 +73,7 @@ button.quiet{background:transparent;color:var(--accent);border:1px solid var(--l
 .opts input,.opts select{padding:4px 8px;font-size:14px;border-radius:6px}
 .opts input[type=number]{width:72px}
 .opts .check{color:var(--ink)}
+.lede2{font-size:14.5px;color:var(--muted);margin:-6px 0 18px}.lede2 span{white-space:nowrap}
 .example{font-size:14px;color:var(--muted);margin:10px 0 0}
 .meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:12px;font-size:14px}
 .meta .linkbtn{padding:0;font-size:14px}
@@ -234,9 +235,9 @@ def zoning_counts() -> dict | None:
     return counts()
 
 
-def _zoning_phrase() -> str:
+def _zoning_chip() -> str:
     z = zoning_counts()
-    return f' Free zoning lookup in <a href="/zoning">{z["jurisdictions"]} cities and counties</a>.' if z else ""
+    return f'<span>Free zoning lookup in <a href="/zoning">{z["jurisdictions"]} cities and counties</a></span> · ' if z else ""
 
 
 ZONING_LINK = ' · <a href="/zoning">Zoning by city</a>' if importlib.util.find_spec("sitekit.zoning") else ""  # hosted build only
@@ -273,7 +274,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
-<header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
+<header><div class="wrap"><a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6" fill="#2f5d50"/><path d="M6 23c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round"/><path d="M6 17c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round" opacity=".6"/><rect x="9" y="7" width="14" height="18" rx="1" fill="none" stroke="#e8a64c" stroke-width="2" stroke-dasharray="4 2"/></svg>Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
 <main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if tip_url() else "") + (' · ' + firms_link() if firms_link() else '') + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
@@ -308,8 +309,8 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
         actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
 <h1>Site context from any US address</h1>
-<p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.{_zoning_phrase()}
-Not a survey. Free for everyday use, no account needed.</p>
+<p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.</p>
+<p class="lede2">{_zoning_chip()}<span>Free for everyday use</span> · <span>No account needed</span> · <span>Not a survey</span></p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
