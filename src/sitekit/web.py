@@ -266,6 +266,9 @@ def run_request(d: dict, batch: bool = False):
         layer_custom=parse_layer_map(d.get("layer_map") or "") if d.get("layers") == "custom" else {},
         skip={k for k in (d.get("skip") or []) if k in OPTIONAL_LAYERS},
     )
+    blocked = plan_allowance(d, request.headers.get("X-Live-Check", ""))
+    if blocked:
+        return jsonify(blocked), 402
     if opts.testfit and not pro_ok():
         return jsonify(error="The test fit is part of Basesheet Pro. Sign in and subscribe on basesheet.site/pro, or build without it.", pro=True), 402
     try:  # Pro firm branding: title block and office layer standard (hosted site only)
@@ -292,6 +295,12 @@ def run_request(d: dict, batch: bool = False):
         except (TypeError, ValueError):
             return None
     base["prior"], base["since"] = _int(d.get("prior"), 9999) or 0, _int(d.get("since"), 3650)
+    base["mprior"] = _int(d.get("mprior"), 9999) or 0  # this browser's plans earlier this month
+
+    from .accounts import current_user as _cu
+
+    _u = _cu()
+    user_id = _u["id"] if _u else None  # read now: the worker thread has no request context
 
     def worker():
         t0 = time.time()
@@ -311,6 +320,7 @@ def run_request(d: dict, batch: bool = False):
             rj = {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
             save_result(run_id, rj)
+            count_plan(user_id)
             events.put({"result": rj})
         except Exception as e:  # noqa: BLE001
             record_usage({**base, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
@@ -391,6 +401,92 @@ def record_usage(rec: dict) -> None:
         print(f"WARN usage record failed: {e}", flush=True)
 
 
+# Monthly allowance (off unless FREE_PLANS_PER_MONTH is set): signed-in free accounts are counted on the server;
+# without an account the browser's own count applies (soft: it prompts a free sign-in rather than policing).
+# Pro accounts, batch runs and the live check are exempt; AI assistants have their own daily cap (mcp.py).
+FREE_PLANS_PER_MONTH = int(os.environ.get("FREE_PLANS_PER_MONTH", "0") or 0)
+ANON_PLANS_PER_MONTH = int(os.environ.get("ANON_PLANS_PER_MONTH", "0") or 0)
+
+
+def _month() -> str:
+    from datetime import datetime, timezone
+
+    return datetime.now(timezone.utc).strftime("%Y-%m")
+
+
+def count_private(prefix: str) -> int:
+    """How many private records sit under a prefix (no reads)."""
+    from .http import session
+
+    if not PRIVATE_TOKEN:
+        folder = LOCAL_INBOX / prefix
+        return len(list(folder.glob("*.json"))) if folder.exists() else 0
+    n, cursor = 0, None
+    while True:
+        d = session().get("https://blob.vercel-storage.com", params={"prefix": prefix + "/", "limit": 1000, **({"cursor": cursor} if cursor else {})},
+                          headers={"authorization": f"Bearer {PRIVATE_TOKEN}", "x-api-version": "7"}, timeout=30).json()
+        n += len(d.get("blobs", []))
+        cursor = d.get("cursor")
+        if not d.get("hasMore"):
+            return n
+
+
+def _is_pro() -> bool:
+    try:
+        from . import billing
+    except ImportError:
+        return False
+    from .accounts import current_user
+
+    return billing.live() and billing.is_pro(current_user())
+
+
+def plan_allowance(d: dict, live_check_header: str) -> dict | None:
+    """None if this run may go ahead; otherwise the JSON for a 402 that the page turns into a sign-in / upgrade box."""
+    if not FREE_PLANS_PER_MONTH:
+        return None
+    tok = os.environ.get("ADMIN_TOKEN", "")
+    if (tok and hmac.compare_digest(live_check_header, tok)) or _is_pro():
+        return None
+    from .accounts import can_sign_up, current_user
+
+    u = current_user()
+    nxt = _next_month_label()
+    if u:
+        used = count_private(f"planq/{u['id']}/{_month()}")
+        if used < FREE_PLANS_PER_MONTH:
+            return None
+        return {"limit": "account", "allowance": FREE_PLANS_PER_MONTH, "resets": nxt,
+                "error": f"You've used this month's {FREE_PLANS_PER_MONTH} free plans. Your allowance resets on {nxt}."}
+    try:
+        mprior = int(d.get("mprior") or 0)
+    except (TypeError, ValueError):
+        mprior = 0
+    if not ANON_PLANS_PER_MONTH or mprior < ANON_PLANS_PER_MONTH or not can_sign_up():
+        return None
+    return {"limit": "anon", "allowance": FREE_PLANS_PER_MONTH, "anon_allowance": ANON_PLANS_PER_MONTH,
+            "error": f"You've made {ANON_PLANS_PER_MONTH} plan{'s' if ANON_PLANS_PER_MONTH != 1 else ''} this month. "
+                     f"Sign in free to keep going: {FREE_PLANS_PER_MONTH} plans a month, no password."}
+
+
+def _next_month_label() -> str:
+    from datetime import date
+
+    t = date.today()
+    first = date(t.year + (t.month == 12), t.month % 12 + 1, 1)
+    return first.strftime("%B %-d")
+
+
+def count_plan(user_id: str | None) -> None:
+    """Record one successful plan against a signed-in account's monthly allowance. Never raises."""
+    if not (FREE_PLANS_PER_MONTH and user_id):
+        return
+    try:
+        private_put(f"planq/{user_id}/{_month()}", {"n": 1})
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN plan count failed: {e}", flush=True)
+
+
 def private_put(prefix: str, record: dict) -> None:
     """Write one JSON record to the private Blob store (not publicly readable)."""
     from datetime import datetime, timezone
@@ -398,8 +494,9 @@ def private_put(prefix: str, record: dict) -> None:
     from .http import session
 
     if not PRIVATE_TOKEN:
-        LOCAL_INBOX.mkdir(parents=True, exist_ok=True)
-        (LOCAL_INBOX / f"{prefix}-{uuid.uuid4().hex[:8]}.json").write_text(json.dumps(record, indent=2))
+        folder = LOCAL_INBOX / prefix  # same layout as the hosted store: <prefix>/<file>.json
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / f"{uuid.uuid4().hex[:8]}.json").write_text(json.dumps(record, indent=2))
         return
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     r = session().put(
@@ -440,7 +537,7 @@ def interest():
     return jsonify(ok=True)
 
 
-EVENT_NAMES = {"ai_setup", "ask_shown", "ask_sent", "run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
+EVENT_NAMES = {"ai_setup", "ask_shown", "ask_sent", "limit_hit", "run_start", "run_done", "run_error", "download_zip", "open_pdf", "save_click", "save_link_sent",
                "tip_click", "firms_click", "vote", "vote_email", "map_pick"}
 
 

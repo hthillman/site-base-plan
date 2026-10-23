@@ -369,7 +369,7 @@ const NEEDS_CODE=__NEEDS_CODE__;
 const TESTFIT=__TESTFIT__;
 const PRO_LIVE=__PROLIVE__;let IS_PRO=false;
 if(TESTFIT&&(PRO_LIVE||new URLSearchParams(location.search).has('beta')))document.getElementById('tfwrap').hidden=false;
-if(TESTFIT&&PRO_LIVE){document.getElementById('tftag').textContent='(Pro · Thurston Co. WA for now)';
+if(TESTFIT&&PRO_LIVE){document.getElementById('tftag').textContent='(experimental, Pro)';
  fetch('/api/billing/status').then(r=>r.json()).then(s=>{IS_PRO=!!s.pro}).catch(()=>{});
  f.testfit.addEventListener('change',()=>{if(f.testfit.checked&&!IS_PRO){f.testfit.checked=false;document.getElementById('tfnote').hidden=false}})}
 const looksApn=v=>/^[0-9A-Za-z][0-9A-Za-z.\\- ]{4,}$/.test(v)&&!/[A-Za-z]{3,}/.test(v)&&/[0-9]{5}/.test(v.replace(/\\D/g,''));
@@ -410,24 +410,36 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
  (s?tryCode(s):Promise.resolve(false)).then(ok=>{if(ok)unlock(s);else{setStored('');gate.hidden=false;gate.code.focus()}});
  gate.onsubmit=async e=>{e.preventDefault();const c=gate.code.value.trim();
   if(await tryCode(c))unlock(c);else document.getElementById('gateerr').hidden=false}}
+// Monthly allowance reached: explain, and offer the free sign-in (no account) or what's next (account).
+function showLimit(err){track('limit_hit');const i=err.info||{};
+ const pro=PRO_LIVE?'<a href="/pro">Pro</a> includes unlimited plans.':'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.';
+ out.innerHTML='<div class="result"><div class="keep ask limitbox"><span><b>'+esc(err.message)+'</b></span>'+
+  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
+ const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
+  const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lf.email.value,website:lf.website.value})});
+  const k=await r.json().catch(()=>({}));lf.outerHTML=r.ok?'<span class="ok">Check your email for the sign-in link (good for 30 minutes).</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}}
+// Plans this calendar month from this browser (a number only, no ID): usage stats and the monthly allowance.
+const thisMonth=()=>new Date().toISOString().slice(0,7);
+const monthPlans=()=>{const v=(LS.get('sitekit-month')||'').split(':');return v[0]===thisMonth()?+(v[1]||0):0};
 // First build: a one-time checkbox (remembered per Terms version) before anything runs.
 const TV='__TERMS_VERSION__',tgate=document.getElementById('tgate');let TOK=!TV||LS.get('sitekit-terms')===TV;
 if(tgate)document.getElementById('tgcheck').onchange=e=>{if(!e.target.checked)return;TOK=true;LS.set('sitekit-terms',TV);tgate.hidden=true;f.requestSubmit()};
 f.onsubmit=async e=>{e.preventDefault();if(!TOK){tgate.hidden=false;document.getElementById('tgcheck').focus();return}
  go.disabled=true;go.textContent='Working…';
  const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();track('run_start');
- const first=LS.get('sitekit-first');body.prior=+(LS.get('sitekit-plans')||0);body.since=first?Math.max(0,Math.round((Date.now()-Date.parse(first))/864e5)):null;
+ const first=LS.get('sitekit-first');body.prior=+(LS.get('sitekit-plans')||0);body.mprior=monthPlans();body.since=first?Math.max(0,Math.round((Date.now()-Date.parse(first))/864e5)):null;
  body.also=[...alsoBox.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
  out.innerHTML='<div class="result"><pre id="log">Starting…</pre></div>';
  const log=document.getElementById('log');const lines=[];
  try{
   const r=await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.status===429)throw new Error('Too many runs from your network in the last few minutes. Give it a moment and try again.');
-  if(!r.ok){const j=await r.json().catch(()=>({error:'Request failed ('+r.status+')'}));throw new Error(j.error)}
+  if(!r.ok){const j=await r.json().catch(()=>({error:'Request failed ('+r.status+')'}));const e=new Error(j.error);e.limit=j.limit;e.info=j;throw e}
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
   for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
    let i;while((i=buf.indexOf('\\n'))>=0){const ev=JSON.parse(buf.slice(0,i));buf=buf.slice(i+1);handle(ev)}}
- }catch(err){track('run_error');out.innerHTML='<div class="result"><p class="errline"><b class="err">Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
+ }catch(err){if(err.limit){showLimit(err);go.disabled=false;go.textContent='Build base plan';return}
+  track('run_error');out.innerHTML='<div class="result"><p class="errline"><b class="err">Couldn\\'t build this site.</b> '+esc(err.message)+'</p>'+
   ((err.suggestions||[]).length?'<div class="chips">'+err.suggestions.map(s=>'<button type="button" class="chip sugg">'+esc(s)+'</button>').join('')+'</div>':'')+
   (err.pick?'<div class="picker"><p class="note"><b>Can’t find it?</b> Click the site on the map, then build.</p><div id="pickmap" role="application" aria-label="Map: click to choose the site"></div>'+
    '<div class="pickbar"><span id="pickll" class="note">No point chosen yet.</span><button type="button" id="pickgo" disabled>Build base plan here</button></div></div>':'')+'</div>';
@@ -437,7 +449,7 @@ f.onsubmit=async e=>{e.preventDefault();if(!TOK){tgate.hidden=false;document.get
  function handle(ev){
   if(ev.log){lines.push(ev.log);log.textContent=lines.join('\\n')}
   if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];e.near=ev.near||null;e.pick=!!ev.pick;throw e}
-  if(ev.result){LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result)}}
+  if(ev.result){LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));LS.set('sitekit-month',thisMonth()+':'+(monthPlans()+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result)}}
 };
 function render(j){
  const order={missing:0,alert:1,caution:2,info:3};
@@ -786,7 +798,7 @@ def privacy() -> str:
 <li>It's sent to geocoding services (Esri, the U.S. Census Bureau, OpenStreetMap) to find the location, and to public GIS services (USGS, USDA, FEMA, USFWS, state parcel servers) to fetch data around it.</li>
 <li>The finished files are stored at an unlisted web link for <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
 <li>Each run leaves an anonymous usage record (state, whether a parcel was found, whether we had zoning for it, run time, which data sources failed) so we can see what's working. It never includes the address or any location finer than the state.</li>
-<li>Your browser keeps a count of the plans you've made and the date of your first one. Each run sends just those two numbers, so we can tell whether people come back. There's no ID and nothing that identifies you or your browser; clearing site data resets the count.</li>
+<li>Your browser keeps a count of the plans you've made (in total and this month) and the date of your first one. Each run sends just those numbers, so we can tell whether people come back and keep free use fair. There's no ID and nothing that identifies you or your browser; clearing site data resets the count.</li>
 </ul>
 <h2>Analytics</h2>
 <p>Page views are counted with Vercel Web Analytics, which doesn't use cookies or track you across sites.</p>
@@ -879,7 +891,7 @@ async function proBar(tries){
   document.getElementById('plede').textContent='Base plans you\\'ve saved, up to 500 with Pro. Files stay here until you delete them.';
   if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits, batch runs and office settings are on.</span>';return}
  if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
- if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+'</b><span class="note">Zoning test fits, office standards, batch runs, 500 saved plans.</span>'+
+ if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+'</b><span class="note">Unlimited plans, batch runs, office standards, experimental test fits, 500 saved plans.</span>'+
    '<a href="/pro">Details</a><label class="check fine"><input type="checkbox" id="agree"> I agree to the <a href="/terms" target="_blank">Terms</a> and will have everything checked by a licensed surveyor and the jurisdiction</label><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
   document.getElementById('getpro').onclick=async()=>{if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
    const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:s.terms_version})});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
@@ -915,16 +927,17 @@ def pro(price: dict | None) -> str:
     label = escape(price["label"]) if price else ""
     body = f"""
 <h1>Basesheet Pro</h1>
-<p class="lede">Base plans stay free for everyone. Pro is for offices that run regular site studies: it adds the features
-that take real work to build and keep accurate, and it pays for the zoning research behind them.</p>
+<p class="lede">Basesheet is free for everyday use. Pro is for offices that run regular site studies: no monthly limit, plus
+the features that take real work to build and keep accurate. It also pays for the zoning research behind them.</p>
 <div class="procard">
 <p class="price">{label or "Monthly"}<span class="note"> · cancel any time</span></p>
 <ul>
-<li><b>Zoning test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking
-layout you can open in CAD. Thurston County, WA today; more jurisdictions are being added every week, and you can ask for yours.</li>
+<li><b>Unlimited plans:</b> no monthly limit for anyone on your account.</li>
 <li><b>Your office standards:</b> your firm name, address and logo in a title block on every PDF sheet, and your CAD layer names on every run.</li>
 <li><b>Batch runs:</b> up to 50 sites at once, with a summary table (parcel size, flood zone, slope, wetlands, soils, zoning) and every plan in one download.</li>
 <li><b>500 saved plans</b> instead of 25.</li>
+<li><b>Experimental test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a rough building and
+parking layout you can open in CAD, where draft zoning rule sheets exist. A starting point to check, never a zoning determination.</li>
 </ul>
 <div id="probox"><label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
 <p><button type="button" id="subscribe">Get Pro</button></p></div>
@@ -962,7 +975,7 @@ async function startCheckout(){if(!document.getElementById('agree').checked){msg
 def firms() -> str:
     body = f"""
 <h1>For firms</h1>
-<p class="lede">Basesheet is free and <a href="{REPO_URL}">open source</a>, and it stays that way. A few offices that run regular
+<p class="lede">Basesheet is free for everyday use and <a href="{REPO_URL}">open source</a>. A few offices that run regular
 site studies have asked for firm-specific features, so I'm working with them to improve the tool for professional usage.</p>
 
 <form id="ff" class="ffshort">
@@ -979,16 +992,16 @@ site studies have asked for firm-specific features, so I'm working with them to 
 <p class="fine">I'll only use this to reply to you. See <a href="/privacy">Privacy</a>.</p>
 </form>
 
-<h2>Free forever</h2>
+<h2>Free for everyday use</h2>
 <ul>
-<li>Base plans from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
+<li>Site context from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
 <li>Every export: DXF, SketchUp terrain, LandXML, GIS, KML and the PDF summary.</li>
 <li>Multi-parcel sites, your own CAD layer names, and the zoning lookup where it's available.</li>
 </ul>
 
 <h2>What I'm working on with firms</h2>
 <ul>
-<li><b>Test fits for the places you work:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking layout you can open in CAD, from zoning rules checked for your jurisdictions.</li>
+<li><b>Experimental test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a building and parking layout you can open in CAD, where zoning rule sheets exist. Always a starting point to check, never a zoning determination.</li>
 <li><b>Your office standards on every output:</b> your title block and logo on the PDF, your CAD layer standard set up once for the whole office.</li>
 <li><b>Batch runs:</b> many sites at once, for feasibility studies and site selection.</li>
 <li><b>Parcel lines where you work,</b> including counties the free tool doesn't cover yet.</li>
@@ -1003,4 +1016,4 @@ document.getElementById('ff').onsubmit=async e=>{e.preventDefault();const f=e.ta
  if(r.ok){f.innerHTML='<p class="ok"><b>Thanks, got it.</b> I\\'ll be in touch by email.</p>'}else{m.textContent=j.error||'Something went wrong.';m.className='fine err'}};
 </script>"""
     return layout("For firms · Basesheet", "/firms", body, script,
-                  description="Basesheet is free and stays free. For offices that run regular site studies: test fits for your jurisdictions, your title block and CAD standards, and batch runs, built with early firms.")
+                  description="Basesheet is free for everyday use. For offices that run regular site studies: unlimited plans, batch runs, your title block and CAD standards, and experimental test fits, built with early firms.")
