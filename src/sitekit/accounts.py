@@ -389,7 +389,19 @@ def auth_logout():
 @bp.get("/api/me")
 def me():
     u = current_user()
-    return jsonify(email=u["email"] if u else None, can_sign_up=can_sign_up())
+    return jsonify(email=u["email"] if u else None, can_sign_up=can_sign_up(), quota=_quota(u))
+
+
+def _quota(u: dict | None) -> dict | None:
+    """This month's free-plan allowance for the page's "X of N left" line; None when limits are off or for Pro."""
+    from . import web
+
+    if not web.FREE_PLANS_PER_MONTH or web._is_pro():
+        return None
+    q = {"allowance": web.FREE_PLANS_PER_MONTH, "anon_allowance": web.ANON_PLANS_PER_MONTH}
+    if u:
+        q["used"] = web.count_private(f"planq/{u['id']}/{web._month()}")
+    return q
 
 
 @bp.get("/api/plans")

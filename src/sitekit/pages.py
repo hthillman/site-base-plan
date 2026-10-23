@@ -73,6 +73,7 @@ button.quiet{background:transparent;color:var(--accent);border:1px solid var(--l
 .opts input,.opts select{padding:4px 8px;font-size:14px;border-radius:6px}
 .opts input[type=number]{width:72px}
 .opts .check{color:var(--ink)}
+.quota{font-size:13px;color:var(--muted);margin:6px 0 0}.quota a{color:inherit}
 .lede2{font-size:14.5px;color:var(--muted);margin:-6px 0 18px}.lede2 span{white-space:nowrap}
 .example{font-size:14px;color:var(--muted);margin:10px 0 0}
 .meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:12px;font-size:14px}
@@ -324,6 +325,7 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
 <button id="go">Build base plan</button>
 </div>
 <div id="also"></div>
+<p id="quota" class="quota" hidden aria-live="polite"></p>
 <div id="apnrow" class="opts" hidden>
 <label>State <select name="state" aria-label="State (needed for parcel numbers)">{opts}</select></label>
 <label>County <input name="county" placeholder="if needed" style="width:130px"></label>
@@ -433,6 +435,13 @@ function showLimit(err){track('limit_hit');const i=err.info||{};
 // Plans this calendar month from this browser (a number only, no ID): usage stats and the monthly allowance.
 const thisMonth=()=>new Date().toISOString().slice(0,7);
 const monthPlans=()=>{const v=(LS.get('sitekit-month')||'').split(':');return v[0]===thisMonth()?+(v[1]||0):0};
+// Free allowance line under the Build button: only while monthly limits are on (QUOTA set), never for Pro.
+const QUOTA=__QUOTA__;let quota=null;
+function showQuota(){const el=document.getElementById('quota');if(!el||!quota)return;
+ const signed=quota.used!==undefined,allow=signed?quota.allowance:quota.anon_allowance,used=signed?quota.used:monthPlans();
+ if(!allow){el.hidden=true;return}const left=Math.max(0,allow-used);
+ el.innerHTML=left+' of '+allow+' free plans left this month'+(signed?'':' · more with a free account')+(PRO_LIVE?' · <a href="/pro">Unlimited with Pro</a>':'');el.hidden=false}
+if(QUOTA)fetch('/api/me').then(r=>r.json()).then(m=>{quota=m.quota||null;showQuota()}).catch(()=>{});
 // First build: a one-time checkbox (remembered per Terms version) before anything runs.
 const TV='__TERMS_VERSION__',tgate=document.getElementById('tgate');let TOK=!TV||LS.get('sitekit-terms')===TV;
 if(tgate)document.getElementById('tgcheck').onchange=e=>{if(!e.target.checked)return;TOK=true;LS.set('sitekit-terms',TV);tgate.hidden=true;f.requestSubmit()};
@@ -461,7 +470,7 @@ f.onsubmit=async e=>{e.preventDefault();if(!TOK){tgate.hidden=false;document.get
  function handle(ev){
   if(ev.log){lines.push(ev.log);log.textContent=lines.join('\\n')}
   if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];e.near=ev.near||null;e.pick=!!ev.pick;throw e}
-  if(ev.result){LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));LS.set('sitekit-month',thisMonth()+':'+(monthPlans()+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result)}}
+  if(ev.result){if(quota&&quota.used!==undefined)quota.used++;setTimeout(showQuota,0);LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));LS.set('sitekit-month',thisMonth()+':'+(monthPlans()+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result)}}
 };
 function render(j){
  const order={missing:0,alert:1,caution:2,info:3};
@@ -589,7 +598,7 @@ document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/ap
 const PRELOAD=__PRELOAD__;
 if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
  else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
-</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(tip_url())).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL)
+</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(tip_url())).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL).replace("__QUOTA__", "true" if os.environ.get("FREE_PLANS_PER_MONTH", "0") not in ("", "0") else "false")
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -843,10 +852,10 @@ def plans() -> str:
 <h1>My plans</h1>
 <p class="lede" id="plede">Base plans you've saved, up to 25. Files stay here until you delete them.</p>
 <div id="pmsg" class="note" aria-live="polite"></div>
+<div id="probar" class="probar" hidden></div>
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
-<div id="probar" class="probar" hidden></div>
 <section id="office" hidden>
 <h2>Your office</h2>
 <p class="note">Used on every base plan you build while signed in: your title block on each PDF sheet, and your CAD layer names.</p>
