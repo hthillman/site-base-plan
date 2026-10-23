@@ -15,7 +15,11 @@ from .plugins import testfit_available
 
 SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
-TIP_FOOTER = f' · <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>' if TIP_URL else ""
+
+
+def tip_url() -> str:
+    """The tip link, until Pro is on sale: then the site asks for Pro instead of tips."""
+    return "" if pro_live() else TIP_URL
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # hosted site only; kept out of the open-source code
 TERMS_ON = importlib.util.find_spec("sitekit.terms") is not None and importlib.import_module("sitekit.terms").READY
 TERMS_LINK = ' · <a href="/terms">Terms</a>' if TERMS_ON else ""
@@ -265,7 +269,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/">Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if TIP_URL else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
+<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if tip_url() else "") + FIRMS_FOOTER + '</p></footer>'}</div></main>
 {script}
 </body></html>"""
 
@@ -295,8 +299,8 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
     actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
     if FIRMS_PAGE:
         actions.append('<a href="/firms" data-ev="firms_click">Using this at a firm?</a>')
-    if TIP_URL:
-        actions.append(f'<a href="{escape(TIP_URL)}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
+    if tip_url():
+        actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
 <h1>Site context from any US address</h1>
 <p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.{_zoning_phrase()}
@@ -579,7 +583,7 @@ document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/ap
 const PRELOAD=__PRELOAD__;
 if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
  else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
-</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(TIP_URL)).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL)
+</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(tip_url())).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL)
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
