@@ -975,7 +975,7 @@ parking layout you can open in CAD, where draft zoning rule sheets exist. A star
 <h2>Fine print</h2>
 <ul>
 <li>Test fits are planning-level, from rule sheets that cite the zoning code. Each one says whether it's been checked by a professional. Confirm with the jurisdiction before relying on it.</li>
-<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews monthly; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
+<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews each month or year, depending on the plan you choose; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
 <li>Prefer to run it yourself? The core tool is open source (MIT) and <a href="{REPO_URL}">always available on GitHub</a>, with no limits. The hosted zoning lookup and Pro features aren't part of it.</li>
 <li>Questions or a firm with several people? {CONTACT_HTML}</li>
 </ul>
