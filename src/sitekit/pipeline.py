@@ -628,6 +628,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
         flags = tf_flags(tf) + flags
         timings["testfit"] = time.time() - t4
     else:
+        tw = time.time()
         try:
             zflags, zoning = zfut.result(timeout=max(1.0, ZONING_BUDGET_S - (time.time() - t1)))
         except Exception as e:  # noqa: BLE001 - TimeoutError or a crash: the plan finishes without zoning
@@ -636,7 +637,7 @@ def run(query: str, opts: Options | None = None, log: Log = print) -> RunResult:
                 f"Zoning lookup skipped: the jurisdiction's zoning map didn't answer within {ZONING_BUDGET_S} s. The rest of the plan is complete; "
                 "try again later for zoning." if timed_out else f"Zoning lookup failed ({type(e).__name__}); the rest of the plan is unaffected.")}], None
         flags = zflags + flags
-        timings["zoning"] = time.time() - t1  # from the start of the fetch it ran alongside
+        timings["zoning_wait"] = time.time() - tw  # only the time the plan waited for it (it runs alongside the fetch and terrain)
 
     envelope = None
     if "massing" not in opts.skip and tf is not None and getattr(tf, "envelope", None) is not None and getattr(tf, "rules", None) is not None and tf.rules.get("height", "max_ft"):
