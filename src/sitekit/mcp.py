@@ -133,6 +133,7 @@ def build(args: dict) -> dict:
     """Run one base plan for a tools/call; returns an MCP CallToolResult."""
     from .geocode import GeocodeError
     from .pipeline import Options, run, zoning_coverage
+    from .parcel import jurisdiction_at
     from .web import OUT, looks_like_apn, publish, query_shape, record_usage, save_result
 
     q = str(args.get("site") or "").strip()[:300]
@@ -177,7 +178,8 @@ def build(args: dict) -> dict:
     save_result(run_id, rj)
     record_usage({**base, "outcome": "ok", "state": res.site.state, "parcel": res.site.parcel is not None, "zoning": zoning_coverage(res),
                   "seconds": round(time.time() - t0, 1), "t": {k: round(v, 1) for k, v in res.timings.items()},
-                  "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed")})
+                  "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
+                  "jurisdiction": jurisdiction_at(res.site.lon, res.site.lat, timeout=5)})
     link = f"{_site_url()}/r/{run_id}?via=ai"
     content = [{"type": "text", "text": _result_text(rj, link)}]
     thumb = _thumbnail(res.files.get("preview"))

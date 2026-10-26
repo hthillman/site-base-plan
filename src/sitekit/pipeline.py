@@ -735,7 +735,7 @@ def _write_dem(path: Path, grid: Grid, epsg: int) -> Path:
 
 
 def zoning_coverage(res: RunResult) -> str:
-    """Coverage outcome for the anonymous usage record (no location below state):
+    """Coverage outcome for the anonymous usage record (no location below city or township):
     covered | no_zoning | no_district | none."""
     z = res.zoning
     if not z:

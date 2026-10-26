@@ -845,7 +845,7 @@ def privacy() -> str:
 <ul>
 <li>It's sent to geocoding services (Esri, the U.S. Census Bureau, OpenStreetMap) to find the location, and to public GIS services (USGS, USDA, FEMA, USFWS, state parcel servers) to fetch data around it.</li>
 <li>The finished files are stored at an unlisted web link for <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
-<li>Each run leaves an anonymous usage record (state, whether a parcel was found, whether we had zoning for it, run time, which data sources failed) so we can see what's working. It never includes the address or any location finer than the state.</li>
+<li>Each run leaves an anonymous usage record (the state, county and city or township it was in, whether a parcel was found, whether we had zoning for it, run time, which data sources failed) so we can see what's working and where to add zoning next. It never includes the address, coordinates or anything finer than the city or township.</li>
 <li>Your browser keeps a count of the plans you've made (in total and this month) and the date of your first one. Each run sends just those numbers, so we can tell whether people come back and keep free use fair. There's no ID and nothing that identifies you or your browser; clearing site data resets the count.</li>
 </ul>
 <h2>Analytics</h2>

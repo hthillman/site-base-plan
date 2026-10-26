@@ -19,7 +19,7 @@ from pathlib import Path
 from flask import Flask, Response, abort, jsonify, request, send_file
 
 from .config import REPO_ROOT
-from .parcel import looks_like_apn
+from .parcel import jurisdiction_at, looks_like_apn
 from .pipeline import Options, run, zoning_coverage
 
 ON_VERCEL = bool(os.environ.get("VERCEL"))
@@ -315,7 +315,7 @@ def run_request(d: dict, batch: bool = False):
             res = run(q, opts, log=lambda m: events.put({"log": m}))
             events.put({"log": "Publishing files"})
             urls = publish(run_id, res.out_dir, res.files)
-            record_usage({
+            rec = {
                 **base, "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
                 "parcels": len(res.site.parcels) or (1 if res.site.parcel is not None else 0), "layers": opts.layer_preset + ("+custom" if opts.layer_custom else ""),
                 "parcel": res.site.parcel is not None, "testfit": getattr(res.testfit, "status", None), "zoning": zoning_coverage(res),
@@ -323,12 +323,16 @@ def run_request(d: dict, batch: bool = False):
                 "t": {k: round(v, 1) for k, v in res.timings.items()},  # per stage, to find what makes a run slow
                 "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                 "dem_res_m": res.layers["dem"].extra.get("source_res_m") if res.layers.get("dem") else None,
-            })
+                "zoning_where": sorted({d.get("jurisdiction") for d in (res.zoning or {}).get("details", []) if d.get("jurisdiction")}),
+            }
             rj = {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
             save_result(run_id, rj)
             count_plan(user_id)
             events.put({"result": rj})
+            # After the result is out, so it never slows a plan: which local government the run was in (city or
+            # township and county, from Census), to see where zoning coverage is missing. Never the address.
+            record_usage({**rec, "jurisdiction": jurisdiction_at(res.site.lon, res.site.lat)})
         except Exception as e:  # noqa: BLE001
             record_usage({**base, "outcome": "error", "input": "apn" if looks_like_apn(q) else "address", "state": opts.state or "",
                           "error_kind": type(e).__name__, "error": str(e)[:160] if type(e).__name__ != "GeocodeError" else "",

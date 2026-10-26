@@ -235,6 +235,25 @@ def county_at(lon: float, lat: float) -> str | None:
         return None
 
 
+def jurisdiction_at(lon: float, lat: float, timeout: float = 8) -> dict:
+    """The local government at a point (city/town/village, township, county) with Census GEOIDs, from the Census
+    reverse geocoder: public data, so it can be kept in usage records, unlike a commercial geocoder's match.
+    Empty on any failure."""
+    try:
+        d = get_json("https://geocoding.geo.census.gov/geocoder/geographies/coordinates",
+                     {"x": lon, "y": lat, "benchmark": "Public_AR_Current", "vintage": "Current_Current",
+                      "layers": "Incorporated Places,County Subdivisions,Counties", "format": "json"}, timeout=timeout)
+        g = d.get("result", {}).get("geographies", {})
+    except Exception:  # noqa: BLE001
+        return {}
+    out = {}
+    for key, layer in (("place", "Incorporated Places"), ("cousub", "County Subdivisions"), ("county", "Counties")):
+        v = (g.get(layer) or [{}])[0]
+        if v.get("GEOID"):
+            out[key], out[f"{key}_geoid"] = v.get("NAME", ""), v["GEOID"]
+    return out
+
+
 def looks_like_apn(q: str) -> bool:
     """Parcel numbers are digits with dashes/dots/spaces and maybe a few
     letters (e.g. 'R12345', '123-45-678A'); addresses have street words."""
