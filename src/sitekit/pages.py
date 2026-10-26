@@ -862,7 +862,8 @@ also counts clicks on buttons like Download and Save, with the state of the site
 <h2>Saved plans</h2>
 <p>Saving is optional. If you sign in to save a plan, your email address and the plans you save (address, files and date) are
 stored privately and kept until you delete them. Accounts and saved-plan records are held by Supabase (our database provider)
-and sign-in emails are sent through Resend. Your email is used only to send sign-in links. Never shared or sold. Delete a
+and emails are sent through Resend. Your email is used to send sign-in links and occasional notes about your account (a welcome
+when you sign up, problems with signing in, and billing if you subscribe). No marketing lists. Never shared or sold. Delete a
 plan from My plans any time; ask through the feedback form to have your account removed.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.

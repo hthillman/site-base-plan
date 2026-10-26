@@ -71,7 +71,7 @@ def sb_verify(token_hash: str, vtype: str) -> dict:
         r = http().post(f"{SUPABASE_URL}/auth/v1/verify", json={"type": "email", "token_hash": token_hash}, headers=_sb(service=False), timeout=20)
     r.raise_for_status()
     u = r.json().get("user") or {}
-    return {"id": u["id"], "email": u.get("email", "")}
+    return {"id": u["id"], "email": u.get("email", ""), "created_at": u.get("created_at", "")}
 
 
 def _rest(method: str, query: str, **kw):
@@ -208,6 +208,39 @@ def _send_link(email: str, link: str) -> None:
                                                            "text": text, "html": html},
                     headers={"authorization": f"Bearer {RESEND_API_KEY}"}, timeout=20)
     r.raise_for_status()
+
+
+WELCOME_SUBJECT = "Welcome to Basesheet"
+
+
+def welcome_text(allowance: int) -> str:
+    plans = (f"Your account gives you {allowance} free plans a month, and you can see your saved plans at https://basesheet.site/plans."
+             if allowance else "You can see your saved plans at https://basesheet.site/plans.")
+    return (f"Hi,\n\nThanks for signing up for Basesheet. {plans}\n\n"
+            "One question, if you have a second: what kind of projects are you using Basesheet for?\n\n"
+            "It's helpful for me to understand what you're up to, so that we can be smart about what features we add. "
+            "I read and reply to every response I get :)\n\nHunter\nBasesheet\n")
+
+
+def maybe_welcome(user: dict) -> None:
+    """One plain-text note on a new account's first sign-in (hosted site only: WELCOME_EMAIL=1). Accounts created more than
+    a day ago never get one, and a private record stops repeats. Never raises: sign-in must not depend on it."""
+    if os.environ.get("WELCOME_EMAIL") != "1" or not RESEND_API_KEY or not user.get("email"):
+        return
+    try:
+        created = datetime.fromisoformat(str(user.get("created_at", "")).replace("Z", "+00:00"))
+        if (datetime.now(timezone.utc) - created).total_seconds() > 86400 or _priv_list(f"welcomed/{user['id']}"):
+            return
+        _priv_put(f"welcomed/{user['id']}", {"at": _now()})  # before sending, so a retry can't send twice
+        from .http import session as http
+
+        allowance = int(os.environ.get("FREE_PLANS_PER_MONTH", "0") or 0)
+        r = http().post("https://api.resend.com/emails", json={"from": EMAIL_FROM, "to": [user["email"]], "subject": WELCOME_SUBJECT,
+                                                               "text": welcome_text(allowance)},
+                        headers={"authorization": f"Bearer {RESEND_API_KEY}"}, timeout=10)
+        r.raise_for_status()
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN welcome email failed: {type(e).__name__}: {e}", flush=True)
 
 
 # ------------------------------------------------------------------ saving
@@ -397,6 +430,8 @@ def auth_finish():
         user = {"id": _uid(payload["e"]), "email": payload["e"]}
     session.permanent = True
     session["uid"], session["email"] = user["id"], user["email"] or payload["e"]
+    if supabase_on():
+        maybe_welcome(user)
     if payload.get("s"):
         try:
             save_plan(user, payload["s"])
