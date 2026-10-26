@@ -17,6 +17,32 @@ SAMPLES = Path(__file__).resolve().parent / "data" / "samples.json"
 TIP_URL = os.environ.get("TIP_URL", "")  # optional tip / donation link shown after a run and in the footer
 
 
+def _allowances() -> tuple[int, int]:
+    """(no-account, free-account) plans a month; (0, 0) while monthly limits are off."""
+    def n(k: str) -> int:
+        try:
+            return int(os.environ.get(k, "0") or 0)
+        except ValueError:
+            return 0
+    return n("ANON_PLANS_PER_MONTH"), n("FREE_PLANS_PER_MONTH")
+
+
+def allowance_line() -> str:
+    """The homepage line under the lede: the free allowance while limits are on, else the original wording."""
+    anon, acct = _allowances()
+    if not acct:
+        return "<span>Free for everyday use</span> · <span>No account needed</span> · <span>Not a survey</span>"
+    first = f"<span>{anon} free plans a month</span> · <span>{acct} with a free account</span>" if anon else f"<span>{acct} free plans a month</span>"
+    return f"{first} · <span>Not a survey</span>"
+
+
+def allowance_li() -> str:
+    anon, acct = _allowances()
+    if not acct:
+        return ""
+    return f"<li>{anon} plans a month without an account, {acct} with a free account (no password).</li>\n" if anon else f"<li>{acct} plans a month with a free account.</li>\n"
+
+
 def tip_url() -> str:
     """The tip link, until Pro is on sale: then the site asks for Pro instead of tips."""
     return "" if pro_live() else TIP_URL
@@ -312,7 +338,7 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
     body = f"""
 <h1>Site context from any US address</h1>
 <p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, {_zoning_words()}aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.</p>
-<p class="lede2"><span>Free for everyday use</span> · <span>No account needed</span> · <span>Not a survey</span></p>
+<p class="lede2">{allowance_line()}</p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
@@ -975,7 +1001,7 @@ parking layout you can open in CAD, where draft zoning rule sheets exist. A star
 <h2>Fine print</h2>
 <ul>
 <li>Test fits are planning-level, from rule sheets that cite the zoning code. Each one says whether it's been checked by a professional. Confirm with the jurisdiction before relying on it.</li>
-<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews monthly; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
+<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews each month or year, depending on the plan you choose; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
 <li>Prefer to run it yourself? The core tool is open source (MIT) and <a href="{REPO_URL}">always available on GitHub</a>, with no limits. The hosted zoning lookup and Pro features aren't part of it.</li>
 <li>Questions or a firm with several people? {CONTACT_HTML}</li>
 </ul>
@@ -1027,7 +1053,7 @@ site studies have asked for firm-specific features, so I'm working with them to 
 <ul>
 <li>Site context from any US address: parcel, neighbors, roads, contours, slope, soils, flood, wetlands, aerial.</li>
 <li>Every export: DXF, SketchUp terrain, LandXML, GIS, KML and the PDF summary.</li>
-<li>Multi-parcel sites, your own CAD layer names, and the zoning lookup where it's available.</li>
+{allowance_li()}<li>Multi-parcel sites, your own CAD layer names, and the zoning lookup where it's available.</li>
 <li>Open source: the core tool is MIT-licensed, so you can always <a href="{REPO_URL}">run your own copy</a> with no limits.</li>
 </ul>
 
