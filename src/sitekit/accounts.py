@@ -349,23 +349,50 @@ def auth_start():
 
 
 @bp.get("/auth")
+def auth_confirm():
+    """The emailed link opens a page with a Sign in button; only the button (a POST) uses the one-time token.
+    Work email scanners (Microsoft Safe Links, Mimecast) open every link before the person does, and a GET that
+    signed in straight away used the token up, so the person's own click then said "expired"."""
+    from itsdangerous import BadSignature, SignatureExpired
+    from markupsafe import escape
+
+    if not enabled():
+        abort(404)
+    t = request.args.get("t", "")
+    try:
+        payload = _serializer().loads(t, max_age=LOGIN_MAX_AGE_S)
+    except SignatureExpired:
+        return redirect("/plans?link=expired")
+    except BadSignature:
+        return redirect("/plans?link=bad")
+    from .pages import layout
+
+    body = (f'<h1>Sign in to Basesheet</h1><p>Signing in as <b>{escape(payload["e"])}</b>.</p>'
+            f'<form method="post" action="/auth"><input type="hidden" name="t" value="{escape(t)}">'
+            '<button autofocus>Sign in</button></form>'
+            '<p class="fine">Didn\'t ask for this? Close this page; nothing happens without the button.</p>')
+    resp = layout("Sign in · Basesheet", "/plans", body, description="Finish signing in to Basesheet.")
+    return resp, 200, {"X-Robots-Tag": "noindex", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
+
+
+@bp.post("/auth")
 def auth_finish():
     from itsdangerous import BadSignature, SignatureExpired
 
     if not enabled():
         abort(404)
     try:
-        payload = _serializer().loads(request.args.get("t", ""), max_age=LOGIN_MAX_AGE_S)
+        payload = _serializer().loads(request.form.get("t", ""), max_age=LOGIN_MAX_AGE_S)
     except SignatureExpired:
-        return redirect("/plans?link=expired")
+        return redirect("/plans?link=expired", code=303)
     except BadSignature:
-        return redirect("/plans?link=bad")
+        return redirect("/plans?link=bad", code=303)
     if supabase_on():
         try:
             user = sb_verify(payload["th"], payload.get("vt", "magiclink"))
         except Exception as e:  # noqa: BLE001 - used or expired on Supabase's side
             print(f"WARN supabase verify failed: {e}", flush=True)
-            return redirect("/plans?link=expired")
+            return redirect("/plans?link=expired", code=303)
     else:
         user = {"id": _uid(payload["e"]), "email": payload["e"]}
     session.permanent = True
@@ -373,11 +400,11 @@ def auth_finish():
     if payload.get("s"):
         try:
             save_plan(user, payload["s"])
-            return redirect("/plans?saved=1")
+            return redirect("/plans?saved=1", code=303)
         except Exception as e:  # noqa: BLE001
             print(f"WARN save after sign-in failed: {e}", flush=True)
-            return redirect("/plans?saved=0")
-    return redirect("/plans")
+            return redirect("/plans?saved=0", code=303)
+    return redirect("/plans", code=303)
 
 
 @bp.post("/api/auth/logout")
