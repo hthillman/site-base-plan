@@ -123,7 +123,7 @@ def resolve_site(query: str, opts: Options, log: Log) -> Site:
             raise GeocodeError(_apn_miss_message(q, state, county, defaulted, errs), hint="apn_not_found")
         counties = {f.props.get("_COUNTY") for f in feats} - {"", None}
         if len(counties) > 1 and not county:
-            raise GeocodeError(f"Parcel number {q} exists in several {state} counties ({', '.join(sorted(counties))}); pick the county.")
+            raise GeocodeError(f"Parcel number {q} exists in several {state} counties ({', '.join(sorted(counties))}); pick the county.", hint="apn_ambiguous")
         biggest = max(feats, key=lambda f: f.geom.area)
         # Parcel numbers are often only unique within a town or county. If the
         # matches are far apart they're different parcels: don't guess.
@@ -134,7 +134,7 @@ def resolve_site(query: str, opts: Options, log: Log) -> Site:
         if len(feats) > 1 and max(x1 - x0, y1 - y0) > 0.03:  # ~2-3 km in degrees
             towns = sorted({f.props.get("_CITY") or f.props.get("_COUNTY") or "?" for f in feats})
             raise GeocodeError(f"Parcel number {q} matches {len(feats)} different parcels in {state} ({', '.join(towns[:8])}). "
-                               "Enter the street address instead, or add the county.")
+                               "Enter the street address instead, or add the county.", hint="apn_ambiguous")
         same = [f for f in feats if f.props.get("_COUNTY") == biggest.props.get("_COUNTY")]
         if len(same) > 1:
             # One tax parcel can be stored as several polygons; merge them.
@@ -253,17 +253,33 @@ def combine_sites(primary: Site, extra_queries: list[str], opts: "Options", log:
     if not queries:
         return primary
     if 1 + len(queries) > MAX_PARCELS:
-        raise GeocodeError(f"Up to {MAX_PARCELS} parcels per site.")
+        raise GeocodeError(f"Up to {MAX_PARCELS} parcels per site.", hint="multi_limit")
     if primary.parcel is None:
-        raise GeocodeError(f"Couldn't find a parcel for '{primary.query}', so it can't be combined with others.")
+        # Combining needs parcel lines. Rather than fail, build the plan for the first address and say why the rest
+        # were left out (people retried the same multi-parcel site a dozen times when this was an error).
+        from .parcel import source_for
+
+        where = f"{primary.county} County, {primary.state}" if primary.county and primary.county != "unknown" else primary.state
+        why = (f"no parcel line was found at '{primary.query}'" if source_for(primary.state, primary.county)
+               else f"Basesheet doesn't have parcel lines for {where} yet (see Parcel data by state)")
+        left = ", ".join(f"'{q}'" for q in queries)
+        return replace(primary, warnings=list(primary.warnings) + [
+            f"Parcels weren't combined: combining needs a parcel line for each address, and {why}. "
+            f"This plan covers only '{primary.query}'; {left} {'was' if len(queries) == 1 else 'were'} left out. "
+            "Widen the buffer to take in the neighboring land instead."])
     parcels = [primary.parcel]
     labels = [primary.matched_address]
     warnings = list(primary.warnings)
     for q in queries:
         log(f"Adding parcel: {q}")
-        sub = resolve_site(q, replace(opts, state=opts.state or primary.state, buffer_ft=0, extra_queries=[]), lambda m: None)
+        try:
+            sub = resolve_site(q, replace(opts, state=opts.state or primary.state, buffer_ft=0, extra_queries=[]), lambda m: None)
+        except GeocodeError as e:  # say which of the combined addresses failed; the first one already worked
+            raise GeocodeError(f"Couldn't find '{q}', one of the parcels to combine. Check the spelling and include the city "
+                               "and state, or remove it and build the rest.", hint="multi_missing") from e
         if sub.parcel is None:
-            raise GeocodeError(f"Couldn't find a parcel for '{q}'. Multi-parcel sites need a parcel line for each address or parcel number.")
+            raise GeocodeError(f"Couldn't find a parcel line for '{q}', so it can't be combined. Check the address or parcel number, "
+                               "or remove it and build the rest.", hint="multi_missing")
         geom = crs_mod.reproject(sub.parcel.geom, sub.epsg, primary.epsg)
         if any(geom.equals_exact(p.geom, 0.5) or geom.intersection(p.geom).area > 0.9 * geom.area for p in parcels):
             warnings.append(f"'{q}' is the same parcel as one already in the site; skipped.")
@@ -273,7 +289,7 @@ def combine_sites(primary: Site, extra_queries: list[str], opts: "Options", log:
     union = unary_union([p.geom for p in parcels])
     acres = union.area / 43560
     if acres > MAX_COMBINED_ACRES:
-        raise GeocodeError(f"Combined site is {acres:.1f} acres; the limit is {MAX_COMBINED_ACRES:g} acres per run.")
+        raise GeocodeError(f"Combined site is {acres:.1f} acres; the limit is {MAX_COMBINED_ACRES:g} acres per run.", hint="multi_too_big")
     if union.geom_type != "Polygon":
         warnings.append(f"The {len(parcels)} parcels don't all touch; the site is drawn as separate pieces.")
     def joined(key):

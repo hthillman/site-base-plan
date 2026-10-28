@@ -352,6 +352,7 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
 <button id="go">Build base plan</button>
 </div>
 <div id="also"></div>
+<p class="fine" id="alsonote" hidden>Combining works where Basesheet has parcel lines (<a href="/parcels">see which counties</a>). Elsewhere the plan covers the first address only.</p>
 <p id="quota" class="quota" hidden aria-live="polite"></p>
 <div id="apnrow" class="opts" hidden>
 <label>State <select name="state" aria-label="State (needed for parcel numbers)">{opts}</select></label>
@@ -414,10 +415,10 @@ if(TESTFIT&&PRO_LIVE){document.getElementById('tftag').textContent='(experimenta
  f.testfit.addEventListener('change',()=>{if(f.testfit.checked&&!IS_PRO){f.testfit.checked=false;document.getElementById('tfnote').hidden=false}})}
 const looksApn=v=>/^[0-9A-Za-z][0-9A-Za-z.\\- ]{4,}$/.test(v)&&!/[A-Za-z]{3,}/.test(v)&&/[0-9]{5}/.test(v.replace(/\\D/g,''));
 const alsoBox=document.getElementById('also');
-document.getElementById('addparcel').onclick=()=>{if(alsoBox.children.length>=4)return;
+document.getElementById('addparcel').onclick=()=>{if(alsoBox.children.length>=4)return;document.getElementById('alsonote').hidden=false;
  const row=document.createElement('div');row.className='search';
  row.innerHTML='<input name="also" placeholder="Another parcel to combine into one site (same state, up to 5)" aria-label="Another parcel"><button type="button" aria-label="Remove">Remove</button>';
- row.querySelector('button').onclick=()=>row.remove();alsoBox.appendChild(row);row.querySelector('input').focus();
+ row.querySelector('button').onclick=()=>{row.remove();document.getElementById('addparcel').hidden=false;if(!alsoBox.children.length)document.getElementById('alsonote').hidden=true};alsoBox.appendChild(row);row.querySelector('input').focus();
  if(alsoBox.children.length>=4)document.getElementById('addparcel').hidden=true;};
 // Options: one summary line; the controls open in place. Non-default choices are remembered.
 const sum=document.getElementById('optsum'),panel=document.getElementById('optpanel'),optbtn=document.getElementById('optbtn');

@@ -340,7 +340,7 @@ def run_request(d: dict, batch: bool = False):
                           "hint": getattr(e, "hint", ""), "shape": query_shape(q) if type(e).__name__ == "GeocodeError" else None,
                           "seconds": round(time.time() - t0, 1)})
             events.put({"error": str(e), "suggestions": getattr(e, "suggestions", []), "near": getattr(e, "near", None),
-                        "pick": type(e).__name__ == "GeocodeError"})
+                        "pick": type(e).__name__ == "GeocodeError" and not getattr(e, "hint", "").startswith("multi")})
         events.put(None)
 
     threading.Thread(target=worker, daemon=True).start()
