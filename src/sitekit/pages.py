@@ -827,46 +827,107 @@ Microsoft's machine-traced footprints, with heights from FEMA USA Structures. Th
                   description="Every public data source behind Basesheet: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
 
 
+PRIVACY_UPDATED = "October 30, 2026"
+
+
 def privacy() -> str:
-    body = """
-<h1>Privacy</h1>
-<p class="sub">Short version: no accounts, nothing sold, files deleted after two days.</p>
-<h2>What happens to an address you enter</h2>
+    try:  # hosted site: the legal operator from the Terms; the open-source copy says who runs it generically
+        from .terms import OPERATOR
+
+        who = OPERATOR.split(",")[0] + ", LLC" if ", LLC" in OPERATOR else OPERATOR
+    except ImportError:
+        who = "the person who runs this site"
+    contact = CONTACT_HTML or "the feedback form"
+    body = f"""
+<h1>Privacy policy</h1>
+<p class="sub">Effective {PRIVACY_UPDATED}. Short version: nothing is sold, addresses aren't kept in usage records, and plan files
+are deleted after two days unless you save them.</p>
+<p>Basesheet (basesheet.site) is run by {who} ("we"). This policy explains what we collect, why, who it's shared with, how long
+it's kept, and the choices you have. Questions or requests: {contact}.</p>
+
+<h2>What we collect</h2>
 <ul>
-<li>It's sent to geocoding services (Esri, the U.S. Census Bureau, OpenStreetMap) to find the location, and to public GIS services (USGS, USDA, FEMA, USFWS, state parcel servers) to fetch data around it.</li>
-<li>The finished files are stored at an unlisted web link for <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
-<li>Each run leaves an anonymous usage record (the state, county and city or township it was in, whether a parcel was found, whether we had zoning for it, run time, which data sources failed) so we can see what's working and where to add zoning next. It never includes the address, coordinates or anything finer than the city or township.</li>
-<li>Your browser keeps a count of the plans you've made (in total and this month) and the date of your first one. Each run sends just those numbers, so we can tell whether people come back and keep free use fair. There's no ID and nothing that identifies you or your browser; clearing site data resets the count.</li>
+<li><b>Addresses you enter.</b> The address, parcel number or coordinates of the property you're studying, used to build the plan.</li>
+<li><b>Plan files.</b> The files a run produces, stored at an unlisted web link.</li>
+<li><b>Usage records.</b> For each run: the state, county and city or township it was in, whether a parcel was found, whether we had
+zoning for it, run time and which data sources failed. Never the address, coordinates or anything finer than the city or township.</li>
+<li><b>A plan count in your browser.</b> Your browser keeps the number of plans you've made (in total and this month) and the date of
+your first one, and sends just those numbers with each run. There's no ID; clearing site data resets it.</li>
+<li><b>Clicks and votes.</b> Clicks on buttons like Download and Save, and "What should it do next?" votes, with the site's state and
+anything you type in the box. Nothing that identifies you.</li>
+<li><b>Account information</b>, if you sign in: your email address, the plans you save (address, files and date) and your monthly plan count.</li>
+<li><b>Pro subscription</b>, if you subscribe: your subscription status and Stripe customer ID, and the date you accepted the Terms.
+Stripe handles your card; we never see or store card numbers.</li>
+<li><b>Office settings</b>, if you add them (Pro): firm name, address lines, "prepared by", logo and CAD layer names.</li>
+<li><b>Things you send us:</b> feedback, firm details from the For firms page, and an email address if you leave one with a feature vote.</li>
+<li><b>ChatGPT and Claude.</b> If you connect Basesheet to ChatGPT or Claude, the assistant gets a key that lets it build plans with your
+account; they count toward your monthly plans. It can't see your saved plans. Without an account, ChatGPT sends an anonymous user ID,
+which we keep only as a scrambled code to count plans per month.</li>
 </ul>
-<h2>Analytics</h2>
-<p>Page views are counted with Vercel Web Analytics, which doesn't use cookies or track you across sites.</p>
-<h2>"What should it do next?"</h2>
-<p>After a run you can click an option to say what you'd like built next. That records the option, anything you type in the box,
-and the run's state. Nothing that identifies you.</p>
-<h2>Firms</h2>
-<p>If you tell me about your firm on the For firms page, your firm, role, answers and email are stored privately and used only to follow up
-about it. Never shared or sold; ask to have them deleted any time.</p>
-<h2>Feature votes and clicks</h2>
-<p>If you vote for a feature you can leave an email to hear when it ships; it's used only for that, never shared or sold. The site
-also counts clicks on buttons like Download and Save, with the state of the site and nothing else, to see what's useful.</p>
-<h2>Saved plans</h2>
-<p>Saving is optional. If you sign in to save a plan, your email address and the plans you save (address, files and date) are
-stored privately and kept until you delete them. Accounts and saved-plan records are held by Supabase (our database provider)
-and emails are sent through Resend. Your email is used to send sign-in links and occasional notes about your account (a welcome
-when you sign up, problems with signing in, and billing if you subscribe). No marketing lists. Never shared or sold. Delete a
-plan from My plans any time; ask through the feedback form to have your account removed.</p>
-<h2>ChatGPT and Claude</h2>
-<p>If you connect Basesheet to ChatGPT or Claude, the assistant gets a key that lets it build plans with your account; they count
-toward your monthly plans. It can't see your saved plans. To disconnect, remove Basesheet in the assistant's settings. Without an
-account, ChatGPT sends an anonymous user ID, which we keep only as a scrambled code to count plans per month.</p>
-<h2>Feedback</h2>
-<p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
-Never shared or sold. Ask through the feedback form to have it deleted.</p>
+
+<h2>How we use it</h2>
+<ul>
+<li>To build your plans and show you the results.</li>
+<li>To run your account: sign-in links, saved plans, your monthly allowance and, for Pro, your subscription and office settings.</li>
+<li>To see what's working and decide what to build next (usage records, clicks and votes).</li>
+<li>To reply to you. Your email is used for sign-in links and occasional notes about your account (a welcome when you sign up,
+problems with signing in, and billing if you subscribe). No marketing lists.</li>
+</ul>
+
+<h2>Who it's shared with</h2>
+<p>We don't sell personal information or share it for advertising. We use these service providers to run Basesheet, and they handle
+data only to provide their service:</p>
+<ul>
+<li><b>Geocoding and public data:</b> Esri, the U.S. Census Bureau and OpenStreetMap see the address to find the location; public GIS
+services (USGS, USDA, FEMA, USFWS, county and state parcel and zoning servers) see the area around it.</li>
+<li><b>Vercel:</b> hosting, file storage and page-view analytics (Vercel Web Analytics, which doesn't use cookies or track you across sites).</li>
+<li><b>Supabase:</b> accounts and saved-plan records.</li>
+<li><b>Resend:</b> sending and forwarding email.</li>
+<li><b>Stripe:</b> payments for Pro.</li>
+<li><b>OpenAI and Anthropic:</b> if you use Basesheet inside ChatGPT or Claude, their own privacy policies cover your conversations there.</li>
+</ul>
+<p>We may also disclose information if the law requires it.</p>
+
+<h2>Cookies and local storage</h2>
+<p>If you sign in, a cookie keeps you signed in. Your browser's local storage holds the plan count above and settings you choose.
+There are no advertising or cross-site tracking cookies.</p>
+
+<h2>How long we keep it</h2>
+<ul>
+<li>Plan files: <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
+<li>Saved plans: until you delete them.</li>
+<li>Account information and office settings: until you ask us to delete your account.</li>
+<li>Subscription and payment records: as long as needed for accounting and tax.</li>
+<li>Feedback, firm details and vote emails: until you ask us to delete them.</li>
+<li>Usage records, clicks and votes don't identify you and are kept to see trends.</li>
+</ul>
+
+<h2>Your choices and rights</h2>
+<ul>
+<li>Delete a saved plan from My plans any time.</li>
+<li>Ask us to see, correct or delete your information, or to close your account: {contact}. We'll answer within 30 days.</li>
+<li>Disconnect ChatGPT or Claude by removing Basesheet in the assistant's settings.</li>
+<li>Clear your browser's site data to reset the plan count.</li>
+<li>Depending on where you live (for example California or the EU), you may have more rights under local law. We honor these requests
+for everyone, wherever you live.</li>
+</ul>
+
+<h2>Children</h2>
+<p>Basesheet is a professional tool and isn't directed to children under 13. We don't knowingly collect their information; if you
+think we have, tell us and we'll delete it.</p>
+
+<h2>Security</h2>
+<p>Data is sent over HTTPS, account records are stored with access controls, and sign-in uses one-time emailed links. No system is
+perfectly secure, but we take reasonable steps to protect your information.</p>
+
+<h2>Changes</h2>
+<p>If we change this policy, we'll update the date at the top. Significant changes will be noted on the site.</p>
+
 <h2>Professional use</h2>
 <p>Outputs are planning-level. Verify conditions in the field and with a licensed surveyor before relying on them.</p>
 """
     return layout("Privacy · Basesheet", "/privacy", body,
-                  description="What happens to an address you enter: which services see it, how long files are kept (2 days), and what anonymous usage data is recorded.")
+                  description="What Basesheet collects, why, who it's shared with, how long it's kept, and your choices.")
 
 
 def plans() -> str:
