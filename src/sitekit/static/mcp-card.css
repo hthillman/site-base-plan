@@ -1,0 +1,27 @@
+/* Basesheet result card inside ChatGPT and Claude (see mcp-card.js). */
+:root{--bg:#fbfaf7;--ink:#1c1c1a;--muted:#6a6963;--line:#e4e1d8;--accent:#2f5d50;--accent-ink:#fff;--warn:#9a5800;--chip:#f2f0ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--ink:#ebeae4;--muted:#a3a19a;--line:#2e2d29;--accent:#86c0ab;--accent-ink:#0f1f19;--warn:#e8a64c;--chip:#1c1c1a}}
+:root[data-theme="dark"]{--bg:#141413;--ink:#ebeae4;--muted:#a3a19a;--line:#2e2d29;--accent:#86c0ab;--accent-ink:#0f1f19;--warn:#e8a64c;--chip:#1c1c1a}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+#card{padding:14px 16px 12px}
+#card.loading{color:var(--muted)}
+header .brand{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--muted)}
+h1{font-size:16px;margin:2px 0 10px;line-height:1.3}
+h2{font-size:13px;margin:12px 0 4px}
+.map{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.map img{display:block;width:100%;height:auto}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.btn{display:inline-block;padding:7px 12px;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:var(--bg);text-decoration:none;font-weight:500}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.formats{color:var(--muted);font-size:12px;margin:2px 0 10px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.fact{background:var(--chip);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column}
+.fact .k{font-size:11px;color:var(--muted)}
+.fact .v{font-weight:600}
+.fact .s{font-size:11px;color:var(--muted)}
+.look{margin:0;padding-left:18px;color:var(--warn)}
+.look li{margin:2px 0}
+.quota{font-size:12px;color:var(--muted);margin:10px 0 0}
+.quota a{color:var(--accent)}
+.disclaimer{font-size:11.5px;color:var(--muted);margin:10px 0 0;border-top:1px solid var(--line);padding-top:8px}

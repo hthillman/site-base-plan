@@ -42,6 +42,10 @@ from .mcp import bp as mcp_bp  # noqa: E402  (AI assistants: ChatGPT, Claude)
 
 app.register_blueprint(mcp_bp)
 
+from .oauth import bp as oauth_bp  # noqa: E402
+
+app.register_blueprint(oauth_bp)
+
 try:  # Pro subscription (hosted site only)
     from .billing import bp as _billing_bp
 
@@ -689,6 +693,19 @@ def sources():
     from .pages import sources as page
 
     return page()
+
+
+@app.get("/pricing")
+def pricing_page():
+    from flask import redirect
+
+    from .pages import pricing, pro_live
+
+    if not pro_live():
+        return redirect("/", code=302)
+    from .billing import prices
+
+    return pricing(prices(), ANON_PLANS_PER_MONTH, FREE_PLANS_PER_MONTH)
 
 
 @app.get("/pro")

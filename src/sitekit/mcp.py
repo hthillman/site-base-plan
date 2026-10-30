@@ -12,6 +12,7 @@ fit: a daily cap (MCP_DAILY_RUNS) protects the free tier instead.
 from __future__ import annotations
 
 import base64
+import hashlib
 import os
 import time
 import uuid
@@ -68,8 +69,50 @@ TOOL = {
     },
     "annotations": {"title": "Build a site base plan", "readOnlyHint": True, "destructiveHint": False,
                     "idempotentHint": True, "openWorldHint": True},
-    "_meta": {"openai/toolInvocation/invoking": "Building the base plan…", "openai/toolInvocation/invoked": "Base plan ready"},
+    # Works without an account; a connected Basesheet account (oauth.py) gets that account's monthly plans.
+    "securitySchemes": [{"type": "noauth"}, {"type": "oauth2", "scopes": ["plans"]}],
+    "_meta": {"openai/toolInvocation/invoking": "Building the base plan…", "openai/toolInvocation/invoked": "Base plan ready",
+              "securitySchemes": [{"type": "noauth"}, {"type": "oauth2", "scopes": ["plans"]}]},
 }
+
+# The result card shown in the chat. Its HTML is a thin shell that loads mcp-card.js and .css from the site, so the
+# card changes with a normal deploy (no new app review). Bump CARD_VERSION only if the shell itself changes.
+CARD_VERSION = "1"
+CARD_URI = f"ui://basesheet/plan-card-v{CARD_VERSION}.html"            # MCP Apps (Claude, and ChatGPT's MCP Apps support)
+CARD_URI_OPENAI = f"ui://basesheet/plan-card-v{CARD_VERSION}.openai.html"  # ChatGPT Apps SDK
+MCP_APPS_MIME = "text/html;profile=mcp-app"
+
+
+def _tool() -> dict:
+    meta = {**TOOL["_meta"], "ui": {"resourceUri": CARD_URI}, "ui/resourceUri": CARD_URI, "openai/outputTemplate": CARD_URI_OPENAI,
+            "openai/widgetAccessible": False}
+    return {**TOOL, "_meta": meta}
+
+
+def _file_host() -> str:
+    """Origin of the public file store that holds the preview image (from the Vercel Blob token's store id)."""
+    tok = os.environ.get("BLOB_READ_WRITE_TOKEN", "")
+    parts = tok.split("_")
+    return f"https://{parts[3].lower()}.public.blob.vercel-storage.com" if len(parts) > 4 else ""
+
+
+def _card_html() -> str:
+    s = _site_url()
+    return (f'<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            f'<link rel="stylesheet" href="{s}/static/mcp-card.css"></head><body><div id="card" class="loading">Building the base plan…</div>'
+            f'<script>window.BASESHEET_SITE={s!r};</script><script src="{s}/static/mcp-card.js"></script></body></html>')
+
+
+def _resources() -> list[dict]:
+    domains = [d for d in (_site_url(), _file_host()) if d]
+    claude_domain = hashlib.sha256(f"{_site_url()}/mcp".encode()).hexdigest()[:32] + ".claudemcpcontent.com"
+    return [
+        {"uri": CARD_URI, "name": "plan-card", "title": "Base plan card", "mimeType": MCP_APPS_MIME,
+         "_meta": {"ui": {"csp": {"resourceDomains": domains, "connectDomains": []}, "domain": claude_domain, "prefersBorder": True}}},
+        {"uri": CARD_URI_OPENAI, "name": "plan-card-openai", "title": "Base plan card", "mimeType": "text/html+skybridge",
+         "_meta": {"openai/widgetCSP": {"resource_domains": domains, "connect_domains": []}, "openai/widgetPrefersBorder": True,
+                   "openai/widgetDescription": "Shows the base plan's preview map, key facts and download links."}},
+    ]
 
 
 def _site_url() -> str:
@@ -114,6 +157,92 @@ def _client() -> str:
     return "other"
 
 
+def _pricing_url() -> str:
+    """Plans and pricing for people who run out. An information page (no checkout), as the assistant stores require."""
+    try:
+        from . import billing
+
+        return f"{_site_url()}/pricing" if billing.live() else _site_url()
+    except ImportError:
+        return _site_url()
+
+
+def _subject(meta: dict) -> str:
+    """Who to count no-account plans against, hashed: ChatGPT's anonymised per-user id, else the MCP session id we hand
+    out on initialize (Claude and others), which is as soft as the browser count on the site. "" if neither."""
+    sub = str(meta.get("openai/subject") or "") or ("session:" + request.headers.get("Mcp-Session-Id", "") if request.headers.get("Mcp-Session-Id") else "")
+    return hashlib.sha256(sub.encode()).hexdigest()[:32] if sub else ""
+
+
+def _quota() -> dict | None:
+    """Plans left this month for the connected account, for the card; None when signed out or limits are off."""
+    from .accounts import current_user
+    from .web import FREE_PLANS_PER_MONTH, _is_pro, _month, count_private
+
+    from .oauth import is_reviewer
+
+    u = current_user()
+    if not u or is_reviewer(u):
+        return None
+    if _is_pro():
+        return {"pro": True}
+    if not FREE_PLANS_PER_MONTH:
+        return None
+    used = count_private(f"planq/{u['id']}/{_month()}")
+    return {"pro": False, "allowance": FREE_PLANS_PER_MONTH, "left": max(0, FREE_PLANS_PER_MONTH - used)}
+
+
+def _allowance_block(meta: dict) -> dict | None:
+    """The same monthly allowance as the site. A connected account uses its own plans (unlimited on Pro); without one,
+    ChatGPT's per-user id gets the no-account allowance and then an offer to connect. Assistants that send no user id
+    are covered by the daily cap only."""
+    from .accounts import current_user
+    from .web import ANON_PLANS_PER_MONTH, FREE_PLANS_PER_MONTH, _is_pro, _month, _next_month_label, count_private
+
+    if not FREE_PLANS_PER_MONTH:
+        return None
+    from .oauth import is_reviewer
+
+    u = current_user()
+    if u:
+        if is_reviewer(u) or _is_pro() or count_private(f"planq/{u['id']}/{_month()}") < FREE_PLANS_PER_MONTH:
+            return None
+        return {"isError": True, "content": [{"type": "text", "text": (
+            f"This Basesheet account has used this month's {FREE_PLANS_PER_MONTH} free plans; they reset on {_next_month_label()}. "
+            f"Plans and pricing: {_pricing_url()}")}]}
+    sub = _subject(meta)
+    if not (sub and ANON_PLANS_PER_MONTH) or count_private(f"appanon/{sub}/{_month()}") < ANON_PLANS_PER_MONTH:
+        return None
+    from .oauth import challenge_header
+
+    why = f"Connect a free Basesheet account to keep going: {FREE_PLANS_PER_MONTH} plans a month."
+    if not meta.get("openai/subject"):  # Claude and others start sign-in from an HTTP 401, not from a tool result
+        return {"http401": why}
+    return {"isError": True, "content": [{"type": "text", "text": (
+        f"You've made {ANON_PLANS_PER_MONTH} plans this month without a Basesheet account. {why} "
+        f"Plans and pricing: {_pricing_url()}")}],
+        "_meta": {"mcp/www_authenticate": [challenge_header("insufficient_scope", why)]}}
+
+
+def _count_success(meta: dict) -> None:
+    from .accounts import current_user
+    from .web import FREE_PLANS_PER_MONTH, _month, count_plan, private_put
+
+    if not FREE_PLANS_PER_MONTH:
+        return
+    from .oauth import is_reviewer
+
+    u = current_user()
+    if u:
+        if not is_reviewer(u):
+            count_plan(u["id"])
+    elif _subject(meta):
+        try:
+            private_put(f"appanon/{_subject(meta)}/{_month()}", {"n": 1})
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN app plan count failed: {e}", flush=True)
+
+
 def _result_text(rj: dict, link: str) -> str:
     lines = [f"Base plan ready: {rj['title']}", ""]
     for f in rj.get("facts") or []:
@@ -129,7 +258,7 @@ def _result_text(rj: dict, link: str) -> str:
     return "\n".join(lines)
 
 
-def build(args: dict) -> dict:
+def build(args: dict, meta: dict | None = None) -> dict:
     """Run one base plan for a tools/call; returns an MCP CallToolResult."""
     from .geocode import GeocodeError
     from .pipeline import Options, run, zoning_coverage
@@ -142,6 +271,9 @@ def build(args: dict) -> dict:
     if _runs_today() >= DAILY_RUNS:
         return {"isError": True, "content": [{"type": "text", "text": "Basesheet's free daily limit for AI assistants is used up. "
                                               f"Build the plan directly at {_site_url()} instead; it's free."}]}
+    blocked = _allowance_block(meta or {})
+    if blocked:
+        return blocked
     _count_run()
     try:
         buffer_ft = min(1000.0, max(0.0, float(args.get("buffer_ft") or 100)))
@@ -180,6 +312,7 @@ def build(args: dict) -> dict:
                   "seconds": round(time.time() - t0, 1), "t": {k: round(v, 1) for k, v in res.timings.items()},
                   "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                   "jurisdiction": jurisdiction_at(res.site.lon, res.site.lat, timeout=5)})
+    _count_success(meta or {})
     link = f"{_site_url()}/r/{run_id}?via=ai"
     content = [{"type": "text", "text": _result_text(rj, link)}]
     thumb = _thumbnail(res.files.get("preview"))
@@ -191,6 +324,7 @@ def build(args: dict) -> dict:
         "needs_a_look": [x["text"] for x in res.flags if x.get("level") in ("alert", "caution", "missing")],
         "files": {"zip": urls.get("zip"), "pdf": urls.get("pdf"), "preview": urls.get("preview")},
         "disclaimer": "Not a survey. Not for permit submission. Planning-level public data, not a zoning determination. Verify with a licensed surveyor and the jurisdiction.",
+        "quota": _quota(), "site": _site_url(),
     }}
 
 
@@ -220,6 +354,13 @@ def _reply(id_, result=None, error=None):
     return jsonify(msg)
 
 
+@bp.get("/.well-known/openai-apps-challenge")
+def openai_challenge():
+    """Domain verification for the ChatGPT app listing: the token from the OpenAI portal, set as OPENAI_APPS_CHALLENGE."""
+    tok = os.environ.get("OPENAI_APPS_CHALLENGE", "").strip()
+    return Response(tok, mimetype="text/plain") if tok else Response(status=404)
+
+
 @bp.route("/mcp", methods=["GET", "DELETE"])
 def mcp_other():
     return Response("Basesheet MCP server: POST JSON-RPC here (Streamable HTTP, stateless).", status=405,
@@ -228,6 +369,14 @@ def mcp_other():
 
 @bp.post("/mcp")
 def mcp_post():
+    from .oauth import bearer_user, challenge_header, enabled, use_token_user
+
+    user, refused = bearer_user() if enabled() else (None, "")
+    if refused:  # a token was sent but isn't valid: 401 so the assistant refreshes it or reconnects
+        return Response('{"error":"invalid_token"}', status=401, mimetype="application/json",
+                        headers={"WWW-Authenticate": challenge_header("invalid_token", refused)})
+    if user:
+        use_token_user(user)
     try:
         msg = request.get_json(force=True)
     except Exception:  # noqa: BLE001
@@ -239,19 +388,34 @@ def mcp_post():
         return Response(status=202)
     if method == "initialize":
         want = params.get("protocolVersion")
-        return _reply(id_, {"protocolVersion": want if want in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
-                            "capabilities": {"tools": {"listChanged": False}},
+        resp = _reply(id_, {"protocolVersion": want if want in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
+                            "capabilities": {"tools": {"listChanged": False}, "resources": {"listChanged": False}},
                             "serverInfo": {"name": "basesheet", "title": "Basesheet", "version": "1.0.0", "websiteUrl": _site_url()},
                             "instructions": INSTRUCTIONS})
+        resp.headers["Mcp-Session-Id"] = uuid.uuid4().hex  # only used to count no-account plans (see _subject)
+        return resp
     if method == "ping":
         return _reply(id_, {})
     if method == "tools/list":
-        return _reply(id_, {"tools": [TOOL]})
+        return _reply(id_, {"tools": [_tool()]})
     if method == "tools/call":
         if params.get("name") != TOOL["name"]:
             return _reply(id_, error={"code": -32602, "message": f"Unknown tool: {params.get('name')}"})
-        return _reply(id_, build(params.get("arguments") or {}))
-    if method in ("resources/list", "prompts/list"):
-        return _reply(id_, {method.split("/")[0]: []})
+        out = build(params.get("arguments") or {}, params.get("_meta") or {})
+        if "http401" in out:
+            return Response('{"error":"insufficient_scope"}', status=401, mimetype="application/json",
+                            headers={"WWW-Authenticate": challenge_header("insufficient_scope", out["http401"])})
+        return _reply(id_, out)
+    if method == "resources/list":
+        return _reply(id_, {"resources": _resources()})
+    if method == "resources/read":
+        res = next((r for r in _resources() if r["uri"] == params.get("uri")), None)
+        if not res:
+            return _reply(id_, error={"code": -32002, "message": f"Resource not found: {params.get('uri')}"})
+        return _reply(id_, {"contents": [{"uri": res["uri"], "mimeType": res["mimeType"], "text": _card_html(), "_meta": res["_meta"]}]})
+    if method == "resources/templates/list":
+        return _reply(id_, {"resourceTemplates": []})
+    if method == "prompts/list":
+        return _reply(id_, {"prompts": []})
     return _reply(id_, error={"code": -32601, "message": f"Method not found: {method}"})
 

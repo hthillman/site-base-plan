@@ -108,6 +108,10 @@ def can_sign_up() -> bool:
 
 def current_user() -> dict | None:
     try:
+        from flask import g
+
+        if g.get("oauth_user"):  # an AI assistant calling /mcp with this account's access token (oauth.py)
+            return g.oauth_user
         uid, email = session.get("uid"), session.get("email")
     except RuntimeError:
         return None
@@ -357,6 +361,9 @@ def auth_start():
     if not EMAIL_RE.match(email):
         return jsonify(error="That doesn't look like an email address."), 400
     payload = {"e": email.lower()}
+    nxt = str(d.get("next") or "")
+    if nxt.startswith("/oauth/authorize?") and len(nxt) < 4000:  # finishing an assistant's connect request (oauth.py)
+        payload["n"] = nxt
     pending = d.get("save")
     if isinstance(pending, dict):
         payload["s"] = {k: pending.get(k) for k in ("run_id", "title", "files", "state")}
@@ -432,6 +439,8 @@ def auth_finish():
     session["uid"], session["email"] = user["id"], user["email"] or payload["e"]
     if supabase_on():
         maybe_welcome(user)
+    if payload.get("n"):
+        return redirect(payload["n"], code=303)
     if payload.get("s"):
         try:
             save_plan(user, payload["s"])

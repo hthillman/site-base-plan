@@ -408,7 +408,9 @@ const f=document.getElementById('f'),out=document.getElementById('out'),go=docum
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const NEEDS_CODE=__NEEDS_CODE__;
 const TESTFIT=__TESTFIT__;
-const PRO_LIVE=__PROLIVE__;let IS_PRO=false;const REPO='__REPO__';
+const PRO_LIVE=__PROLIVE__;let IS_PRO=false;
+const VIA_AI=new URLSearchParams(location.search).get('via')==='ai';  // opened from ChatGPT/Claude: no Pro upsell (app store rules)
+const REPO='__REPO__';
 if(TESTFIT&&(PRO_LIVE||new URLSearchParams(location.search).has('beta')))document.getElementById('tfwrap').hidden=false;
 if(TESTFIT&&PRO_LIVE){document.getElementById('tftag').textContent='(experimental, Pro)';
  fetch('/api/billing/status').then(r=>r.json()).then(s=>{IS_PRO=!!s.pro}).catch(()=>{});
@@ -454,7 +456,7 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
 // Monthly allowance reached: explain, and offer the free sign-in (no account) or what's next (account).
 function showLimit(err){track('limit_hit');const i=err.info||{};
  const self=' Or <a href="'+REPO+'">run the open-source version</a> yourself, with no limits.';
- const pro=(PRO_LIVE?'<a href="/pro">Pro</a> includes unlimited plans.':'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
+ const pro=(PRO_LIVE?(VIA_AI?'<a href="/pricing">Plans and pricing</a>':'<a href="/pro">Pro</a> includes unlimited plans.'):'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
  out.innerHTML='<div class="result"><div class="keep ask limitbox"><span><b>'+esc(err.message)+'</b></span>'+
   (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
  const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
@@ -468,7 +470,7 @@ const QUOTA=__QUOTA__;let quota=null;
 function showQuota(){const el=document.getElementById('quota');if(!el||!quota)return;
  const signed=quota.used!==undefined,allow=signed?quota.allowance:quota.anon_allowance,used=signed?quota.used:monthPlans();
  if(!allow){el.hidden=true;return}const left=Math.max(0,allow-used);
- el.innerHTML=left+' of '+allow+' free plans left this month'+(signed?'':' · more with a free account')+(PRO_LIVE?' · <a href="/pro">Unlimited with Pro</a>':'');el.hidden=false}
+ el.innerHTML=left+' of '+allow+' free plans left this month'+(signed?'':' · more with a free account')+(PRO_LIVE?(VIA_AI?' · <a href="/pricing">Plans and pricing</a>':' · <a href="/pro">Unlimited with Pro</a>'):'');el.hidden=false}
 if(QUOTA)fetch('/api/me').then(r=>r.json()).then(m=>{quota=m.quota||null;showQuota()}).catch(()=>{});
 // First build: a one-time checkbox (remembered per Terms version) before anything runs.
 const TV='__TERMS_VERSION__',tgate=document.getElementById('tgate');let TOK=!TV||LS.get('sitekit-terms')===TV;
@@ -535,7 +537,7 @@ function render(j){
   info.map(x=>'<li class="flag plain"><span>'+esc(x.text)+'</span></li>').join('')+
   '</ul><p class="note">Every layer’s source, date and limits are in provenance.md inside the zip.</p></details>'+
  '<div class="rfoot">'+nextRow(j.zoning)+
-  (PRO_LIVE?'<p class="note firmline">Using this at a firm? <a href="/pro" data-ev="firms_click">Basesheet Pro</a> adds batch runs, your title block on every sheet and experimental test fits.</p>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
+  (PRO_LIVE&&!VIA_AI?'<p class="note firmline">Using this at a firm? <a href="/pro" data-ev="firms_click">Basesheet Pro</a> adds batch runs, your title block on every sheet and experimental test fits.</p>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
  RUN_STATE=j.state||'';track('run_done');
@@ -853,6 +855,10 @@ stored privately and kept until you delete them. Accounts and saved-plan records
 and emails are sent through Resend. Your email is used to send sign-in links and occasional notes about your account (a welcome
 when you sign up, problems with signing in, and billing if you subscribe). No marketing lists. Never shared or sold. Delete a
 plan from My plans any time; ask through the feedback form to have your account removed.</p>
+<h2>ChatGPT and Claude</h2>
+<p>If you connect Basesheet to ChatGPT or Claude, the assistant gets a key that lets it build plans with your account; they count
+toward your monthly plans. It can't see your saved plans. To disconnect, remove Basesheet in the assistant's settings. Without an
+account, ChatGPT sends an anonymous user ID, which we keep only as a scrambled code to count plans per month.</p>
 <h2>Feedback</h2>
 <p>Feedback you send is stored privately and read by the person who runs this site. If you include an email, it's used only to reply.
 Never shared or sold. Ask through the feedback form to have it deleted.</p>
@@ -952,12 +958,47 @@ proBar(0);
 FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hosted site only
 
 
+def pricing(prices: dict | None, anon: int, free: int) -> str:
+    """Plans and pricing for people sent from ChatGPT or Claude: information only, no checkout (the assistant stores
+    don't allow linking an app to a purchase)."""
+    m, y = (prices or {}).get("month"), (prices or {}).get("year")
+    price = " or ".join(escape(p["label"]) for p in (m, y) if p) or "monthly or yearly"
+    allowance = (f"{anon} plans a month without an account, {free} with a free account (no password)." if anon and free
+                 else f"{free} plans a month with a free account." if free else "Free for everyday use.")
+    body = f"""
+<h1>Plans and pricing</h1>
+<h2>Free</h2>
+<ul>
+<li>{allowance}</li>
+<li>Every export: DXF for CAD, SketchUp terrain, Civil 3D LandXML, GIS layers, KML and the PDF summary.</li>
+<li>Works the same in ChatGPT and Claude once you connect your Basesheet account.</li>
+</ul>
+<h2>Basesheet Pro · {price}</h2>
+{PRO_FEATURES}<p>To subscribe, sign in at basesheet.site and choose Pro on My plans. Cancel any time.</p>
+<h2>Open source</h2>
+<p>The core tool is MIT-licensed, so you can <a href="{REPO_URL}">run your own copy</a> with no limits.</p>
+"""
+    return layout("Plans and pricing · Basesheet", "/pricing", body,
+                  description="Basesheet plans: free monthly plans, and Basesheet Pro for unlimited plans, batch runs and your office title block.")
+
+
 def pro_live() -> bool:
     try:
         from .billing import live
     except ImportError:
         return False
     return live()
+
+
+PRO_FEATURES = """<ul>
+<li><b>Unlimited plans:</b> no monthly limit.</li>
+<li><b>Your office standards:</b> your firm name, address and logo in a title block on every PDF sheet, and your CAD layer names on every run.</li>
+<li><b>Batch runs:</b> up to 50 sites at once, with a summary table (parcel size, flood zone, slope, wetlands, soils, zoning) and every plan in one download.</li>
+<li><b>500 saved plans</b> instead of 25.</li>
+<li><b>Experimental test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a rough building and
+parking layout you can open in CAD, where draft zoning rule sheets exist. A starting point to check, never a zoning determination.</li>
+</ul>
+"""
 
 
 def pro(prices: dict | None) -> str:
@@ -975,15 +1016,7 @@ def pro(prices: dict | None) -> str:
 the features that take real work to build and keep accurate. It also pays for the zoning research behind them.</p>
 <div class="procard">
 {choice}<p class="note">Cancel any time.</p>
-<ul>
-<li><b>Unlimited plans:</b> no monthly limit.</li>
-<li><b>Your office standards:</b> your firm name, address and logo in a title block on every PDF sheet, and your CAD layer names on every run.</li>
-<li><b>Batch runs:</b> up to 50 sites at once, with a summary table (parcel size, flood zone, slope, wetlands, soils, zoning) and every plan in one download.</li>
-<li><b>500 saved plans</b> instead of 25.</li>
-<li><b>Experimental test fits:</b> buildable area after setbacks and buffers, maximum units, parking, and a rough building and
-parking layout you can open in CAD, where draft zoning rule sheets exist. A starting point to check, never a zoning determination.</li>
-</ul>
-<div id="probox"><label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
+{PRO_FEATURES}<div id="probox"><label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
 <p><button type="button" id="subscribe">Get Pro</button></p></div>
 <p id="promsg" class="note" aria-live="polite"></p>
 </div>
