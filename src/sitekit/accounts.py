@@ -50,7 +50,7 @@ def _sb(service: bool = True, **extra) -> dict:
 
 def sb_sign_in_token(email: str) -> tuple[str, str, str]:
     """One-time sign-in token from Supabase Auth (creates the account on first use), as (token hash for the link,
-    verification type, 6-digit code for typing in). No email is sent by Supabase."""
+    verification type, numeric code for typing in; 8 digits in this Supabase project). No email is sent by Supabase."""
     from .http import session as http
 
     r = http().post(f"{SUPABASE_URL}/auth/v1/admin/generate_link", json={"type": "magiclink", "email": email}, headers=_sb(), timeout=20)
@@ -58,13 +58,12 @@ def sb_sign_in_token(email: str) -> tuple[str, str, str]:
         http().post(f"{SUPABASE_URL}/auth/v1/admin/users", json={"email": email, "email_confirm": True}, headers=_sb(), timeout=20).raise_for_status()
         r = http().post(f"{SUPABASE_URL}/auth/v1/admin/generate_link", json={"type": "magiclink", "email": email}, headers=_sb(), timeout=20)
     r.raise_for_status()
-    d = r.json()
-    props = d.get("properties") or d
+    props = r.json().get("properties") or r.json()
     return props["hashed_token"], props.get("verification_type") or "magiclink", str(props.get("email_otp") or "")
 
 
 def sb_verify_code(email: str, code: str) -> dict:
-    """Exchange a typed 6-digit code for the Supabase user. Raises on a wrong, used or expired code."""
+    """Exchange a typed sign-in code for the Supabase user. Raises on a wrong, used or expired code."""
     from .http import session as http
 
     r = None
@@ -218,7 +217,7 @@ def _public_delete(urls: list[str]) -> None:
 
 # ------------------------------------------------------------------ email
 def _send_link(email: str, link: str, code: str = "") -> None:
-    """The sign-in email: a 6-digit code to type in (work email filters sometimes block or pre-open links) and the link."""
+    """The sign-in email: a code to type in (work email filters sometimes block or pre-open links) and the link."""
     from html import escape as h
 
     from .http import session as http
@@ -492,7 +491,7 @@ CODE_TRIES_PER_HOUR = 5
 
 @bp.post("/api/auth/code")
 def auth_code():
-    """Sign in with the 6-digit code from the email, typed on the page that asked for it."""
+    """Sign in with the code from the email, typed on the page that asked for it."""
     from .web import count_private, private_put
 
     if not can_sign_up():
@@ -500,8 +499,8 @@ def auth_code():
     d = request.get_json(force=True, silent=True) or {}
     email = str(d.get("email") or "").strip().lower()[:254]
     code = re.sub(r"\D", "", str(d.get("code") or ""))
-    if not EMAIL_RE.match(email) or len(code) != 6:
-        return jsonify(error="Enter the 6-digit code from the email."), 400
+    if not EMAIL_RE.match(email) or not 6 <= len(code) <= 10:
+        return jsonify(error="Enter the code from the email."), 400
     tries = f"codetry/{hashlib.sha256(email.encode()).hexdigest()[:24]}/{datetime.now(timezone.utc):%Y%m%d%H}"
     if count_private(tries) >= CODE_TRIES_PER_HOUR:
         return jsonify(error="Too many tries. Ask for a new email, or try again in an hour."), 429
