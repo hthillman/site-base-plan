@@ -48,8 +48,9 @@ def _sb(service: bool = True, **extra) -> dict:
     return {"apikey": key, "authorization": f"Bearer {key}", **extra}
 
 
-def sb_sign_in_token(email: str) -> tuple[str, str]:
-    """One-time sign-in token from Supabase Auth (creates the account on first use). No email is sent by Supabase."""
+def sb_sign_in_token(email: str) -> tuple[str, str, str]:
+    """One-time sign-in token from Supabase Auth (creates the account on first use), as (token hash for the link,
+    verification type, 6-digit code for typing in). No email is sent by Supabase."""
     from .http import session as http
 
     r = http().post(f"{SUPABASE_URL}/auth/v1/admin/generate_link", json={"type": "magiclink", "email": email}, headers=_sb(), timeout=20)
@@ -59,7 +60,22 @@ def sb_sign_in_token(email: str) -> tuple[str, str]:
     r.raise_for_status()
     d = r.json()
     props = d.get("properties") or d
-    return props["hashed_token"], props.get("verification_type") or "magiclink"
+    return props["hashed_token"], props.get("verification_type") or "magiclink", str(props.get("email_otp") or "")
+
+
+def sb_verify_code(email: str, code: str) -> dict:
+    """Exchange a typed 6-digit code for the Supabase user. Raises on a wrong, used or expired code."""
+    from .http import session as http
+
+    r = None
+    for vtype in ("magiclink", "email"):
+        r = http().post(f"{SUPABASE_URL}/auth/v1/verify", json={"type": vtype, "email": email, "token": code},
+                        headers=_sb(service=False), timeout=20)
+        if r.status_code < 400:
+            break
+    r.raise_for_status()
+    u = r.json().get("user") or {}
+    return {"id": u["id"], "email": u.get("email", ""), "created_at": u.get("created_at", "")}
 
 
 def sb_verify(token_hash: str, vtype: str) -> dict:
@@ -201,14 +217,26 @@ def _public_delete(urls: list[str]) -> None:
 
 
 # ------------------------------------------------------------------ email
-def _send_link(email: str, link: str) -> None:
+def _send_link(email: str, link: str, code: str = "") -> None:
+    """The sign-in email: a 6-digit code to type in (work email filters sometimes block or pre-open links) and the link."""
+    from html import escape as h
+
     from .http import session as http
 
-    text = (f"Here's your link to sign in to Basesheet:\n\n{link}\n\n"
-            "It works for 30 minutes. If you didn't ask for this, you can ignore this email.\n")
-    html = (f'<p>Here\'s your link to sign in to Basesheet:</p><p><a href="{link}">Sign in to Basesheet</a></p>'
-            "<p>It works for 30 minutes. If you didn't ask for this, you can ignore this email.</p>")
-    r = http().post("https://api.resend.com/emails", json={"from": EMAIL_FROM, "to": [email], "subject": "Your Basesheet sign-in link",
+    if code:
+        subject = f"Your Basesheet sign-in code: {code}"
+        text = (f"Your Basesheet sign-in code is {code}\n\nType it on the page where you asked to sign in. Or open this link:\n{link}\n\n"
+                "Both work for 30 minutes. If you didn't ask for this, you can ignore this email.\n")
+        html = (f'<p>Your Basesheet sign-in code is</p><p style="font-size:28px;font-weight:600;letter-spacing:4px">{h(code)}</p>'
+                f'<p>Type it on the page where you asked to sign in. Or <a href="{h(link)}">open this link</a>.</p>'
+                "<p>Both work for 30 minutes. If you didn't ask for this, you can ignore this email.</p>")
+    else:
+        subject = "Your Basesheet sign-in link"
+        text = (f"Here's your link to sign in to Basesheet:\n\n{link}\n\n"
+                "It works for 30 minutes. If you didn't ask for this, you can ignore this email.\n")
+        html = (f'<p>Here\'s your link to sign in to Basesheet:</p><p><a href="{h(link)}">Sign in to Basesheet</a></p>'
+                "<p>It works for 30 minutes. If you didn't ask for this, you can ignore this email.</p>")
+    r = http().post("https://api.resend.com/emails", json={"from": EMAIL_FROM, "to": [email], "subject": subject,
                                                            "text": text, "html": html},
                     headers={"authorization": f"Bearer {RESEND_API_KEY}"}, timeout=20)
     r.raise_for_status()
@@ -369,23 +397,26 @@ def auth_start():
         payload["s"] = {k: pending.get(k) for k in ("run_id", "title", "files", "state")}
     if supabase_on():
         try:
-            th, vt = sb_sign_in_token(email.lower())
+            th, vt, code = sb_sign_in_token(email.lower())
         except Exception as e:  # noqa: BLE001
             print(f"WARN supabase sign-in token failed: {e}", flush=True)
             return jsonify(error="Sign-in isn't working right now. Try again in a minute."), 502
         payload.update(th=th, vt=vt)
+    else:  # local development: our own code, checked against the session
+        code = f"{secrets.randbelow(10**6):06d}"
+        session["dev_code"] = {"e": email.lower(), "c": code, "t": int(datetime.now(timezone.utc).timestamp())}
     token = _serializer().dumps(payload)
     base = os.environ.get("SITE_URL", "").rstrip("/") or request.host_url.rstrip("/")
     link = f"{base}/auth?t={token}"
     if RESEND_API_KEY and not local_dev():
         try:
-            _send_link(email, link)
+            _send_link(email, link, code)
         except Exception as e:  # noqa: BLE001
             print(f"WARN sign-in email failed: {e}", flush=True)
             return jsonify(error="Couldn't send the email just now. Try again in a minute."), 502
         return jsonify(ok=True)
-    print(f"Sign-in link for {email}: {link}", flush=True)
-    return jsonify(ok=True, dev_link=link)
+    print(f"Sign-in link for {email}: {link} (code {code})", flush=True)
+    return jsonify(ok=True, dev_link=link, dev_code=code)
 
 
 @bp.get("/auth")
@@ -435,19 +466,65 @@ def auth_finish():
             return redirect("/plans?link=expired", code=303)
     else:
         user = {"id": _uid(payload["e"]), "email": payload["e"]}
+    return redirect(_signed_in(user, payload["e"], payload.get("n", ""), payload.get("s")) or "/plans", code=303)
+
+
+def _signed_in(user: dict, email: str, nxt: str = "", save: dict | None = None) -> str:
+    """Start the session after a link or a code; returns where to go next ("" = the caller's default)."""
     session.permanent = True
-    session["uid"], session["email"] = user["id"], user["email"] or payload["e"]
+    session["uid"], session["email"] = user["id"], user["email"] or email
     if supabase_on():
         maybe_welcome(user)
-    if payload.get("n"):
-        return redirect(payload["n"], code=303)
-    if payload.get("s"):
+    if nxt.startswith("/oauth/authorize?"):
+        return nxt
+    if save:
         try:
-            save_plan(user, payload["s"])
-            return redirect("/plans?saved=1", code=303)
+            save_plan(user, save)
+            return "/plans?saved=1"
         except Exception as e:  # noqa: BLE001
             print(f"WARN save after sign-in failed: {e}", flush=True)
-            return redirect("/plans?saved=0", code=303)
+            return "/plans?saved=0"
+    return ""
+
+
+CODE_TRIES_PER_HOUR = 5
+
+
+@bp.post("/api/auth/code")
+def auth_code():
+    """Sign in with the 6-digit code from the email, typed on the page that asked for it."""
+    from .web import count_private, private_put
+
+    if not can_sign_up():
+        abort(404)
+    d = request.get_json(force=True, silent=True) or {}
+    email = str(d.get("email") or "").strip().lower()[:254]
+    code = re.sub(r"\D", "", str(d.get("code") or ""))
+    if not EMAIL_RE.match(email) or len(code) != 6:
+        return jsonify(error="Enter the 6-digit code from the email."), 400
+    tries = f"codetry/{hashlib.sha256(email.encode()).hexdigest()[:24]}/{datetime.now(timezone.utc):%Y%m%d%H}"
+    if count_private(tries) >= CODE_TRIES_PER_HOUR:
+        return jsonify(error="Too many tries. Ask for a new email, or try again in an hour."), 429
+    try:
+        private_put(tries, {"n": 1})
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN code attempt count failed: {e}", flush=True)
+    if supabase_on():
+        try:
+            user = sb_verify_code(email, code)
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN code verify failed: {e}", flush=True)
+            return jsonify(error="That code didn't work. Check it, or ask for a new email (codes last 30 minutes)."), 400
+    else:
+        dc = session.get("dev_code") or {}
+        if not (dc.get("e") == email and hmac.compare_digest(str(dc.get("c", "")), code)):
+            return jsonify(error="That code didn't work. Check it, or ask for a new email (codes last 30 minutes)."), 400
+        session.pop("dev_code", None)
+        user = {"id": _uid(email), "email": email}
+    save = d.get("save") if isinstance(d.get("save"), dict) else None
+    if save:
+        save = {k: save.get(k) for k in ("run_id", "title", "files", "state")}
+    return jsonify(ok=True, redirect=_signed_in(user, email, str(d.get("next") or ""), save))
     return redirect("/plans", code=303)
 
 

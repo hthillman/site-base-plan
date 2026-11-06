@@ -299,7 +299,7 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <meta name="color-scheme" content="light dark">
 <style>{CSS}</style>
 {ld}
-<script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script>
+<script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script><script src="/static/signin-code.js" defer></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
 <header><div class="wrap"><a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6" fill="#2f5d50"/><path d="M6 23c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round"/><path d="M6 17c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round" opacity=".6"/><rect x="9" y="7" width="14" height="18" rx="1" fill="none" stroke="#e8a64c" stroke-width="2" stroke-dasharray="4 2"/></svg>Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
@@ -461,7 +461,9 @@ function showLimit(err){track('limit_hit');const i=err.info||{};
   (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
  const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lf.email.value,website:lf.website.value})});
-  const k=await r.json().catch(()=>({}));lf.outerHTML=r.ok?'<span class="ok">Check your email for the sign-in link (good for 30 minutes).</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}}
+  const k=await r.json().catch(()=>({})),em=lf.email.value;const sp=document.createElement('span');lf.replaceWith(sp);
+  if(r.ok){sp.className='ok';sp.innerHTML='Check your email for the sign-in link (good for 30 minutes).'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(sp,em,{back:'/'})}
+  else{sp.className='err';sp.textContent=k.error||'Something went wrong.'}}}
 // Plans this calendar month from this browser (a number only, no ID): usage stats and the monthly allowance.
 const thisMonth=()=>new Date().toISOString().slice(0,7);
 const monthPlans=()=>{const v=(LS.get('sitekit-month')||'').split(':');return v[0]===thisMonth()?+(v[1]||0):0};
@@ -584,7 +586,7 @@ async function wireSave(j){const box=document.getElementById('savebox');if(!box|
   sf.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('sfmsg');
    const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:sf.email.value,website:sf.website.value,save:plan})});
    const k=await r.json().catch(()=>({}));
-   if(r.ok){track('save_link_sent');sf.hidden=true;m.className='fine ok';m.innerHTML='Check your email for the sign-in link. It works for 30 minutes.'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':'')}
+   if(r.ok){track('save_link_sent');sf.hidden=true;m.className='fine ok';m.innerHTML='Check your email for the sign-in link. It works for 30 minutes.'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(m,sf.email.value,{save:plan})}
    else{m.className='fine err';m.textContent=k.error||'Something went wrong.'}};};}
 function zoningBox(z){if(!z||!(z.details||[]).length)return '';
  const zs=z.details.map(d=>'<div class="zone"><div><span class="zt">'+esc(d.zone)+' '+esc(d.name||'')+'</span> <span class="zj">· '+esc(d.jurisdiction)+
@@ -980,7 +982,7 @@ async function load(){
 signin.onsubmit=async e=>{e.preventDefault();
  const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:signin.email.value,website:signin.website.value})});
  const k=await r.json().catch(()=>({}));
- if(r.ok){signin.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':'')}
+ if(r.ok){signin.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(msg,signin.email.value,{back:'/plans'})}
  else{msg.innerHTML='<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}};
 document.getElementById('signout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/plans'};
 load();
@@ -1099,7 +1101,7 @@ fetch('/api/billing/status').then(r=>r.json()).then(s=>{
   '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
   const pin=document.getElementById('pin');pin.onsubmit=async e=>{e.preventDefault();
    const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value})});
-   const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a>':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'};return}
+   const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>';if(r.ok&&window.bsCode)bsCode(msg,pin.email.value,{back:location.pathname})};return}
  TV=s.terms_version;document.getElementById('subscribe').onclick=startCheckout});
 let TV='';
 async function startCheckout(){if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}

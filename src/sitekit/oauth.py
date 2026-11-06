@@ -289,7 +289,8 @@ def authorize():
                   "const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},"
                   f"body:JSON.stringify({{email:f.email.value,website:f.website.value,next:{json.dumps(here)}}})}});"
                   "const k=await r.json().catch(()=>({}));if(r.ok){f.hidden=true;m.className='fine ok';"
-                  "m.innerHTML='Check your email for the sign-in link (good for 30 minutes).'+(k.dev_link?' <a href=\"'+k.dev_link+'\">Dev: open link</a>':'')}"
+                  "m.innerHTML='Check your email for the sign-in link (good for 30 minutes).'+(k.dev_link?' <a href=\"'+k.dev_link+'\">Dev: open link</a> (code '+k.dev_code+')':'');"
+                  f"window.bsCode&&bsCode(m,f.email.value,{{next:{json.dumps(here)}}})}}"
                   "else{f.querySelector('button').disabled=false;m.className='fine err';m.textContent=k.error||'Something went wrong.'}}</script>")
         from .pages import layout
 
