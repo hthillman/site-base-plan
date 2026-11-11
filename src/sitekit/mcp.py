@@ -67,8 +67,10 @@ TOOL = {
         "required": ["site"],
         "additionalProperties": False,
     },
-    "annotations": {"title": "Build a site base plan", "readOnlyHint": True, "destructiveHint": False,
-                    "idempotentHint": True, "openWorldHint": True},
+    # Not read-only or idempotent: each call creates a new plan (new files in Basesheet's storage, a new result link)
+    # and uses one of the person's monthly plans. Nothing existing is changed or deleted, and it queries public services.
+    "annotations": {"title": "Build a site base plan", "readOnlyHint": False, "destructiveHint": False,
+                    "idempotentHint": False, "openWorldHint": True},
     # Works without an account; a connected Basesheet account (oauth.py) gets that account's monthly plans.
     "securitySchemes": [{"type": "noauth"}, {"type": "oauth2", "scopes": ["plans"]}],
     "_meta": {"openai/toolInvocation/invoking": "Building the base plan…", "openai/toolInvocation/invoked": "Base plan ready",
