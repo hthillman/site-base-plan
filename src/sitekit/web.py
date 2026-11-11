@@ -4,6 +4,7 @@ because function responses are capped at 4.5 MB and /tmp doesn't persist."""
 
 from __future__ import annotations
 
+import hashlib
 import hmac
 import importlib.util
 import io
@@ -312,6 +313,7 @@ def run_request(d: dict, batch: bool = False):
 
     _u = _cu()
     user_id = _u["id"] if _u else None  # read now: the worker thread has no request context
+    anon_key = visitor_key() if not (user_id or base.get("live_check") or _is_pro()) else ""
 
     def worker():
         t0 = time.time()
@@ -333,6 +335,7 @@ def run_request(d: dict, batch: bool = False):
                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
             save_result(run_id, rj)
             count_plan(user_id)
+            count_anon(anon_key)
             events.put({"result": rj})
             # After the result is out, so it never slows a plan: which local government the run was in (city or
             # township and county, from Census), to see where zoning coverage is missing. Never the address.
@@ -421,6 +424,9 @@ def record_usage(rec: dict) -> None:
 # Pro accounts, batch runs and the live check are exempt; AI assistants have their own daily cap (mcp.py).
 FREE_PLANS_PER_MONTH = int(os.environ.get("FREE_PLANS_PER_MONTH", "0") or 0)
 ANON_PLANS_PER_MONTH = int(os.environ.get("ANON_PLANS_PER_MONTH", "0") or 0)
+# The browser's own count is easy to reset (private window, another browser), so no-account plans are also counted
+# on the server per connection: a scrambled IP that changes every month and can't be turned back into the address.
+ANON_IP_PLANS_PER_MONTH = int(os.environ.get("ANON_IP_PLANS_PER_MONTH", "0") or 0) or ANON_PLANS_PER_MONTH
 
 
 def _month() -> str:
@@ -456,6 +462,13 @@ def _is_pro() -> bool:
     return billing.live() and billing.is_pro(current_user())
 
 
+def visitor_key() -> str:
+    """This connection's monthly no-account plan counter key: a salted hash of the IP and the month (never the IP)."""
+    ip = (request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0] or request.remote_addr or "").strip()
+    secret = os.environ.get("SECRET_KEY", "dev-only-secret")
+    return hashlib.sha256(f"{secret}|{_month()}|{ip}".encode()).hexdigest()[:24] if ip else ""
+
+
 def plan_allowance(d: dict, live_check_header: str) -> dict | None:
     """None if this run may go ahead; otherwise the JSON for a 402 that the page turns into a sign-in / upgrade box."""
     if not FREE_PLANS_PER_MONTH:
@@ -477,8 +490,12 @@ def plan_allowance(d: dict, live_check_header: str) -> dict | None:
         mprior = int(d.get("mprior") or 0)
     except (TypeError, ValueError):
         mprior = 0
-    if not ANON_PLANS_PER_MONTH or mprior < ANON_PLANS_PER_MONTH or not can_sign_up():
+    if not ANON_PLANS_PER_MONTH or not can_sign_up():
         return None
+    if mprior < ANON_PLANS_PER_MONTH:
+        key = visitor_key()
+        if not key or count_private(f"anonip/{_month()}/{key}") < ANON_IP_PLANS_PER_MONTH:
+            return None
     return {"limit": "anon", "allowance": FREE_PLANS_PER_MONTH, "anon_allowance": ANON_PLANS_PER_MONTH,
             "error": f"You've made {ANON_PLANS_PER_MONTH} plan{'s' if ANON_PLANS_PER_MONTH != 1 else ''} this month. "
                      f"Sign in free to keep going: {FREE_PLANS_PER_MONTH} plans a month, no password."}
@@ -490,6 +507,16 @@ def _next_month_label() -> str:
     t = date.today()
     first = date(t.year + (t.month == 12), t.month % 12 + 1, 1)
     return first.strftime("%B %-d")
+
+
+def count_anon(key: str) -> None:
+    """Record one successful no-account plan against this connection's monthly counter. Never raises."""
+    if not (FREE_PLANS_PER_MONTH and ANON_PLANS_PER_MONTH and key):
+        return
+    try:
+        private_put(f"anonip/{_month()}/{key}", {"n": 1})
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN anon plan count failed: {e}", flush=True)
 
 
 def count_plan(user_id: str | None) -> None:

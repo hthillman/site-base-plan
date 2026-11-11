@@ -829,7 +829,7 @@ Microsoft's machine-traced footprints, with heights from FEMA USA Structures. Th
                   description="Every public data source behind Basesheet: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
 
 
-PRIVACY_UPDATED = "October 30, 2026"
+PRIVACY_UPDATED = "November 11, 2026"
 
 
 def privacy() -> str:
@@ -855,6 +855,9 @@ it's kept, and the choices you have. Questions or requests: {contact}.</p>
 zoning for it, run time and which data sources failed. Never the address, coordinates or anything finer than the city or township.</li>
 <li><b>A plan count in your browser.</b> Your browser keeps the number of plans you've made (in total and this month) and the date of
 your first one, and sends just those numbers with each run. There's no ID; clearing site data resets it.</li>
+<li><b>A monthly plan count per connection.</b> To keep free use fair, plans made without an account are also counted on our side,
+under a scrambled code made from your IP address and the month. The code can't be turned back into your IP address, and it
+changes every month.</li>
 <li><b>Clicks and votes.</b> Clicks on buttons like Download and Save, and "What should it do next?" votes, with the site's state and
 anything you type in the box. Nothing that identifies you.</li>
 <li><b>Account information</b>, if you sign in: your email address, the plans you save (address, files and date) and your monthly plan count.</li>
