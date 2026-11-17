@@ -242,11 +242,11 @@ def _send_link(email: str, link: str, code: str = "") -> None:
 
 
 # ------------------------------------------------------------------ product news (opt-in only)
-# Occasional product news goes only to people who ticked "Email me occasional product news" (at sign-in or on My plans).
-# Every news email carries an unsubscribe link and the postal address (NEWS_POSTAL_ADDRESS), as US law requires.
+# Account holders get occasional product news unless they've turned it off (unticked at sign-in, on My plans, or the
+# unsubscribe link). Every news email carries an unsubscribe link and the postal address (NEWS_POSTAL_ADDRESS), as US law requires.
 def news_status(uid: str) -> bool:
     found = _priv_list(f"news/{uid}")
-    return bool(found and found[0]["record"].get("on"))
+    return bool(found[0]["record"].get("on")) if found else True
 
 
 def news_set(user: dict, on: bool, how: str) -> None:
@@ -254,7 +254,13 @@ def news_set(user: dict, on: bool, how: str) -> None:
 
 
 def news_subscribers() -> list[dict]:
-    return [x["record"] for x in _priv_list("news/") if x["record"].get("on") and x["record"].get("email")]
+    """Confirmed accounts that haven't turned news off: [{uid, email}]."""
+    off = {x["record"].get("uid") for x in _priv_list("news/") if not x["record"].get("on")}
+    from .http import session as http
+
+    users = http().get(f"{SUPABASE_URL}/auth/v1/admin/users", params={"per_page": 1000}, headers=_sb(), timeout=30).json().get("users", [])
+    return [{"uid": u["id"], "email": u["email"]} for u in users
+            if u.get("email") and (u.get("email_confirmed_at") or u.get("confirmed_at")) and u["id"] not in off]
 
 
 def unsubscribe_url(uid: str) -> str:
@@ -446,8 +452,8 @@ def auth_start():
     if not EMAIL_RE.match(email):
         return jsonify(error="That doesn't look like an email address."), 400
     payload = {"e": email.lower()}
-    if d.get("news"):
-        payload["w"] = 1
+    if "news" in d:
+        payload["w"] = 1 if d.get("news") else 0
     nxt = str(d.get("next") or "")
     if nxt.startswith("/oauth/authorize?") and len(nxt) < 4000:  # finishing an assistant's connect request (oauth.py)
         payload["n"] = nxt
@@ -525,16 +531,16 @@ def auth_finish():
             return redirect("/plans?link=expired", code=303)
     else:
         user = {"id": _uid(payload["e"]), "email": payload["e"]}
-    return redirect(_signed_in(user, payload["e"], payload.get("n", ""), payload.get("s"), bool(payload.get("w"))) or "/plans", code=303)
+    return redirect(_signed_in(user, payload["e"], payload.get("n", ""), payload.get("s"), None if "w" not in payload else bool(payload["w"])) or "/plans", code=303)
 
 
-def _signed_in(user: dict, email: str, nxt: str = "", save: dict | None = None, news: bool = False) -> str:
+def _signed_in(user: dict, email: str, nxt: str = "", save: dict | None = None, news: bool | None = None) -> str:
     """Start the session after a link or a code; returns where to go next ("" = the caller's default)."""
     session.permanent = True
     session["uid"], session["email"] = user["id"], user["email"] or email
-    if news:
+    if news is not None:
         try:
-            news_set({"id": user["id"], "email": user["email"] or email}, True, "sign_in")
+            news_set({"id": user["id"], "email": user["email"] or email}, bool(news), "sign_in")
         except Exception as e:  # noqa: BLE001
             print(f"WARN news opt-in failed: {e}", flush=True)
     if supabase_on():
@@ -588,7 +594,7 @@ def auth_code():
     save = d.get("save") if isinstance(d.get("save"), dict) else None
     if save:
         save = {k: save.get(k) for k in ("run_id", "title", "files", "state")}
-    return jsonify(ok=True, redirect=_signed_in(user, email, str(d.get("next") or ""), save, bool(d.get("news"))))
+    return jsonify(ok=True, redirect=_signed_in(user, email, str(d.get("next") or ""), save, None if "news" not in d else bool(d.get("news"))))
     return redirect("/plans", code=303)
 
 

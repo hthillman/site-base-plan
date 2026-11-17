@@ -458,7 +458,7 @@ function showLimit(err){track('limit_hit');const i=err.info||{};
  const self=' Or <a href="'+REPO+'">run the open-source version</a> yourself, with no limits.';
  const pro=(PRO_LIVE?(VIA_AI?'<a href="/pricing">Plans and pricing</a>':'<a href="/pro">Pro</a> includes unlimited plans.'):'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
  out.innerHTML='<div class="result"><div class="keep ask limitbox"><span><b>'+esc(err.message)+'</b></span>'+
-  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
+  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
  const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lf.email.value,website:lf.website.value,news:!!(lf.news&&lf.news.checked)})});
   const k=await r.json().catch(()=>({})),em=lf.email.value;const sp=document.createElement('span');lf.replaceWith(sp);
@@ -580,7 +580,7 @@ async function wireSave(j){const box=document.getElementById('savebox');if(!box|
   if(me.email){box.textContent='Saving…';
    const r=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan)});const k=await r.json().catch(()=>({}));
    box.innerHTML=r.ok?'<span class="ok">Saved.</span> <a href="/plans">My plans</a>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';return}
-  box.innerHTML='<form id="sf" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a link</button><label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form>'+
+  box.innerHTML='<form id="sf" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form>'+
    '<span class="fine" id="sfmsg">Click the link in the email and this plan is saved. No password.</span>';
   const sf=document.getElementById('sf');sf.email.focus();
   sf.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('sfmsg');
@@ -877,9 +877,8 @@ which we keep only as a scrambled code to count plans per month.</li>
 <li>To see what's working and decide what to build next (usage records, clicks and votes).</li>
 <li>To reply to you. Your email is used for sign-in links and occasional notes about your account (a welcome when you sign up,
 problems with signing in, and billing if you subscribe).</li>
-<li>Product news, only if you ask for it: tick "Email me occasional product news" when you sign in or on My plans. It's a few
-emails a year about new features, coverage and pricing; every one has an unsubscribe link, and you can untick it on My plans any time.
-Nobody else is added to it.</li>
+<li>Product news: if you have an account, we may email you occasionally (a few times a year) about new features, coverage and
+pricing. Every one has an unsubscribe link, and you can turn it off on My plans any time.</li>
 </ul>
 
 <h2>Who it's shared with</h2>
@@ -947,7 +946,7 @@ def plans() -> str:
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button>
-<label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form>
+<label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form>
 <section id="office" hidden>
 <h2>Your office</h2>
 <p class="note">Used on every base plan you build while signed in: your title block on each PDF sheet, and your CAD layer names.</p>
@@ -1108,7 +1107,7 @@ if(new URLSearchParams(location.search).has('cancelled'))msg.textContent='Checko
 fetch('/api/billing/status').then(r=>r.json()).then(s=>{
  if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans">My plans and billing</a>';return}
  if(!s.signed_in){box.innerHTML='<form id="pin" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
-  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
+  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
   const pin=document.getElementById('pin');pin.onsubmit=async e=>{e.preventDefault();
    const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value,news:!!(pin.news&&pin.news.checked)})});
    const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>';if(r.ok&&window.bsCode)bsCode(msg,pin.email.value,{back:location.pathname})};return}
