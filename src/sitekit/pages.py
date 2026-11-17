@@ -193,7 +193,7 @@ ul{padding-left:20px}li{margin:5px 0}
 .keep{padding:12px;border:1px solid var(--line);border-radius:8px;font-size:14px;display:grid;gap:8px;color:var(--muted);background:var(--field)}
 
 .keep .quiet{justify-self:start;padding:8px 14px}
-.keep .savef{display:flex;gap:8px;flex-wrap:wrap}
+.keep .savef{display:flex;gap:8px;flex-wrap:wrap}.savef .news{flex-basis:100%;margin:0;color:var(--muted)}
 .sh{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 8px;font-weight:600}
 .callouts{list-style:none;padding:0;margin:0;display:grid;gap:8px}
 .callouts .co{padding:10px 12px;border-radius:8px;border:1px solid var(--line);border-left:3px solid var(--caution);background:var(--field);font-size:14.5px;color:var(--ink)}
@@ -458,9 +458,9 @@ function showLimit(err){track('limit_hit');const i=err.info||{};
  const self=' Or <a href="'+REPO+'">run the open-source version</a> yourself, with no limits.';
  const pro=(PRO_LIVE?(VIA_AI?'<a href="/pricing">Plans and pricing</a>':'<a href="/pro">Pro</a> includes unlimited plans.'):'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
  out.innerHTML='<div class="result"><div class="keep ask limitbox"><span><b>'+esc(err.message)+'</b></span>'+
-  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
+  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
  const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
-  const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lf.email.value,website:lf.website.value})});
+  const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lf.email.value,website:lf.website.value,news:!!(lf.news&&lf.news.checked)})});
   const k=await r.json().catch(()=>({})),em=lf.email.value;const sp=document.createElement('span');lf.replaceWith(sp);
   if(r.ok){sp.className='ok';sp.innerHTML='Check your email for the sign-in link (good for 30 minutes).'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(sp,em,{back:'/'})}
   else{sp.className='err';sp.textContent=k.error||'Something went wrong.'}}}
@@ -580,11 +580,11 @@ async function wireSave(j){const box=document.getElementById('savebox');if(!box|
   if(me.email){box.textContent='Saving…';
    const r=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan)});const k=await r.json().catch(()=>({}));
    box.innerHTML=r.ok?'<span class="ok">Saved.</span> <a href="/plans">My plans</a>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';return}
-  box.innerHTML='<form id="sf" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a link</button></form>'+
+  box.innerHTML='<form id="sf" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a link</button><label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form>'+
    '<span class="fine" id="sfmsg">Click the link in the email and this plan is saved. No password.</span>';
   const sf=document.getElementById('sf');sf.email.focus();
   sf.onsubmit=async e=>{e.preventDefault();const m=document.getElementById('sfmsg');
-   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:sf.email.value,website:sf.website.value,save:plan})});
+   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:sf.email.value,website:sf.website.value,news:!!(sf.news&&sf.news.checked),save:plan})});
    const k=await r.json().catch(()=>({}));
    if(r.ok){track('save_link_sent');sf.hidden=true;m.className='fine ok';m.innerHTML='Check your email for the sign-in link. It works for 30 minutes.'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(m,sf.email.value,{save:plan})}
    else{m.className='fine err';m.textContent=k.error||'Something went wrong.'}};};}
@@ -829,7 +829,7 @@ Microsoft's machine-traced footprints, with heights from FEMA USA Structures. Th
                   description="Every public data source behind Basesheet: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
 
 
-PRIVACY_UPDATED = "November 11, 2026"
+PRIVACY_UPDATED = "November 17, 2026"
 
 
 def privacy() -> str:
@@ -876,7 +876,10 @@ which we keep only as a scrambled code to count plans per month.</li>
 <li>To run your account: sign-in links, saved plans, your monthly allowance and, for Pro, your subscription and office settings.</li>
 <li>To see what's working and decide what to build next (usage records, clicks and votes).</li>
 <li>To reply to you. Your email is used for sign-in links and occasional notes about your account (a welcome when you sign up,
-problems with signing in, and billing if you subscribe). No marketing lists.</li>
+problems with signing in, and billing if you subscribe).</li>
+<li>Product news, only if you ask for it: tick "Email me occasional product news" when you sign in or on My plans. It's a few
+emails a year about new features, coverage and pricing; every one has an unsubscribe link, and you can untick it on My plans any time.
+Nobody else is added to it.</li>
 </ul>
 
 <h2>Who it's shared with</h2>
@@ -943,7 +946,8 @@ def plans() -> str:
 <div id="probar" class="probar" hidden></div>
 <div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
-<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form>
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button>
+<label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form>
 <section id="office" hidden>
 <h2>Your office</h2>
 <p class="note">Used on every base plan you build while signed in: your title block on each PDF sheet, and your CAD layer names.</p>
@@ -959,6 +963,7 @@ def plans() -> str:
 </form>
 </section>
 <p class="fine" id="signout-row" hidden><span id="who"></span> · <button type="button" class="linkbtn" id="signout" style="padding:0">Sign out</button></p>
+<p class="fine" id="news-row" hidden><label class="check"><input type="checkbox" id="newscb"> Email me occasional product news (a few times a year; unsubscribe any time)</label></p>
 """
     script = """<script>
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -972,6 +977,8 @@ async function load(){
  const me=await (await fetch('/api/me')).json().catch(()=>({}));
  if(!me.email){document.getElementById('plede').textContent=me.can_sign_up?'Sign in with your email to see the plans you\\'ve saved. No password: we email you a link.':'Saving plans isn\\'t available yet.';signin.hidden=!me.can_sign_up;return}
  document.getElementById('signout-row').hidden=false;document.getElementById('who').textContent='Signed in as '+me.email;
+ fetch('/api/news').then(r=>r.json()).then(n=>{const cb=document.getElementById('newscb');cb.checked=!!n.on;document.getElementById('news-row').hidden=false;
+  cb.onchange=()=>fetch('/api/news',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({on:cb.checked})})}).catch(()=>{});
  const r=await fetch('/api/plans');const d=await r.json().catch(()=>({plans:[]}));
  if(!d.plans||!d.plans.length){list.innerHTML='<p class="note">No saved plans yet. Build a base plan on the <a href="/">home page</a> and choose Save to my plans.</p>';return}
  list.innerHTML=d.plans.map(p=>'<div class="plan" data-id="'+esc(p.id)+'"><span class="t">'+esc(p.title)+'</span><span class="note">Saved '+esc((p.saved_at||'').slice(0,10))+'</span>'+
@@ -983,7 +990,7 @@ async function load(){
   const r=await fetch('/api/plans/'+encodeURIComponent(row.dataset.id),{method:'DELETE'});
   if(r.ok){row.remove();if(!list.children.length)load()}else{b.textContent='Couldn\\'t delete'}});}
 signin.onsubmit=async e=>{e.preventDefault();
- const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:signin.email.value,website:signin.website.value})});
+ const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:signin.email.value,website:signin.website.value,news:!!(signin.news&&signin.news.checked)})});
  const k=await r.json().catch(()=>({}));
  if(r.ok){signin.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(msg,signin.email.value,{back:'/plans'})}
  else{msg.innerHTML='<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}};
@@ -1101,9 +1108,9 @@ if(new URLSearchParams(location.search).has('cancelled'))msg.textContent='Checko
 fetch('/api/billing/status').then(r=>r.json()).then(s=>{
  if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans">My plans and billing</a>';return}
  if(!s.signed_in){box.innerHTML='<form id="pin" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
-  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
+  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news"> Email me occasional product news</label></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
   const pin=document.getElementById('pin');pin.onsubmit=async e=>{e.preventDefault();
-   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value})});
+   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value,news:!!(pin.news&&pin.news.checked)})});
    const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>';if(r.ok&&window.bsCode)bsCode(msg,pin.email.value,{back:location.pathname})};return}
  TV=s.terms_version;document.getElementById('subscribe').onclick=startCheckout});
 let TV='';

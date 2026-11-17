@@ -241,6 +241,64 @@ def _send_link(email: str, link: str, code: str = "") -> None:
     r.raise_for_status()
 
 
+# ------------------------------------------------------------------ product news (opt-in only)
+# Occasional product news goes only to people who ticked "Email me occasional product news" (at sign-in or on My plans).
+# Every news email carries an unsubscribe link and the postal address (NEWS_POSTAL_ADDRESS), as US law requires.
+def news_status(uid: str) -> bool:
+    found = _priv_list(f"news/{uid}")
+    return bool(found and found[0]["record"].get("on"))
+
+
+def news_set(user: dict, on: bool, how: str) -> None:
+    _priv_put(f"news/{user['id']}", {"uid": user["id"], "email": user.get("email", ""), "on": bool(on), "how": how, "at": _now()})
+
+
+def news_subscribers() -> list[dict]:
+    return [x["record"] for x in _priv_list("news/") if x["record"].get("on") and x["record"].get("email")]
+
+
+def unsubscribe_url(uid: str) -> str:
+    base = os.environ.get("SITE_URL", "").rstrip("/") or "https://basesheet.site"
+    from itsdangerous import URLSafeSerializer
+
+    return f"{base}/unsubscribe?t=" + URLSafeSerializer(SECRET_KEY or "dev-only-secret", salt="basesheet-news").dumps(uid)
+
+
+@bp.route("/api/news", methods=["GET", "POST"])
+def news_pref():
+    u = current_user()
+    if not u:
+        return jsonify(error="Sign in first."), 401
+    if request.method == "POST":
+        on = bool((request.get_json(force=True, silent=True) or {}).get("on"))
+        news_set(u, on, "my_plans")
+        return jsonify(on=on)
+    return jsonify(on=news_status(u["id"]))
+
+
+@bp.route("/unsubscribe", methods=["GET", "POST"])
+def unsubscribe():
+    """One click on a button (not the link itself, so email scanners can't unsubscribe people)."""
+    from itsdangerous import BadSignature, URLSafeSerializer
+    from markupsafe import escape
+
+    from .pages import layout
+
+    t = request.values.get("t", "")
+    try:
+        uid = URLSafeSerializer(SECRET_KEY or "dev-only-secret", salt="basesheet-news").loads(t)
+    except BadSignature:
+        return layout("Unsubscribe · Basesheet", "/plans", "<h1>That link didn't work</h1><p>Sign in and untick product news on My plans instead.</p>"), 400
+    if request.method == "POST" or request.headers.get("List-Unsubscribe") or request.form.get("List-Unsubscribe") == "One-Click":
+        found = _priv_list(f"news/{uid}")
+        rec = found[0]["record"] if found else {"uid": uid}
+        _priv_put(f"news/{uid}", {**rec, "on": False, "how": "unsubscribe", "at": _now()})
+        return layout("Unsubscribed · Basesheet", "/plans", "<h1>You're unsubscribed</h1><p>No more product news. Sign-in emails and notes about your account still come when needed.</p>")
+    body = (f'<h1>Unsubscribe from Basesheet news?</h1><form method="post" action="/unsubscribe"><input type="hidden" name="t" value="{escape(t)}">'
+            '<button autofocus>Unsubscribe</button></form>')
+    return layout("Unsubscribe · Basesheet", "/plans", body), 200, {"X-Robots-Tag": "noindex", "Cache-Control": "no-store"}
+
+
 WELCOME_SUBJECT = "Welcome to Basesheet"
 
 
@@ -388,6 +446,8 @@ def auth_start():
     if not EMAIL_RE.match(email):
         return jsonify(error="That doesn't look like an email address."), 400
     payload = {"e": email.lower()}
+    if d.get("news"):
+        payload["w"] = 1
     nxt = str(d.get("next") or "")
     if nxt.startswith("/oauth/authorize?") and len(nxt) < 4000:  # finishing an assistant's connect request (oauth.py)
         payload["n"] = nxt
@@ -465,13 +525,18 @@ def auth_finish():
             return redirect("/plans?link=expired", code=303)
     else:
         user = {"id": _uid(payload["e"]), "email": payload["e"]}
-    return redirect(_signed_in(user, payload["e"], payload.get("n", ""), payload.get("s")) or "/plans", code=303)
+    return redirect(_signed_in(user, payload["e"], payload.get("n", ""), payload.get("s"), bool(payload.get("w"))) or "/plans", code=303)
 
 
-def _signed_in(user: dict, email: str, nxt: str = "", save: dict | None = None) -> str:
+def _signed_in(user: dict, email: str, nxt: str = "", save: dict | None = None, news: bool = False) -> str:
     """Start the session after a link or a code; returns where to go next ("" = the caller's default)."""
     session.permanent = True
     session["uid"], session["email"] = user["id"], user["email"] or email
+    if news:
+        try:
+            news_set({"id": user["id"], "email": user["email"] or email}, True, "sign_in")
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN news opt-in failed: {e}", flush=True)
     if supabase_on():
         maybe_welcome(user)
     if nxt.startswith("/oauth/authorize?"):
@@ -523,7 +588,7 @@ def auth_code():
     save = d.get("save") if isinstance(d.get("save"), dict) else None
     if save:
         save = {k: save.get(k) for k in ("run_id", "title", "files", "state")}
-    return jsonify(ok=True, redirect=_signed_in(user, email, str(d.get("next") or ""), save))
+    return jsonify(ok=True, redirect=_signed_in(user, email, str(d.get("next") or ""), save, bool(d.get("news"))))
     return redirect("/plans", code=303)
 
 
