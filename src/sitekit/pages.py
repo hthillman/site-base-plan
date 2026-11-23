@@ -298,6 +298,7 @@ header nav a{border-left:0;padding:12px 18px}header a.go{display:none}}
 .hero figcaption{text-transform:uppercase}
 .callout.k1{left:12px;top:12px}.callout.k2{right:12px;top:12px}.callout.k3{right:12px;bottom:12px}
 .procard{border-radius:0!important;border:1.5px solid var(--ink)!important}
+.proemail{margin:14px 0 10px}.proemail label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}.proemail input{width:100%;max-width:380px;font:inherit;padding:10px 12px;border:1.5px solid var(--ink);background:#fff;border-radius:0}.proemail .fine{margin:6px 0 0}
 .home #out:not(:empty){margin:0;padding:24px 32px;border-bottom:1.5px solid var(--ink)}
 .strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1.5px solid var(--ink)}
 .strip>div{padding:16px 20px;border-right:1px solid var(--line)}.strip>div:last-child{border-right:0}
@@ -1257,7 +1258,10 @@ def pro(prices: dict | None) -> str:
 the features that take real work to build and keep accurate. It also pays for the zoning research behind them.</p>
 <div class="procard">
 {choice}<p class="note">Cancel any time.</p>
-{PRO_FEATURES}<div id="probox"><label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
+{PRO_FEATURES}<div id="probox"><div id="emailrow" class="proemail" hidden><label for="proemail">Email address</label>
+<input id="proemail" type="email" maxlength="254" autocomplete="email" required>
+<p class="fine" id="emailnote">Your Pro subscription will be associated with this email.</p></div>
+<label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
 <p><button type="button" id="subscribe">Get Pro</button></p></div>
 <p id="promsg" class="note" aria-live="polite"></p>
 </div>
@@ -1275,13 +1279,26 @@ const box=document.getElementById('probox'),msg=document.getElementById('promsg'
 if(new URLSearchParams(location.search).has('cancelled'))msg.textContent='Checkout cancelled. Nothing was charged.';
 fetch('/api/billing/status').then(r=>r.json()).then(s=>{
  if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans">My plans and billing</a>';return}
- if(!s.signed_in){const n=document.createElement('p');n.className='fine';n.textContent='No account needed first: pay with Stripe and your Basesheet account is set up with that email.';box.appendChild(n)}
- TV=s.terms_version;document.getElementById('subscribe').onclick=startCheckout});
-let TV='';
-async function startCheckout(){if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
+ const row=document.getElementById('emailrow');row.hidden=false;
+ if(s.signed_in){row.innerHTML='<p class="fine">Your Pro subscription will be associated with <b>'+esc(s.email||'your account')+'</b>. Not you? <button type="button" class="linkbtn" id="proout" style="padding:0">Sign out</button></p>';
+  document.getElementById('proout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.reload()}}
+ else{const em=document.getElementById('proemail');em.oninput=()=>{fix=null;document.getElementById('emailnote').textContent='Your Pro subscription will be associated with this email.'}}
+ GUEST=!s.signed_in;TV=s.terms_version;document.getElementById('subscribe').onclick=startCheckout});
+let TV='',GUEST=false,fix=null;
+const TYPO={'gmial.com':'gmail.com','gmai.com':'gmail.com','gamil.com':'gmail.com','gmail.co':'gmail.com','gmail.con':'gmail.com','gnail.com':'gmail.com',
+ 'hotmial.com':'hotmail.com','hotnail.com':'hotmail.com','hotmail.co':'hotmail.com','yahoo.co':'yahoo.com','yaho.com':'yahoo.com','outlok.com':'outlook.com',
+ 'outlook.co':'outlook.com','iclod.com':'icloud.com','icloud.co':'icloud.com'};
+async function startCheckout(){let email='';
+ if(GUEST){const em=document.getElementById('proemail');email=em.value.trim();
+  if(!em.checkValidity()||!email){msg.innerHTML='<span class="err">Please enter your email address.</span>';em.focus();return}
+  const dom=email.split('@')[1].toLowerCase();
+  if(TYPO[dom]&&fix!==email){fix=email;const sug=email.split('@')[0]+'@'+TYPO[dom];
+   document.getElementById('emailnote').innerHTML='Did you mean <button type="button" class="linkbtn" id="sug" style="padding:0">'+esc(sug)+'</button>? Click Get Pro again to keep what you typed.';
+   document.getElementById('sug').onclick=()=>{em.value=sug;em.oninput()};return}}
+ if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
  msg.textContent='Opening checkout…';
  const iv=(document.querySelector('input[name=iv]:checked')||{}).value||'month';
- const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:TV,interval:iv})});const k=await r.json().catch(()=>({}));
+ const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:TV,interval:iv,email:email})});const k=await r.json().catch(()=>({}));
  if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}
 </script>"""
     return layout("Basesheet Pro", "/pro", body, script,
