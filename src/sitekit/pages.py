@@ -242,6 +242,92 @@ code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-
 .cta p{margin:0 0 12px}.cta .btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:600;padding:9px 16px;border-radius:8px}
 th[scope],.tablewrap th{white-space:nowrap}
 @media(max-width:560px){.meta .sep,footer .actions .sep{display:none}.meta,footer .actions{gap:6px 16px}h1{font-size:24px}.search{flex-direction:column}.search button{padding:13px}main{padding-top:28px}}
+/* ---- drafting-sheet look (2026-11): every page is a sheet on a drafting grid, with a ruled nav and a title block ---- */
+:root{--paper:#fdfcf9;--gridline:rgba(47,93,80,.075)}
+@media (prefers-color-scheme:dark){:root{--paper:#1a1a18;--gridline:rgba(134,192,171,.06)}}
+body{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ background:var(--bg) linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/24px 24px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.02em}
+.tag{font-size:11.5px;color:var(--muted);text-transform:uppercase}
+input,select,textarea,button,.panel{border-radius:3px}
+h1{font-weight:700}
+.sheet{max-width:784px;margin:28px auto 36px;background:var(--paper);border:1.5px solid var(--ink)}
+.sheet.wide{max-width:1160px}
+.sheet main{padding:36px 0 8px}.sheet .wrap{max-width:none;padding:0 32px}
+.sheet.wide main{padding:0}.sheet.wide main>.wrap{padding:0}
+header{border-bottom:1.5px solid var(--ink)}
+header .wrap{padding:0!important;align-items:stretch;gap:0;flex-wrap:nowrap;min-height:54px}
+.brand{padding:0 20px;border-right:1.5px solid var(--ink);margin-right:auto;font-size:18px;font-weight:700}
+header nav{gap:0;align-items:stretch}header nav a{display:flex;align-items:center;padding:0 18px;border-left:1px solid color-mix(in srgb,var(--ink) 22%,transparent);font-size:14px;color:var(--ink)}
+header nav a.on,header nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+header .hright{gap:0;align-self:stretch;align-items:stretch}header a.gh{display:none}
+header a.go{display:flex;align-items:center;padding:0 20px;background:var(--ink);color:var(--paper);text-decoration:none;font-size:14px;font-weight:600;white-space:nowrap}
+header .menu{margin:0;padding:0 16px;border-left:1px solid var(--line)}
+@media(max-width:560px){header .wrap{flex-wrap:wrap}header nav{border-top:1.5px solid var(--ink);margin-top:0}
+header nav a{border-left:0;padding:12px 18px}header a.go{display:none}}
+.titleblock{display:grid;grid-template-columns:2fr 1.4fr 1fr;border-top:1.5px solid var(--ink);margin-top:40px;font-size:13px;color:var(--muted)}
+.sheet.wide .titleblock{margin-top:0}
+.titleblock>div{padding:12px 16px;border-right:1px solid var(--line)}.titleblock>div:last-child{border-right:0}
+.titleblock b{display:block;color:var(--ink);font-size:14px;font-weight:600}.titleblock .warn{color:var(--alert)}
+.titleblock p{margin:6px 0 0;font-size:13px}.titleblock a{color:var(--muted)}
+.afterblock{font-size:13px;color:var(--muted);padding:14px 32px}
+@media(max-width:720px){.titleblock{grid-template-columns:1fr}.titleblock>div{border-right:0;border-bottom:1px solid var(--line)}
+.titleblock>div:last-child{border-bottom:0}.sheet{margin:12px 8px 20px}
+.sheet .wrap{padding:0 18px}}
+/* home page: full-bleed ruled rows inside the sheet */
+.hero{display:grid;grid-template-columns:1fr 1.05fr;border-bottom:1.5px solid var(--ink)}
+.hero .hl{padding:32px 32px 24px;border-right:1.5px solid var(--ink)}
+.hero h1{font-size:46px;line-height:1.04;letter-spacing:-.02em;margin:10px 0 12px}
+.hero .lede{font-size:17px;margin-bottom:14px}
+.formats{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 0;border:1.5px solid var(--ink);width:fit-content;max-width:100%}
+.formats span{display:flex;flex-direction:column;padding:6px 12px;font-size:10.5px;color:var(--muted);text-transform:uppercase;border-right:1px solid color-mix(in srgb,var(--ink) 22%,transparent)}
+.formats span:last-child{border-right:0}.formats b{font:600 13px/1.3 "IBM Plex Sans",sans-serif;color:var(--ink);text-transform:none}
+.hero .lede2{margin:0 0 14px}
+.hero .search input{padding:14px}
+.hero .search{gap:0}.hero .search input{border:1.5px solid var(--ink);border-right:0;border-radius:3px 0 0 3px;background:var(--field)}
+.hero .search button{border-radius:0 3px 3px 0;border:1.5px solid var(--ink);padding:0 18px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:5px 18px;margin-top:16px;font-size:12.5px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:8px}.legend i{flex:none;width:22px;display:inline-block}
+.legend .p{border-top:2px dashed #c2352b}.legend .c{border-top:1.5px solid #9a6a3a}.legend .f{height:10px;background:#8fb0c9}.legend .w{height:10px;background:#7fb89c}
+.hero .example{font-size:13px;margin-top:12px}
+.hero figure{margin:0;position:relative;background:#fff;min-height:320px}
+.hero figure img{width:100%;height:100%;object-fit:cover;display:block}
+.hero figcaption{position:absolute;left:12px;bottom:12px;font-size:11px;background:var(--paper);border:1.5px solid var(--ink);padding:4px 9px;color:var(--ink)}
+.hero figcaption a{color:var(--ink);text-decoration:none}.hero figcaption a:hover{text-decoration:underline}
+.callout{position:absolute;background:var(--paper);color:var(--ink);border:1.5px solid var(--ink);padding:5px 9px;font-size:11.5px;text-transform:uppercase}
+.hero figcaption{text-transform:uppercase}
+.callout.k1{left:12px;top:12px}.callout.k2{right:12px;top:12px}.callout.k3{right:12px;bottom:12px}
+.procard{border-radius:0!important;border:1.5px solid var(--ink)!important}
+.home #out:not(:empty){margin:0;padding:24px 32px;border-bottom:1.5px solid var(--ink)}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1.5px solid var(--ink)}
+.strip>div{padding:16px 20px;border-right:1px solid var(--line)}.strip>div:last-child{border-right:0}
+.strip b{display:block;margin-top:4px;font-size:15px}.strip p{margin:4px 0 0;font-size:13.5px;color:var(--muted)}
+.sheetsec{display:grid;grid-template-columns:190px 1fr;border-bottom:1.5px solid var(--ink)}
+.sheetsec .no{padding:22px 20px;border-right:1.5px solid var(--ink);font-size:12px;color:var(--muted)}
+.sheetsec .no b{display:block;font:700 30px/1 "IBM Plex Sans",sans-serif;color:var(--ink);margin-bottom:8px}
+.sheetsec .body{padding:22px 26px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.steps h3{margin:4px 0;font-size:16px}.steps p{margin:0;color:var(--muted);font-size:14.5px}
+.outs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.outs figure{margin:0}
+.outs img{width:100%;height:170px;object-fit:cover;object-position:center;border:1.5px solid var(--ink);display:block;background:#fff}
+.outs figcaption{font-size:13.5px;color:var(--muted);margin-top:8px}.outs figcaption b{display:block;color:var(--ink);font-size:15px}
+.procta{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:center;border:1.5px solid var(--ink);padding:12px;margin:18px 0 0}
+.procta img{width:100%;height:auto;border:1px solid var(--line);display:block}.procta b{font-size:15px}.procta p{margin:4px 0 10px;color:var(--muted);font-size:14px}
+.pbtn{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:7px 14px;border-radius:3px;text-decoration:none;font-weight:600;font-size:14px}
+@media(max-width:560px){.procta{grid-template-columns:1fr}}
+.strip .striplink{margin:6px 0 0;font-size:11.5px}
+.plans2{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink)}.plans2>div{padding:18px 20px}
+.plans2>div+div{border-left:1.5px solid var(--ink);background:color-mix(in srgb,var(--accent) 8%,var(--paper))}
+.plans2 .price{font-size:30px;font-weight:700;margin:2px 0}.plans2 .price small{font-size:14px;color:var(--muted);font-weight:500}
+.plans2 ul{padding-left:18px;margin:8px 0 0;color:var(--muted);font-size:14.5px}
+@media(max-width:860px){.hero{grid-template-columns:1fr}.hero .hl{border-right:0;border-bottom:1.5px solid var(--ink)}
+.strip{grid-template-columns:1fr 1fr}.strip>div:nth-child(2){border-right:0}.strip>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+.sheetsec{grid-template-columns:1fr}.sheetsec .no{border-right:0;border-bottom:1px solid var(--line);padding:14px 20px}
+.sheetsec .no b{display:inline;font-size:20px;margin-right:8px}.steps{grid-template-columns:1fr}.outs{grid-template-columns:1fr}.outs img{height:auto;max-height:260px}.plans2{grid-template-columns:1fr}
+.plans2>div+div{border-left:0;border-top:1.5px solid var(--ink)}}
+@media(max-width:560px){.hero .hl{padding:24px 18px}.hero h1{font-size:32px}
+.formats{border:0;gap:6px;width:auto}.formats span{padding:5px 9px;border:1.5px solid var(--ink)!important}.legend{grid-template-columns:1fr}
+.hero .search{flex-direction:column;gap:8px}.hero .search input{border-right:1.5px solid var(--ink);border-radius:3px}.hero .search button{border-radius:3px;padding:12px}
+.home #out:not(:empty){padding:18px}.afterblock{padding:12px 18px}}
 """
 
 REPO_URL = "https://github.com/hthillman/site-base-plan"
@@ -276,6 +362,22 @@ DEFAULT_DESCRIPTION = ("Free planning-level site context from public data for an
                        "FEMA flood zones, wetlands and aerial, as DXF, SketchUp terrain, LandXML, GIS and PDF.")
 
 
+def title_block(extra: str = "") -> str:
+    """The footer, drawn like a drawing's title block (every page)."""
+    links = ('<a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK
+             + ' · <a href="/privacy">Privacy</a>' + (' · ' + firms_link() if firms_link() else '') + f' · <a href="{REPO_URL}">Open source</a>')
+    contact = CONTACT_HTML or '<a href="/#fbtoggle">Send feedback</a>'
+    try:
+        from .terms import OPERATOR
+
+        builder = f'<p>{escape(OPERATOR.split(", a ")[0])} · Olympia, WA</p>'
+    except ImportError:
+        builder = ""
+    return (f'<footer class="titleblock"><div><b>Basesheet</b>Site base maps from public data{builder}<p>{links}</p>{extra}</div>'
+            '<div><b class="warn">Not a survey</b>Planning-level public data. Not a certified site plan or for permit submission.</div>'
+            f'<div><span class="mono tag">Contact</span><b>{contact}</b></div></footer>')
+
+
 def layout(title: str, active: str, body: str, script: str = "", description: str = DEFAULT_DESCRIPTION,
            jsonld: list[dict] | None = None) -> str:
     from .accounts import current_email
@@ -299,13 +401,17 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>{CSS}</style>
 {ld}
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script><script src="/static/signin-code.js" defer></script>
 <script defer src="/_vercel/insights/script.js"></script>
-</head><body>
-<header><div class="wrap"><a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6" fill="#2f5d50"/><path d="M6 23c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round"/><path d="M6 17c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round" opacity=".6"/><rect x="9" y="7" width="14" height="18" rx="1" fill="none" stroke="#e8a64c" stroke-width="2" stroke-dasharray="4 2"/></svg>Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
-<main><div class="wrap">{body}{"" if active == "/" else '<footer><p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>' + ZONING_LINK + TERMS_LINK + (f' · Contact: {CONTACT_HTML}' if CONTACT_HTML else '') + '</p><p class="fine">Free, no account.' + (f' <a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a> if it helped.' if tip_url() else "") + (' · ' + firms_link() if firms_link() else '') + '</p></footer>'}</div></main>
+</head><body class="{"home" if active == "/" else ""}">
+<div class="sheet{" wide" if active == "/" else ""}">
+<header><div class="wrap"><a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6" fill="#2f5d50"/><path d="M6 23c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round"/><path d="M6 17c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round" opacity=".6"/><rect x="9" y="7" width="14" height="18" rx="1" fill="none" stroke="#e8a64c" stroke-width="2" stroke-dasharray="4 2"/></svg>Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<a class="go" href="/">Build a plan →</a><button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
+<main><div class="wrap">{body}</div></main>{title_block()}
+</div>
 {script}
 </body></html>"""
 
@@ -317,12 +423,48 @@ def _samples() -> dict:
         return {}
 
 
+def _hero_lede() -> str:
+    layers = ('Parcel lines, LiDAR contours, flood zones, wetlands, soils and <a href="/zoning">zoning</a> (where covered)'
+              if zoning_counts() else "Parcel lines, LiDAR contours, flood zones, wetlands and soils")
+    return layers + " for any US property. All from public data, in about 30 seconds."
+
+
+def _zoning_strip() -> str:
+    c = zoning_counts()
+    return f"{c['jurisdictions']} places" if c else "Where published"
+
+
+def _plans_section() -> str:
+    """Free vs Pro, numbered like the sheet's other sections; free only when Pro isn't on sale."""
+    anon, acct = _allowances()
+    free = (f"{anon} plans a month, {acct} with a free account" if anon and acct else "Free for everyday use")
+    pro = ""
+    if pro_live():
+        try:
+            from .billing import price
+
+            m = price("month")
+        except ImportError:
+            m = None
+        amt = f"${m['amount']:g}" if m else "Pro"
+        pro = (f'<div><div class="mono tag">Pro</div><div class="price">{amt}<small> /month</small></div><ul><li>Unlimited plans</li>'
+               '<li>Your office title block on every sheet</li><li>Batch runs of up to 50 sites</li><li>Experimental zoning test fits</li></ul>'
+               '<p style="margin:12px 0 0"><a class="pbtn" href="/pro">Get Pro</a></p>'
+               + (f'<p class="fine" style="margin:6px 0 0">Teams of 3 or more? {CONTACT_HTML}</p>' if CONTACT_HTML else '') + '</div>')
+    return ('<section class="sheetsec"><div class="no mono"><b>04</b>Plans</div><div class="body"><div class="plans2"'
+            + ('' if pro else ' style="grid-template-columns:1fr"') + '>'
+            f'<div><div class="mono tag">Free</div><div class="price">$0</div><ul><li>{escape(free)}</li><li>Every file format</li>'
+            '<li>Zoning lookup where covered</li><li>Open source: <a href="' + REPO_URL + '">run your own copy</a></li></ul></div>'
+            + pro + '</div></div></section>')
+
+
 def index(parcel_states: list[str], needs_code: bool, preload: dict | None = None) -> str:
     states_sorted = sorted(STATES.items(), key=lambda kv: kv[1])
     opts = '<option value="">Auto</option>' + "".join(f'<option value="{k}">{escape(v)}</option>' for k, v in states_sorted)
     s = _samples()
     example = (f'<p class="example">See an example: <a href="{escape(s["pdf"])}" target="_blank" rel="noopener">PDF</a> · '
                f'<a href="{escape(s["zip"])}">all files</a> for a waterfront lot in Olympia, WA.</p>') if s else ""
+    example_caption = (f'<a href="{escape(s["pdf"])}" target="_blank" rel="noopener">Example · Olympia, WA ↗</a>' if s else "Example · Olympia, WA")
     from .parcel import county_sources
 
     from .config import load_config
@@ -338,9 +480,10 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
     if tip_url():
         actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
     body = f"""
+<section class="hero"><div class="hl">
+<div class="mono tag">Sheet 01 · Site base map</div>
 <h1>Site context from any US address</h1>
-<p class="lede">Parcel lines, contours, slopes, soils, flood zones, wetlands, {_zoning_words()}aerial and 3D massing from public data, ready for AutoCAD, SketchUp, Civil 3D and GIS.</p>
-<p class="lede2">{allowance_line()}</p>
+<p class="lede">{_hero_lede()}</p>
 
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
@@ -388,14 +531,36 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
 </div>
 </div>
 </form>
-{example}
-<p class="example">Also works in ChatGPT and Claude: <a href="/guides/use-in-chatgpt-and-claude" data-ev="ai_setup">set it up in a minute</a>.</p>
+<div class="formats mono" aria-label="Opens in"><span><b>AutoCAD</b>DXF</span><span><b>SketchUp</b>SKP</span><span><b>Civil 3D</b>LandXML</span><span><b>GIS</b>GeoJSON · TIF</span><span><b>PDF</b>Summary</span></div>
+</div>
+<figure><img src="/static/hero.jpg" width="1000" height="714" alt="Example base plan: a waterfront lot in Olympia, WA, with parcel line, contours, floodplain and wetlands" fetchpriority="high">
+<span class="callout mono k1">Parcel 1.09 ac</span><span class="callout mono k2">Zone UW · Olympia</span><span class="callout mono k3">Elev 7–64 ft · slope 6.4%</span>
+<figcaption class="mono">{example_caption}</figcaption></figure>
+</section>
 
 <div id="out"></div>
 
-<footer>
-<p class="fine">Planning-level public data, not a survey. Parcel lines in <a href="/about#coverage">{n} states{county_txt}</a>.</p>
-<p class="fine"><a href="/guides">Guides</a> · <a href="/parcels">Parcel data by state</a>{ZONING_LINK}{TERMS_LINK}{(" · Contact: " + CONTACT_HTML) if CONTACT_HTML else ""}</p>
+<div class="sheetbelow">
+<div class="strip">
+<div><span class="mono tag">Terrain</span><b>USGS 3DEP LiDAR</b><p>Elevation, contours at 1, 2 or 5 ft, slope</p></div>
+<div><span class="mono tag">Hazards</span><b>FEMA + USFWS</b><p>Flood zones and mapped wetlands</p></div>
+<div><span class="mono tag">Parcels</span><b>County assessors</b><p>Lines, parcel numbers, neighbors in {n} states{county_txt}</p></div>
+<div><span class="mono tag">Zoning</span><b>{_zoning_strip()}</b><p>District and rules where covered</p><p class="mono striplink"><a href="/sources">Accuracy and sources →</a></p></div>
+</div>
+<section class="sheetsec"><div class="no mono"><b>02</b>How it works</div><div class="body"><div class="steps">
+<div><div class="mono tag">A</div><h3>Enter an address</h3><p>Or a parcel number or coordinates. Combine up to five parcels into one site.</p></div>
+<div><div class="mono tag">B</div><h3>We assemble the site</h3><p>Every layer clipped to your site, in State Plane coordinates, on standard CAD layers or your own.</p></div>
+<div><div class="mono tag">C</div><h3>Download and draw</h3><p>DXF, SketchUp terrain, Civil 3D LandXML, GIS layers and a PDF summary sheet. Or ask for one in <a href="/guides/use-in-chatgpt-and-claude" data-ev="ai_setup">ChatGPT and Claude</a>.</p></div>
+</div></div></section>
+<section class="sheetsec"><div class="no mono"><b>03</b>What you get</div><div class="body"><div class="outs">
+<figure><img src="/static/out-sheet.jpg" width="900" height="582" loading="lazy" alt="PDF summary sheet for the Olympia example, with an office title block"><figcaption><b>PDF sheets</b>Map, legend, sources and your title block (Pro)</figcaption></figure>
+<figure><img src="/static/out-cad.jpg" width="900" height="685" loading="lazy" alt="The DXF drawing open in CAD, with parcel, contour, flood and wetland layers"><figcaption><b>DXF for CAD</b>Every feature on its own layer, in State Plane</figcaption></figure>
+<figure><img src="/static/out-terrain.jpg" width="700" height="322" loading="lazy" alt="The 3D terrain with aerial imagery draped over it"><figcaption><b>3D terrain</b>For SketchUp and Civil 3D, with the aerial draped</figcaption></figure>
+</div></div></section>
+{_plans_section()}
+</div>
+
+<div class="afterblock">
 <p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
 <form id="fb" hidden>
 <textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
@@ -403,7 +568,7 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 <span class="fine" id="fbmsg"></span>
 </form>
-</footer>
+</div>
 """
     script = """<script>
 const f=document.getElementById('f'),out=document.getElementById('out'),go=document.getElementById('go');
@@ -541,7 +706,7 @@ function render(j){
   info.map(x=>'<li class="flag plain"><span>'+esc(x.text)+'</span></li>').join('')+
   '</ul><p class="note">Every layer’s source, date and limits are in provenance.md inside the zip.</p></details>'+
  '<div class="rfoot">'+nextRow(j.zoning)+
-  (PRO_LIVE&&!VIA_AI?'<p class="note firmline">Using this at a firm? <a href="/pro" data-ev="firms_click">Basesheet Pro</a> adds batch runs, your title block on every sheet and experimental test fits.</p>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
+  (PRO_LIVE&&!VIA_AI&&!IS_PRO?'<div class="procta"><a href="/pro" data-ev="firms_click"><img src="/static/out-sheet.jpg" alt="A sheet with an office title block" width="900" height="582"></a><div><b>Put your office’s title block on this sheet</b><p>Basesheet Pro adds your title block and CAD layers to every plan, plus unlimited plans and batch runs of up to 50 sites.</p><a class="pbtn" href="/pro" data-ev="firms_click">See Pro</a></div></div>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
  RUN_STATE=j.state||'';track('run_done');
@@ -1110,11 +1275,7 @@ const box=document.getElementById('probox'),msg=document.getElementById('promsg'
 if(new URLSearchParams(location.search).has('cancelled'))msg.textContent='Checkout cancelled. Nothing was charged.';
 fetch('/api/billing/status').then(r=>r.json()).then(s=>{
  if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans">My plans and billing</a>';return}
- if(!s.signed_in){box.innerHTML='<form id="pin" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">'+
-  '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form><p class="fine">Sign in first (no password), then choose Get Pro on My plans.</p>';
-  const pin=document.getElementById('pin');pin.onsubmit=async e=>{e.preventDefault();
-   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pin.email.value,website:pin.website.value,news:!!(pin.news&&pin.news.checked)})});
-   const k=await r.json().catch(()=>({}));msg.innerHTML=r.ok?'<span class="ok">Check your email for the sign-in link.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':''):'<span class="err">'+esc(k.error||'Something went wrong.')+'</span>';if(r.ok&&window.bsCode)bsCode(msg,pin.email.value,{back:location.pathname})};return}
+ if(!s.signed_in){const n=document.createElement('p');n.className='fine';n.textContent='No account needed first: pay with Stripe and your Basesheet account is set up with that email.';box.appendChild(n)}
  TV=s.terms_version;document.getElementById('subscribe').onclick=startCheckout});
 let TV='';
 async function startCheckout(){if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}

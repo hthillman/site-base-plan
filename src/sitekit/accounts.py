@@ -443,6 +443,18 @@ def delete_plan(user: dict, plan_id: str) -> bool:
 
 
 # ------------------------------------------------------------------ routes
+def email_sign_in(email: str, nxt: str = "") -> None:
+    """Email a sign-in link and code to an address (used after a guest Pro checkout for an existing account)."""
+    email = email.strip().lower()
+    payload = {"e": email}
+    if nxt:
+        payload["n"] = nxt
+    th, vt, code = sb_sign_in_token(email)
+    payload.update(th=th, vt=vt)
+    base = os.environ.get("SITE_URL", "").rstrip("/") or request.host_url.rstrip("/")
+    _send_link(email, f"{base}/auth?t={_serializer().dumps(payload)}", code)
+
+
 @bp.post("/api/auth/start")
 def auth_start():
     if not can_sign_up():

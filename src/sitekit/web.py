@@ -896,6 +896,15 @@ def _zoning_city_paths() -> list[str]:
     return city_paths()
 
 
+@app.errorhandler(404)
+def not_found(_e):
+    from .pages import layout
+
+    body = ('<h1>That page isn\'t on this sheet</h1><p class="lede">The link may be old or mistyped.</p>'
+            '<p><a href="/">Build a base plan</a> · <a href="/zoning">Zoning by city</a> · <a href="/guides">Guides</a></p>')
+    return layout("Page not found · Basesheet", "/404", body), 404
+
+
 @app.get("/sitemap.xml")
 def sitemap():
     from .pages import FIRMS_PAGE
