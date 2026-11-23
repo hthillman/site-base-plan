@@ -314,6 +314,7 @@ def run_request(d: dict, batch: bool = False):
     _u = _cu()
     user_id = _u["id"] if _u else None  # read now: the worker thread has no request context
     anon_key = visitor_key() if not (user_id or base.get("live_check") or _is_pro()) else ""
+    pro_device = request.cookies.get(DEVICE_COOKIE, "") if user_id and not base.get("live_check") and _is_pro() else ""
 
     def worker():
         t0 = time.time()
@@ -336,6 +337,7 @@ def run_request(d: dict, batch: bool = False):
             save_result(run_id, rj)
             count_plan(user_id)
             count_anon(anon_key)
+            note_pro_device(user_id, pro_device)
             events.put({"result": rj})
             # After the result is out, so it never slows a plan: which local government the run was in (city or
             # township and county, from Census), to see where zoning coverage is missing. Never the address.
@@ -507,6 +509,38 @@ def _next_month_label() -> str:
     t = date.today()
     first = date(t.year + (t.month == 12), t.month % 12 + 1, 1)
     return first.strftime("%B %-d")
+
+
+# Pro is one person per subscription (Terms, section 5). Signed-in browsers get a random device ID cookie, and each Pro plan
+# records which device it came from that month, so a shared sign-in shows up in the usage report. Nothing is enforced.
+DEVICE_COOKIE = "bsd"
+
+
+def note_pro_device(user_id: str | None, device: str) -> None:
+    if not (user_id and device):
+        return
+    try:
+        from datetime import datetime, timezone
+
+        from .accounts import _priv_put
+
+        _priv_put(f"prodev/{user_id}/{_month()}/{device}", {"at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN pro device note failed: {e}", flush=True)
+
+
+@app.after_request
+def _device_cookie(resp):
+    """A random ID for signed-in browsers (no personal data), used only to count devices per Pro account."""
+    try:
+        from flask import session
+
+        if session.get("uid") and not request.cookies.get(DEVICE_COOKIE):
+            resp.set_cookie(DEVICE_COOKIE, uuid.uuid4().hex[:16], max_age=400 * 86400, httponly=True, samesite="Lax",
+                            secure=bool(os.environ.get("SECRET_KEY")))
+    except Exception:  # noqa: BLE001
+        pass
+    return resp
 
 
 def count_anon(key: str) -> None:

@@ -829,7 +829,7 @@ Microsoft's machine-traced footprints, with heights from FEMA USA Structures. Th
                   description="Every public data source behind Basesheet: USGS 3DEP LiDAR, NRCS SSURGO soils, FEMA flood zones, USFWS wetlands, Census TIGER roads, Esri imagery and statewide and county parcel layers, with terms.")
 
 
-PRIVACY_UPDATED = "November 17, 2026"
+PRIVACY_UPDATED = "November 23, 2026"
 
 
 def privacy() -> str:
@@ -896,7 +896,8 @@ services (USGS, USDA, FEMA, USFWS, county and state parcel and zoning servers) s
 <p>We may also disclose information if the law requires it.</p>
 
 <h2>Cookies and local storage</h2>
-<p>If you sign in, a cookie keeps you signed in. Your browser's local storage holds the plan count above and settings you choose.
+<p>If you sign in, a cookie keeps you signed in, and a second cookie holds a random device ID (nothing about you) that we use
+only to count how many devices a Pro subscription is used from, since a subscription is for one person. Your browser's local storage holds the plan count above and settings you choose.
 There are no advertising or cross-site tracking cookies.</p>
 
 <h2>How long we keep it</h2>
