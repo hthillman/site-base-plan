@@ -617,6 +617,7 @@ async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form
  msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
 document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
 const PRELOAD=__PRELOAD__;
+{const pq=new URLSearchParams(location.search).get('q');if(pq&&!PRELOAD){f.query.value=pq.slice(0,300);f.query.focus()}}  // from a /zoning/<place> search box
 if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
  else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
 </script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(tip_url())).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL).replace("__QUOTA__", "true" if os.environ.get("FREE_PLANS_PER_MONTH", "0") not in ("", "0") else "false")

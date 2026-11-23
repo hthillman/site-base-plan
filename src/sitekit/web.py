@@ -888,6 +888,14 @@ def og_image():
     return r
 
 
+def _zoning_city_paths() -> list[str]:
+    try:
+        from .zoning.coverage_page import city_paths
+    except ImportError:
+        return []
+    return city_paths()
+
+
 @app.get("/sitemap.xml")
 def sitemap():
     from .pages import FIRMS_PAGE
@@ -895,7 +903,7 @@ def sitemap():
     base = _site_url()
     from .guides import all_paths
 
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/zoning"] if ZONING_PAGE else []) + (["/firms"] if FIRMS_PAGE else []) + all_paths()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/zoning"] + _zoning_city_paths() if ZONING_PAGE else []) + (["/firms"] if FIRMS_PAGE else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")
