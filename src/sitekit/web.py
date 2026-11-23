@@ -179,8 +179,9 @@ def load_result(run_id: str) -> dict | None:
     return r.json() if r.ok else None
 
 
-def publish(run_id: str, folder: Path, files: dict[str, str]) -> dict[str, str]:
-    """Map output keys to downloadable URLs (Blob when deployed, local otherwise)."""
+def publish(run_id: str, folder: Path, files: dict[str, str], keep: str | None = None) -> dict[str, str]:
+    """Map output keys to downloadable URLs (Blob when deployed, local otherwise). `keep`: a saved/ folder for a
+    signed-in user's plan, outside the 2-day cleanup."""
     names = {k: Path(v).name for k, v in files.items()}
     if not BLOB_TOKEN:
         LOCAL_RUNS[run_id] = folder
@@ -188,7 +189,7 @@ def publish(run_id: str, folder: Path, files: dict[str, str]) -> dict[str, str]:
         urls["zip"] = f"/zip/{run_id}"
         return urls
     # The zip (everything) plus a separate PDF copy for in-browser viewing.
-    prefix = f"runs/{folder.name}-{run_id}"
+    prefix = keep or f"runs/{folder.name}-{run_id}"
     data = _zip_bytes(folder)
     path = f"{prefix}/{folder.name}.zip"
     def put_all():
@@ -278,11 +279,19 @@ def run_request(d: dict, batch: bool = False):
         layer_custom=parse_layer_map(d.get("layer_map") or "") if d.get("layers") == "custom" else {},
         skip={k for k in (d.get("skip") or []) if k in OPTIONAL_LAYERS},
     )
-    blocked = plan_allowance(d, request.headers.get("X-Live-Check", ""))
+    rebuild = ""
+    try:  # building an expired plan from your own list again doesn't use up a plan
+        from .accounts import current_user as _cur, rebuild_ok
+
+        if not batch and rebuild_ok(_cur(), str(d.get("rebuild") or ""), q):
+            rebuild = str(d["rebuild"])
+    except ImportError:
+        pass
+    blocked = None if rebuild else plan_allowance(d, request.headers.get("X-Live-Check", ""))
     if blocked:
         return jsonify(blocked), 402
     if opts.testfit and not pro_ok():
-        return jsonify(error="The test fit is part of Basesheet Pro. Sign in and subscribe on basesheet.site/pro, or build without it.", pro=True), 402
+        return jsonify(error="The test fit is part of Basesheet Pro. Subscribe at basesheet.site/pricing, or build without it.", pro=True), 402
     try:  # Pro firm branding: title block and office layer standard (hosted site only)
         from .accounts import current_user
         from .firm import apply_to
@@ -315,13 +324,25 @@ def run_request(d: dict, batch: bool = False):
     user_id = _u["id"] if _u else None  # read now: the worker thread has no request context
     anon_key = visitor_key() if not (user_id or base.get("live_check") or _is_pro()) else ""
     pro_device = request.cookies.get(DEVICE_COOKIE, "") if user_id and not base.get("live_check") and _is_pro() else ""
+    keeper = _u if _u and not batch and not base.get("live_check") else None  # signed-in plans are listed in /plans
+    meta = {"query": q[:300], "also": opts.extra_queries, "state": opts.state or "", "county": opts.county or ""}
+    if rebuild:
+        base["rebuild"] = True
 
     def worker():
         t0 = time.time()
         try:
             res = run(q, opts, log=lambda m: events.put({"log": m}))
             events.put({"log": "Publishing files"})
-            urls = publish(run_id, res.out_dir, res.files)
+            keep, cap = None, 0
+            if keeper:
+                try:
+                    from .accounts import keep_slot
+
+                    keep, cap = keep_slot(keeper)
+                except Exception as e:  # noqa: BLE001
+                    print(f"WARN keep slot failed: {e}", flush=True)
+            urls = publish(run_id, res.out_dir, res.files, keep=keep if BLOB_TOKEN else None)
             rec = {
                 **base, "outcome": "ok", "input": "apn" if looks_like_apn(q) else "address", "state": res.site.state,
                 "parcels": len(res.site.parcels) or (1 if res.site.parcel is not None else 0), "layers": opts.layer_preset + ("+custom" if opts.layer_custom else ""),
@@ -335,7 +356,20 @@ def run_request(d: dict, batch: bool = False):
             rj = {"flags": res.flags, "files": urls, "seconds": round(res.timings.get("total", 0)), "state": res.site.state,
                   "zoning": res.zoning, "run_id": run_id, "title": res.site.matched_address, "facts": res.facts}
             save_result(run_id, rj)
-            count_plan(user_id)
+            if keeper:
+                try:
+                    from .accounts import record_plan
+
+                    files = dict(urls)
+                    if keep and BLOB_TOKEN:
+                        files["result"] = blob_put(f"{keep}/result.json", json.dumps(rj).encode(), "application/json")
+                    record_plan(keeper, run_id, res.site.matched_address, res.site.state, files, meta,
+                                temp=not keep, replaces=rebuild)
+                    rj = {**rj, "kept": "saved" if keep else "full", "kept_cap": cap}
+                except Exception as e:  # noqa: BLE001
+                    print(f"WARN plan record failed: {e}", flush=True)
+            if not rebuild:
+                count_plan(user_id)
             count_anon(anon_key)
             note_pro_device(user_id, pro_device)
             events.put({"result": rj})
@@ -742,16 +776,42 @@ def index():
 
 @app.get("/r/<run_id>")
 def result_page(run_id):
-    """A finished run's result page, shareable for as long as its files are kept (2 days)."""
+    """Old result links (emails, ChatGPT and Claude) now open the plan in the app."""
+    from flask import redirect
+
+    qs = request.query_string.decode()
+    return redirect(f"/plans/{run_id}" + (f"?{qs}" if qs else ""), code=301)
+
+
+@app.get("/plans/<run_id>")
+def plan_page(run_id):
+    """One plan. Anyone with the link can open it while its files are kept (2 days); a signed-in owner can open a
+    kept plan any time, and rebuild one whose files have gone without using up a plan."""
     import re
 
-    from .pages import index as page
+    from .pages import app_plans
     from .parcel import supported_states
 
     if not re.fullmatch(r"[0-9a-f]{10}", run_id):
         abort(404)
-    rj = load_result(run_id) or {"expired": True}
-    resp = Response(page(supported_states(), bool(ACCESS_CODE), preload=rj))
+    rj = None
+    try:
+        from .accounts import current_user, plan_for_run
+
+        u = current_user()
+        mine = plan_for_run(u, run_id) if u else None
+    except ImportError:
+        mine = None
+    if mine:
+        rj = mine.get("result") or None
+    rj = rj or load_result(run_id)
+    if rj and mine:
+        rj = {**rj, "kept": mine.get("kept")}
+    if not rj:
+        rj = {"expired": True}
+        if mine:
+            rj.update({"query": mine.get("query") or "", "rebuild": run_id if mine.get("query") else ""})
+    resp = Response(app_plans(supported_states(), bool(ACCESS_CODE), preload=rj))
     resp.headers["X-Robots-Tag"] = "noindex"
     return resp
 
@@ -771,32 +831,35 @@ def sources():
     return page()
 
 
+def _pro_live() -> bool:
+    from .pages import pro_live
+
+    return pro_live()
+
+
 @app.get("/pricing")
 def pricing_page():
+    """Plans and pricing, with Pro checkout. From ChatGPT or Claude (?via=ai) it's information only: the assistant
+    stores don't allow an app to link to a purchase."""
     from flask import redirect
 
-    from .pages import pricing, pro_live
+    from .pages import FIRMS_PAGE, pricing, pro, pro_live
 
     if not pro_live():
-        return redirect("/", code=302)
+        return redirect("/firms" if FIRMS_PAGE else "/", code=302)
     from .billing import prices
 
-    return pricing(prices(), ANON_PLANS_PER_MONTH, free_allowance())
+    if request.args.get("via") == "ai":
+        return pricing(prices(), ANON_PLANS_PER_MONTH, free_allowance())
+    return pro(prices())
 
 
 @app.get("/pro")
 def pro_page():
     from flask import redirect
 
-    try:
-        from . import billing
-    except ImportError:
-        billing = None
-    if billing is None or not billing.live():
-        return redirect("/firms", code=302)
-    from .pages import pro
-
-    return pro(billing.prices())
+    qs = request.query_string.decode()
+    return redirect("/pricing" + (f"?{qs}" if qs else ""), code=301)
 
 
 @app.get("/firms")
@@ -810,12 +873,20 @@ def firms_page():
 
 @app.get("/plans")
 def plans_page():
+    from .pages import app_plans
+    from .parcel import supported_states
+
+    return app_plans(supported_states(), bool(ACCESS_CODE))
+
+
+@app.get("/plans/settings")
+def settings_page():
     from .accounts import enabled
-    from .pages import plans
+    from .pages import settings
 
     if not enabled():
         abort(404)
-    return plans()
+    return settings()
 
 
 @app.get("/privacy")
@@ -912,7 +983,7 @@ def sitemap():
     base = _site_url()
     from .guides import all_paths
 
-    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/zoning"] + _zoning_city_paths() if ZONING_PAGE else []) + (["/firms"] if FIRMS_PAGE else []) + all_paths()
+    paths = ["/", "/about", "/sources", "/privacy"] + (["/terms"] if TERMS_ON else []) + (["/zoning"] + _zoning_city_paths() if ZONING_PAGE else []) + (["/firms"] if FIRMS_PAGE else []) + (["/pricing"] if _pro_live() else []) + all_paths()
     urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return Response(xml, mimetype="application/xml")

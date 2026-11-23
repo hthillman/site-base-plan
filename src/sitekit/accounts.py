@@ -242,7 +242,7 @@ def _send_link(email: str, link: str, code: str = "") -> None:
 
 
 # ------------------------------------------------------------------ product news (opt-in only)
-# Account holders get occasional product news unless they've turned it off (unticked at sign-in, on My plans, or the
+# Account holders get occasional product news unless they've turned it off (unticked at sign-in, in Settings, or the
 # unsubscribe link). Every news email carries an unsubscribe link and the postal address (NEWS_POSTAL_ADDRESS), as US law requires.
 def news_status(uid: str) -> bool:
     found = _priv_list(f"news/{uid}")
@@ -294,7 +294,7 @@ def unsubscribe():
     try:
         uid = URLSafeSerializer(SECRET_KEY or "dev-only-secret", salt="basesheet-news").loads(t)
     except BadSignature:
-        return layout("Unsubscribe · Basesheet", "/plans", "<h1>That link didn't work</h1><p>Sign in and untick product news on My plans instead.</p>"), 400
+        return layout("Unsubscribe · Basesheet", "/plans", "<h1>That link didn't work</h1><p>Sign in and untick product news in Settings instead.</p>"), 400
     if request.method == "POST" or request.headers.get("List-Unsubscribe") or request.form.get("List-Unsubscribe") == "One-Click":
         found = _priv_list(f"news/{uid}")
         rec = found[0]["record"] if found else {"uid": uid}
@@ -368,12 +368,12 @@ def save_plan(user: dict, plan: dict) -> dict:
         for existing in _priv_list(f"plans/{uid}/"):
             if existing["record"].get("run_id") == run_id:
                 return existing["record"]
-    have = len(_rest("GET", f"?user_id=eq.{uid}&select=id")) if supabase_on() else len(_priv_list(f"plans/{uid}/"))
+    have = _kept_count(uid)
     cap = PRO_MAX_PLANS if _is_pro(user) else MAX_PLANS
     if have >= cap:
         if cap == PRO_MAX_PLANS:
-            raise ValueError(f"You've saved {cap} plans. Delete one in My plans to save this one.")
-        raise ValueError(f"You've saved {MAX_PLANS} plans, the most a free account keeps. Delete one in My plans to save this, "
+            raise ValueError(f"You've saved {cap} plans. Delete one in your plans to save this one.")
+        raise ValueError(f"You've saved {MAX_PLANS} plans, the most a free account keeps. Delete one in your plans to save this, "
                          "or if you're using Basesheet at a firm and need more, tell us on the For firms page (basesheet.site/firms).")
     plan_id = uuid.uuid4().hex[:12]
     kept = {}
@@ -397,6 +397,19 @@ def save_plan(user: dict, plan: dict) -> dict:
                                       "x-add-random-suffix": "0", "x-allow-overwrite": "1"}, timeout=120)
             put.raise_for_status()
             kept[k] = put.json()["url"]
+        try:  # the result too, so the plan opens at /plans/<run_id> after the 2-day files are gone
+            from .web import load_result
+
+            rj = load_result(run_id)
+            if rj:
+                rj = {**rj, "files": {**(rj.get("files") or {}), **kept}}
+                put = http().put(f"https://blob.vercel-storage.com/{folder}/result.json", data=json.dumps(rj).encode(),
+                                 headers={"authorization": f"Bearer {_blob_token()}", "x-api-version": "7", "x-content-type": "application/json",
+                                          "x-add-random-suffix": "0", "x-allow-overwrite": "1"}, timeout=60)
+                put.raise_for_status()
+                kept["result"] = put.json()["url"]
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN saved result copy failed: {e}", flush=True)
     title = str(plan.get("title") or "Site plan")[:200]
     state = str(plan.get("state") or "")[:2]
     if supabase_on():
@@ -405,6 +418,85 @@ def save_plan(user: dict, plan: dict) -> dict:
     rec = {"id": plan_id, "run_id": run_id, "title": title, "state": state, "files": kept, "saved_at": _now()}
     _priv_put(f"plans/{uid}/{plan_id}", rec)
     return rec
+
+
+def _counts(files: dict) -> bool:
+    """A plan whose files are kept (and so counts toward the saved-plan cap): not a record of a run past the cap."""
+    return bool(files.get("zip")) and not files.get("temp")
+
+
+def _rows(uid: str) -> list[dict]:
+    if supabase_on():
+        return [_shape(r) for r in _rest("GET", f"?user_id=eq.{uid}&select=*&order=saved_at.desc")]
+    return sorted((x["record"] for x in _priv_list(f"plans/{uid}/")), key=lambda r: r.get("saved_at", ""), reverse=True)
+
+
+def _kept_count(uid: str) -> int:
+    return sum(1 for r in _rows(uid) if _counts(r.get("files") or {}))
+
+
+def keep_slot(user: dict) -> tuple[str | None, int]:
+    """Where a signed-in run's files go so they're kept: a saved/ folder while the account is under its cap, else None
+    (the run is still listed in their plans, with 2-day files). Returns (folder, cap)."""
+    cap = PRO_MAX_PLANS if _is_pro(user) else MAX_PLANS
+    if _kept_count(user["id"]) >= cap:
+        return None, cap
+    return f"saved/{user['id']}-{secrets.token_hex(8)}", cap
+
+
+def record_plan(user: dict, run_id: str, title: str, state: str, files: dict, meta: dict, temp: bool, replaces: str = "") -> None:
+    """List a signed-in run in the user's plans. `temp`: its files are the 2-day ones (account at its cap).
+    `replaces`: a run this one rebuilt, whose record is dropped."""
+    kept = {k: files[k] for k in ("zip", "pdf", "preview", "result") if files.get(k)}
+    kept["meta"] = {k: v for k, v in meta.items() if v}
+    if temp:
+        kept["temp"] = True
+    uid, title, state = user["id"], str(title or "Site plan")[:200], str(state or "")[:2]
+    if replaces and re.fullmatch(r"[0-9a-f]{10}", replaces):
+        if supabase_on():
+            _rest("DELETE", f"?user_id=eq.{uid}&run_id=eq.{replaces}")
+        else:
+            _priv_delete([x["ref"] for x in _priv_list(f"plans/{uid}/") if x["record"].get("run_id") == replaces])
+    if supabase_on():
+        _rest("POST", "", json={"user_id": uid, "run_id": run_id, "title": title, "state": state, "files": kept})
+        return
+    plan_id = uuid.uuid4().hex[:12]
+    _priv_put(f"plans/{uid}/{plan_id}", {"id": plan_id, "run_id": run_id, "title": title, "state": state, "files": kept, "saved_at": _now()})
+
+
+def plan_for_run(user: dict, run_id: str) -> dict | None:
+    """The signed-in user's own plan for a run: {result (kept copy or None), kept, kept_cap, query}."""
+    if not re.fullmatch(r"[0-9a-f]{10}", run_id):
+        return None
+    if supabase_on():
+        found = [_shape(r) for r in _rest("GET", f"?user_id=eq.{user['id']}&run_id=eq.{run_id}&select=*")]
+    else:
+        found = [x["record"] for x in _priv_list(f"plans/{user['id']}/") if x["record"].get("run_id") == run_id]
+    if not found:
+        return None
+    files = found[0].get("files") or {}
+    result = None
+    if files.get("result") and not files.get("temp"):
+        try:
+            from .http import session as http
+
+            r = http().get(files["result"], timeout=30)
+            result = r.json() if r.ok else None
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN kept result load failed: {e}", flush=True)
+    return {"result": result, "kept": "full" if files.get("temp") else "saved" if _counts(files) else None,
+            "kept_cap": PRO_MAX_PLANS if _is_pro(user) else MAX_PLANS, "query": (files.get("meta") or {}).get("query", "")}
+
+
+def rebuild_ok(user: dict | None, run_id: str, query: str) -> bool:
+    """A rebuild of the user's own listed plan whose files have expired: it doesn't use up a plan."""
+    if not (user and run_id and query):
+        return False
+    try:
+        p = plan_for_run(user, run_id)
+    except Exception:  # noqa: BLE001
+        return False
+    return bool(p) and p.get("query", "").strip().lower() == query.strip().lower()
 
 
 def _is_pro(user: dict) -> bool:
@@ -420,10 +512,12 @@ def _shape(row: dict) -> dict:
 
 
 def list_plans(user: dict) -> list[dict]:
-    if supabase_on():
-        return [_shape(r) for r in _rest("GET", f"?user_id=eq.{user['id']}&select=*&order=saved_at.desc")]
-    recs = [x["record"] for x in _priv_list(f"plans/{user['id']}/")]
-    return sorted(recs, key=lambda r: r.get("saved_at", ""), reverse=True)
+    return _rows(user["id"])
+
+
+def _own_files(files: dict) -> list[str]:
+    """A plan's kept file URLs (never the shared 2-day run files, which the daily cleanup removes)."""
+    return [v for v in files.values() if isinstance(v, str) and "/saved/" in v]
 
 
 def delete_plan(user: dict, plan_id: str) -> bool:
@@ -432,11 +526,11 @@ def delete_plan(user: dict, plan_id: str) -> bool:
             return False
         gone = _rest("DELETE", f"?id=eq.{plan_id}&user_id=eq.{user['id']}")
         for row in gone:
-            _public_delete(list((row.get("files") or {}).values()))
+            _public_delete(_own_files(row.get("files") or {}))
         return bool(gone)
     for x in _priv_list(f"plans/{user['id']}/"):
         if x["record"].get("id") == plan_id:
-            _public_delete(list((x["record"].get("files") or {}).values()))
+            _public_delete(_own_files(x["record"].get("files") or {}))
             _priv_delete([x["ref"]])
             return True
     return False

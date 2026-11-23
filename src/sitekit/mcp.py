@@ -164,7 +164,7 @@ def _pricing_url() -> str:
     try:
         from . import billing
 
-        return f"{_site_url()}/pricing" if billing.live() else _site_url()
+        return f"{_site_url()}/pricing?via=ai" if billing.live() else _site_url()
     except ImportError:
         return _site_url()
 
@@ -315,7 +315,7 @@ def build(args: dict, meta: dict | None = None) -> dict:
                   "failed_layers": sorted(k for k, lr in res.layers.items() if lr.status == "failed"),
                   "jurisdiction": jurisdiction_at(res.site.lon, res.site.lat, timeout=5)})
     _count_success(meta or {})
-    link = f"{_site_url()}/r/{run_id}?via=ai"
+    link = f"{_site_url()}/plans/{run_id}?via=ai"
     content = [{"type": "text", "text": _result_text(rj, link)}]
     thumb = _thumbnail(res.files.get("preview"))
     if thumb:

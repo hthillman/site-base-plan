@@ -305,7 +305,7 @@ def authorize():
             f'<input type="hidden" name="csrf" value="{escape(_consent_token(user["id"], p))}">'
             '<button name="decision" value="allow" autofocus>Connect</button> '
             '<button name="decision" value="deny" class="linkbtn">Cancel</button></form>'
-            '<p class="fine">Not you? <a href="/plans">Sign out on My plans</a>, then connect again.</p>')
+            '<p class="fine">Not you? <a href="/plans/settings">Sign out in Settings</a>, then connect again.</p>')
     return _page(f"Connect {who} · Basesheet", body)
 
 

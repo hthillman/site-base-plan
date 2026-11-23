@@ -58,7 +58,7 @@ CONTACT_HTML = f'<a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)
 def firms_link() -> str:
     """Footer link for firms: Basesheet Pro once it's on sale, the early-access page before that."""
     if pro_live():
-        return '<a href="/pro" data-ev="firms_click">Basesheet Pro</a>'
+        return '<a href="/pricing" data-ev="firms_click">Basesheet Pro</a>'
     on = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")
     return '<a href="/firms" data-ev="firms_click">Using this at a firm?</a>' if on else ""
 
@@ -329,6 +329,24 @@ header nav a{border-left:0;padding:12px 18px}header a.go{display:none}}
 .formats{border:0;gap:6px;width:auto}.formats span{padding:5px 9px;border:1.5px solid var(--ink)!important}.legend{grid-template-columns:1fr}
 .hero .search{flex-direction:column;gap:8px}.hero .search input{border-right:1.5px solid var(--ink);border-radius:3px}.hero .search button{border-radius:3px;padding:12px}
 .home #out:not(:empty){padding:18px}.afterblock{padding:12px 18px}}
+/* the app at /plans: plain working sections inside the same sheet */
+.appsec{padding:24px 32px;border-bottom:1.5px solid var(--ink)}.appsec h1{font-size:26px;margin:0 0 14px}.appsec h2{font-size:20px;margin:0 0 4px}
+.appsec[hidden]{display:none}.app .search input{border:1.5px solid var(--ink);border-right:0;border-radius:3px 0 0 3px;background:var(--field)}
+.app .search{gap:0}.app .search button{border-radius:0 3px 3px 0;border:1.5px solid var(--ink);padding:0 18px}#also .search{gap:8px}#also .search input{border-right:1.5px solid var(--ink);border-radius:3px}#also .search button{border-radius:3px}
+.appout:not(:empty){padding:24px 32px;border-bottom:1.5px solid var(--ink)}.appout .result{border-top:0;padding-top:0}
+.planbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 32px;border-bottom:1.5px solid var(--ink);font-size:14px}
+.planbar[hidden]{display:none}.planbar>a:first-child{color:var(--ink);text-decoration:none}.planbar>a:first-child:hover{text-decoration:underline}
+#plist .plan a.t{color:var(--ink);font-weight:600;text-decoration:none}#plist .plan a.t:hover{text-decoration:underline}
+#plist .plan .acts button.again{color:var(--accent)}#signbox{margin-top:14px}#mlede{margin:0 0 6px}
+.inapp .titleblock{margin-top:0}
+header .mgo{display:none!important}
+.pricegrid{display:grid;grid-template-columns:1fr 1.7fr;border:1.5px solid var(--ink);margin:18px 0}
+.pricegrid .procard{border:0!important;border-left:1.5px solid var(--ink)!important;margin:0;background:color-mix(in srgb,var(--accent) 6%,var(--paper))}
+.freecard{padding:16px 18px}.freecard .price,.procard .price{font-size:26px;font-weight:700;margin:2px 0 6px}.freecard ul{padding-left:18px;color:var(--muted);font-size:14.5px}
+@media(max-width:700px){.pricegrid{grid-template-columns:1fr}.pricegrid .procard{border-left:0!important;border-top:1.5px solid var(--ink)!important}}
+@media(max-width:560px){.appsec,.appout:not(:empty){padding:18px}.planbar{padding:10px 18px}.app .search{flex-direction:column;gap:8px}
+.app .search input{border-right:1.5px solid var(--ink);border-radius:3px}.app .search button{border-radius:3px;padding:12px}
+header .mgo{display:flex!important;font-weight:600}}
 """
 
 REPO_URL = "https://github.com/hthillman/site-base-plan"
@@ -379,18 +397,40 @@ def title_block(extra: str = "") -> str:
             f'<div><span class="mono tag">Contact</span><b>{contact}</b></div></footer>')
 
 
+def _public_nav() -> list[tuple[str, str]]:
+    return ([("/pricing", "Pricing")] if pro_live() else []) + ([("/zoning", "Zoning")] if zoning_counts() else []) + NAV[1:3]
+
+
+def _app_nav(signed_in: bool) -> list[tuple[str, str]]:
+    return ([("/plans", "Plans")] + ([("/plans/batch", "Batch")] if pro_live() else [])
+            + [("/plans/settings", "Settings" if signed_in else "Sign in")])
+
+
 def layout(title: str, active: str, body: str, script: str = "", description: str = DEFAULT_DESCRIPTION,
-           jsonld: list[dict] | None = None) -> str:
-    from .accounts import current_email
+           jsonld: list[dict] | None = None, app: str = "") -> str:
+    """Every page. `app` (plans, batch, settings) switches the header to the app's tabs."""
+    from .accounts import can_sign_up, current_email
 
-    from .accounts import can_sign_up
+    signed = bool(current_email())
+    try:
+        from flask import request
 
-    nav = NAV[1:] + ([("/plans", "My plans")] if current_email() else [("/plans", "Sign in")] if can_sign_up() else [])
-    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{escape(t)}</a>' for h, t in nav)
+        via_ai = request.args.get("via") == "ai"  # opened from ChatGPT or Claude: no links to buying anything (store rules)
+    except RuntimeError:
+        via_ai = False
+    if app:
+        nav = [x for x in _app_nav(signed) if not (via_ai and x[0] == "/plans/batch")] + (
+            [] if signed or via_ai or not pro_live() else [("/pricing", "Pricing")])
+        go = '<a class="go" href="/plans?new">New plan +</a>'
+    else:
+        nav = _public_nav() + ([] if signed or not can_sign_up() else [("/plans/settings", "Sign in")])
+        go = f'<a class="go" href="/plans">{"My plans" if signed else "Build a plan"} →</a>'
+    mgo = go.replace('class="go"', 'class="mgo"')  # the same link inside the phone menu, where the black cell is hidden
+    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{escape(t)}</a>' for h, t in nav) + mgo
     url = f"{SITE_URL}{active}" if SITE_URL else active
     og_img = f"{SITE_URL}/og.png" if SITE_URL else "/og.png"
     ld = "".join(f'<script type="application/ld+json">{json.dumps(j, separators=(",", ":"))}</script>' for j in (jsonld or []))
-    return f"""<!doctype html>
+    html = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(title)}</title>
 <meta name="description" content="{escape(description)}">
@@ -408,13 +448,14 @@ def layout(title: str, active: str, body: str, script: str = "", description: st
 {ld}
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script><script src="/static/signin-code.js" defer></script>
 <script defer src="/_vercel/insights/script.js"></script>
-</head><body class="{"home" if active == "/" else ""}">
-<div class="sheet{" wide" if active == "/" else ""}">
-<header><div class="wrap"><a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6" fill="#2f5d50"/><path d="M6 23c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round"/><path d="M6 17c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round" opacity=".6"/><rect x="9" y="7" width="14" height="18" rx="1" fill="none" stroke="#e8a64c" stroke-width="2" stroke-dasharray="4 2"/></svg>Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}<a class="go" href="/">Build a plan →</a><button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
+</head><body class="{"home" if active == "/" else "inapp" if app else ""}">
+<div class="sheet{" wide" if active == "/" or app else ""}">
+<header><div class="wrap"><a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6" fill="#2f5d50"/><path d="M6 23c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round"/><path d="M6 17c4-1 6-5 10-5s6 3 10 2" fill="none" stroke="#fbfaf7" stroke-width="2" stroke-linecap="round" opacity=".6"/><rect x="9" y="7" width="14" height="18" rx="1" fill="none" stroke="#e8a64c" stroke-width="2" stroke-dasharray="4 2"/></svg>Basesheet</a><nav id="sitenav" aria-label="Site">{links}</nav><div class="hright">{GITHUB_ICON}{go}<button type="button" class="menu" aria-expanded="false" aria-controls="sitenav" aria-label="Menu" onclick="var h=this.closest('header'),o=h.classList.toggle('open');this.setAttribute('aria-expanded',o)"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div></div></header>
 <main><div class="wrap">{body}</div></main>{title_block()}
 </div>
 {script}
 </body></html>"""
+    return html.replace('href="/pricing"', 'href="/pricing?via=ai"') if via_ai else html
 
 
 def _samples() -> dict:
@@ -450,7 +491,7 @@ def _plans_section() -> str:
         amt = f"${m['amount']:g}" if m else "Pro"
         pro = (f'<div><div class="mono tag">Pro</div><div class="price">{amt}<small> /month</small></div><ul><li>Unlimited plans</li>'
                '<li>Your office title block on every sheet</li><li>Batch runs of up to 50 sites</li><li>Experimental zoning test fits</li></ul>'
-               '<p style="margin:12px 0 0"><a class="pbtn" href="/pro">Get Pro</a></p>'
+               '<p style="margin:12px 0 0"><a class="pbtn" href="/pricing">Get Pro</a></p>'
                + (f'<p class="fine" style="margin:6px 0 0">Teams of 3 or more? {CONTACT_HTML}</p>' if CONTACT_HTML else '') + '</div>')
     return ('<section class="sheetsec"><div class="no mono"><b>04</b>Plans</div><div class="body"><div class="plans2"'
             + ('' if pro else ' style="grid-template-columns:1fr"') + '>'
@@ -459,33 +500,15 @@ def _plans_section() -> str:
             + pro + '</div></div></section>')
 
 
-def index(parcel_states: list[str], needs_code: bool, preload: dict | None = None) -> str:
+def _tool_form(parcel_states: list[str]) -> str:
+    """The base plan form (address, extra parcels, options), used on /plans."""
     states_sorted = sorted(STATES.items(), key=lambda kv: kv[1])
     opts = '<option value="">Auto</option>' + "".join(f'<option value="{k}">{escape(v)}</option>' for k, v in states_sorted)
-    s = _samples()
-    example = (f'<p class="example">See an example: <a href="{escape(s["pdf"])}" target="_blank" rel="noopener">PDF</a> · '
-               f'<a href="{escape(s["zip"])}">all files</a> for a waterfront lot in Olympia, WA.</p>') if s else ""
-    example_caption = (f'<a href="{escape(s["pdf"])}" target="_blank" rel="noopener">Example · Olympia, WA ↗</a>' if s else "Example · Olympia, WA")
-    from .parcel import county_sources
-
     from .config import load_config
 
     _cfg = load_config()
     layer_lines = "\n".join(f"{st.name} = {st.name}" for k, st in _cfg.layers.items() if not k.startswith("tf_"))
-    n = len(parcel_states)
-    _cs = county_sources()
-    county_txt = f" + {sum(len(v) for v in _cs.values())} counties in {len(_cs)} more" if _cs else ""
-    actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
-    if FIRMS_PAGE:
-        actions.append(firms_link())
-    if tip_url():
-        actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
-    body = f"""
-<section class="hero"><div class="hl">
-<div class="mono tag">Sheet 01 · Site base map</div>
-<h1>Site context from any US address</h1>
-<p class="lede">{_hero_lede()}</p>
-
+    return f"""
 <form id="gate" hidden class="search">
 <input name="code" type="password" autocomplete="current-password" placeholder="Access code" required aria-label="Access code">
 <button>Continue</button>
@@ -517,7 +540,7 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
 <label>Contours <select name="interval"><option value="1">1 ft</option><option value="2" selected>2 ft</option><option value="5">5 ft</option></select></label>
 <label>Layers <select name="layers" aria-label="CAD layer names"><option value="default">Default (SITE-*)</option><option value="ncs">NCS-style (V-PROP-LINE…)</option><option value="custom">Custom…</option></select></label>
 <label id="tfwrap" class="check" hidden><input type="checkbox" name="testfit"> Apartment test fit <span id="tftag">(experimental, Thurston Co. WA)</span></label>
-<p id="tfnote" class="note" hidden>Test fits are part of <a href="/pro">Basesheet Pro</a>.</p>
+<p id="tfnote" class="note" hidden>Test fits are part of <a href="/pricing">Basesheet Pro</a>.</p>
 </div>
 <fieldset class="checks incl"><legend>Include (fewer layers can be faster)</legend>
 <label><input type="checkbox" id="inc-aerial" data-k="aerial" checked> Aerial</label>
@@ -532,46 +555,10 @@ def index(parcel_states: list[str], needs_code: bool, preload: dict | None = Non
 </div>
 </div>
 </form>
-<div class="formats mono" aria-label="Opens in"><span><b>AutoCAD</b>DXF</span><span><b>SketchUp</b>SKP</span><span><b>Civil 3D</b>LandXML</span><span><b>GIS</b>GeoJSON · TIF</span><span><b>PDF</b>Summary</span></div>
-</div>
-<figure><img src="/static/hero.jpg" width="1000" height="714" alt="Example base plan: a waterfront lot in Olympia, WA, with parcel line, contours, floodplain and wetlands" fetchpriority="high">
-<span class="callout mono k1">Parcel 1.09 ac</span><span class="callout mono k2">Zone UW · Olympia</span><span class="callout mono k3">Elev 7–64 ft · slope 6.4%</span>
-<figcaption class="mono">{example_caption}</figcaption></figure>
-</section>
-
-<div id="out"></div>
-
-<div class="sheetbelow">
-<div class="strip">
-<div><span class="mono tag">Terrain</span><b>USGS 3DEP LiDAR</b><p>Elevation, contours at 1, 2 or 5 ft, slope</p></div>
-<div><span class="mono tag">Hazards</span><b>FEMA + USFWS</b><p>Flood zones and mapped wetlands</p></div>
-<div><span class="mono tag">Parcels</span><b>County assessors</b><p>Lines, parcel numbers, neighbors in {n} states{county_txt}</p></div>
-<div><span class="mono tag">Zoning</span><b>{_zoning_strip()}</b><p>District and rules where covered</p><p class="mono striplink"><a href="/sources">Accuracy and sources →</a></p></div>
-</div>
-<section class="sheetsec"><div class="no mono"><b>02</b>How it works</div><div class="body"><div class="steps">
-<div><div class="mono tag">A</div><h3>Enter an address</h3><p>Or a parcel number or coordinates. Combine up to five parcels into one site.</p></div>
-<div><div class="mono tag">B</div><h3>We assemble the site</h3><p>Every layer clipped to your site, in State Plane coordinates, on standard CAD layers or your own.</p></div>
-<div><div class="mono tag">C</div><h3>Download and draw</h3><p>DXF, SketchUp terrain, Civil 3D LandXML, GIS layers and a PDF summary sheet. Or ask for one in <a href="/guides/use-in-chatgpt-and-claude" data-ev="ai_setup">ChatGPT and Claude</a>.</p></div>
-</div></div></section>
-<section class="sheetsec"><div class="no mono"><b>03</b>What you get</div><div class="body"><div class="outs">
-<figure><img src="/static/out-sheet.jpg" width="900" height="582" loading="lazy" alt="PDF summary sheet for the Olympia example, with an office title block"><figcaption><b>PDF sheets</b>Map, legend, sources and your title block (Pro)</figcaption></figure>
-<figure><img src="/static/out-cad.jpg" width="900" height="685" loading="lazy" alt="The DXF drawing open in CAD, with parcel, contour, flood and wetland layers"><figcaption><b>DXF for CAD</b>Every feature on its own layer, in State Plane</figcaption></figure>
-<figure><img src="/static/out-terrain.jpg" width="700" height="322" loading="lazy" alt="The 3D terrain with aerial imagery draped over it"><figcaption><b>3D terrain</b>For SketchUp and Civil 3D, with the aerial draped</figcaption></figure>
-</div></div></section>
-{_plans_section()}
-</div>
-
-<div class="afterblock">
-<p class="actions">{" <span class=\"sep\" aria-hidden=\"true\">·</span> ".join(actions)}</p>
-<form id="fb" hidden>
-<textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
-<div class="inline"><input name="email" type="email" maxlength="254" placeholder="Email, if you'd like a reply" aria-label="Email (optional)"><button>Send</button></div>
-<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-<span class="fine" id="fbmsg"></span>
-</form>
-</div>
 """
-    script = """<script>
+
+
+TOOL_JS = """<script>
 const f=document.getElementById('f'),out=document.getElementById('out'),go=document.getElementById('go');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const NEEDS_CODE=__NEEDS_CODE__;
@@ -602,8 +589,6 @@ function updSum(){const sk=skipped();sum.textContent=(f.buffer.value||0)+' ft bu
 ['buffer','interval','layers'].forEach(n=>f[n].addEventListener('change',()=>{updSum();if(n!=='layers'){try{localStorage.setItem('sitekit-'+n,f[n].value)}catch(e){}}}));
 f.buffer.addEventListener('input',updSum);
 optbtn.onclick=()=>{const open=panel.hidden;panel.hidden=!open;optbtn.textContent=open?'Done':'Change';optbtn.setAttribute('aria-expanded',open)};
-const fbt=document.getElementById('fbtoggle');
-fbt.onclick=()=>{const fb=document.getElementById('fb');fb.hidden=!fb.hidden;fbt.setAttribute('aria-expanded',!fb.hidden);if(!fb.hidden)fb.message.focus()};
 const lm=document.getElementById('layermap');
 const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 if(LS.get('sitekit-layers'))f.layers.value=LS.get('sitekit-layers');
@@ -624,9 +609,9 @@ if(NEEDS_CODE){f.hidden=true;const s=getStored();
 // Monthly allowance reached: explain, and offer the free sign-in (no account) or what's next (account).
 function showLimit(err){track('limit_hit');const i=err.info||{};
  const self=' Or <a href="'+REPO+'">run the open-source version</a> yourself, with no limits.';
- const pro=(PRO_LIVE?(VIA_AI?'<a href="/pricing">Plans and pricing</a>':'<a href="/pro">Pro</a> includes unlimited plans.'):'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
+ const pro=(PRO_LIVE?(VIA_AI?'<a href="/pricing?via=ai">Plans and pricing</a>':'<a href="/pricing">Pro</a> includes unlimited plans.'):'Need more? <a href="/firms">Tell us how you use it</a> and we\\'ll be in touch about unlimited plans.')+self;
  out.innerHTML='<div class="result"><div class="keep ask limitbox"><span><b>'+esc(err.message)+'</b></span>'+
-  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form><span class="fine">Then build again from the home page.</span>':'<span>'+pro+'</span>')+'</div></div>';
+  (err.limit==='anon'?'<form class="savef" id="limf"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form><span class="fine">Then build again here.</span>':'<span>'+pro+'</span>')+'</div></div>';
  const lf=document.getElementById('limf');if(lf)lf.onsubmit=async e=>{e.preventDefault();
   const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lf.email.value,website:lf.website.value,news:!!(lf.news&&lf.news.checked)})});
   const k=await r.json().catch(()=>({})),em=lf.email.value;const sp=document.createElement('span');lf.replaceWith(sp);
@@ -640,14 +625,14 @@ const QUOTA=__QUOTA__;let quota=null;
 function showQuota(){const el=document.getElementById('quota');if(!el||!quota)return;
  const signed=quota.used!==undefined,allow=signed?quota.allowance:quota.anon_allowance,used=signed?quota.used:monthPlans();
  if(!allow){el.hidden=true;return}const left=Math.max(0,allow-used);
- el.innerHTML=left+' of '+allow+' free plans left this month'+(signed?'':' · more with a free account')+(PRO_LIVE?(VIA_AI?' · <a href="/pricing">Plans and pricing</a>':' · <a href="/pro">Unlimited with Pro</a>'):'');el.hidden=false}
+ el.innerHTML=left+' of '+allow+' free plans left this month'+(signed?'':' · more with a free account')+(PRO_LIVE?(VIA_AI?' · <a href="/pricing?via=ai">Plans and pricing</a>':' · <a href="/pricing">Unlimited with Pro</a>'):'');el.hidden=false}
 if(QUOTA)fetch('/api/me').then(r=>r.json()).then(m=>{quota=m.quota||null;showQuota()}).catch(()=>{});
 // First build: a one-time checkbox (remembered per Terms version) before anything runs.
 const TV='__TERMS_VERSION__',tgate=document.getElementById('tgate');let TOK=!TV||LS.get('sitekit-terms')===TV;
 if(tgate)document.getElementById('tgcheck').onchange=e=>{if(!e.target.checked)return;TOK=true;LS.set('sitekit-terms',TV);tgate.hidden=true;f.requestSubmit()};
 f.onsubmit=async e=>{e.preventDefault();if(!TOK){tgate.hidden=false;document.getElementById('tgcheck').focus();return}
  go.disabled=true;go.textContent='Working…';
- const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.skip=skipped();track('run_start');
+ const body=Object.fromEntries(new FormData(f));body.testfit=f.testfit.checked;body.code=CODE;body.rebuild=REBUILD;REBUILD='';body.skip=skipped();track('run_start');
  const first=LS.get('sitekit-first');body.prior=+(LS.get('sitekit-plans')||0);body.mprior=monthPlans();body.since=first?Math.max(0,Math.round((Date.now()-Date.parse(first))/864e5)):null;
  body.also=[...alsoBox.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
  out.innerHTML='<div class="result"><pre id="log">Starting…</pre></div>';
@@ -670,7 +655,7 @@ f.onsubmit=async e=>{e.preventDefault();if(!TOK){tgate.hidden=false;document.get
  function handle(ev){
   if(ev.log){lines.push(ev.log);log.textContent=lines.join('\\n')}
   if(ev.error){const e=new Error(ev.error);e.suggestions=ev.suggestions||[];e.near=ev.near||null;e.pick=!!ev.pick;throw e}
-  if(ev.result){if(quota&&quota.used!==undefined)quota.used++;setTimeout(showQuota,0);LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));LS.set('sitekit-month',thisMonth()+':'+(monthPlans()+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result)}}
+  if(ev.result){if(quota&&quota.used!==undefined)quota.used++;setTimeout(showQuota,0);LS.set('sitekit-plans',String(+(LS.get('sitekit-plans')||0)+1));LS.set('sitekit-month',thisMonth()+':'+(monthPlans()+1));if(!LS.get('sitekit-first'))LS.set('sitekit-first',new Date().toISOString().slice(0,10));render(ev.result);onDone(ev.result)}}
 };
 function render(j){
  const order={missing:0,alert:1,caution:2,info:3};
@@ -707,7 +692,7 @@ function render(j){
   info.map(x=>'<li class="flag plain"><span>'+esc(x.text)+'</span></li>').join('')+
   '</ul><p class="note">Every layer’s source, date and limits are in provenance.md inside the zip.</p></details>'+
  '<div class="rfoot">'+nextRow(j.zoning)+
-  (PRO_LIVE&&!VIA_AI&&!IS_PRO?'<div class="procta"><a href="/pro" data-ev="firms_click"><img src="/static/out-sheet.jpg" alt="A sheet with an office title block" width="900" height="582"></a><div><b>Put your office’s title block on this sheet</b><p>Basesheet Pro adds your title block and CAD layers to every plan, plus unlimited plans and batch runs of up to 50 sites.</p><a class="pbtn" href="/pro" data-ev="firms_click">See Pro</a></div></div>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
+  (PRO_LIVE&&!VIA_AI&&!IS_PRO?'<div class="procta"><a href="/pricing" data-ev="firms_click"><img src="/static/out-sheet.jpg" alt="A sheet with an office title block" width="900" height="582"></a><div><b>Put your office’s title block on this sheet</b><p>Basesheet Pro adds your title block and CAD layers to every plan, plus unlimited plans and batch runs of up to 50 sites.</p><a class="pbtn" href="/pricing" data-ev="firms_click">See Pro</a></div></div>':PRO?'<p class="note firmline">Using this at a firm? I’m working with a few offices on test fits, title blocks and batch runs. <a href="/firms" data-ev="firms_click">Tell me what you need</a>.</p>':'')+
  '</div></div>';
  const wi=document.getElementById('whatsin');wi.onclick=()=>{const c=document.getElementById('contents');c.hidden=!c.hidden;wi.setAttribute('aria-expanded',!c.hidden)};
  RUN_STATE=j.state||'';track('run_done');
@@ -740,14 +725,16 @@ function wireDl(){const a=out.querySelector('[data-ev=download_zip]'),w=document
  a.addEventListener('click',e=>{if(LS.get('sitekit-dlwarn'))return;e.preventDefault();e.stopImmediatePropagation();w.hidden=false;go.focus()},true);
  go.addEventListener('click',()=>{LS.set('sitekit-dlwarn','1');w.hidden=true})}
 async function wireSave(j){const box=document.getElementById('savebox');if(!box||!j.run_id)return;
+ if(j.kept==='saved'){box.innerHTML='<span class="ok">Saved to <a href="/plans">your plans</a>.</span>';return}
+ if(j.kept==='full'){box.innerHTML='<span>You have '+esc(j.kept_cap||'')+' saved plans, the most your account keeps, so these files expire in 2 days. This plan stays in <a href="/plans">your plans</a> and you can build it again for free.'+(PRO_LIVE&&!VIA_AI&&!IS_PRO?' <a href="/pricing">Pro</a> keeps 500.':'')+'</span>';return}
  let me={};try{me=await (await fetch('/api/me')).json()}catch(e){return}
  if(!me.email&&!me.can_sign_up)return;
  const plan={run_id:j.run_id,title:j.title,files:j.files,state:j.state};
- box.innerHTML='<span>Download links expire in 2 days. Save the plan to keep its files.</span><button type="button" class="quiet" id="savebtn">Save to my plans</button>';
+ box.innerHTML='<span>Download links expire in 2 days. Sign in to keep this plan.</span><button type="button" class="quiet" id="savebtn">Keep this plan</button>';
  document.getElementById('savebtn').onclick=async()=>{track('save_click');
   if(me.email){box.textContent='Saving…';
    const r=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan)});const k=await r.json().catch(()=>({}));
-   box.innerHTML=r.ok?'<span class="ok">Saved.</span> <a href="/plans">My plans</a>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';return}
+   box.innerHTML=r.ok?'<span class="ok">Saved.</span> <a href="/plans">Your plans</a>':'<span class="err">'+esc(k.error||'Couldn\\'t save.')+'</span>';return}
   box.innerHTML='<form id="sf" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form>'+
    '<span class="fine" id="sfmsg">Click the link in the email and this plan is saved. No password.</span>';
   const sf=document.getElementById('sf');sf.email.focus();
@@ -778,15 +765,105 @@ function wireNext(state){const box=document.getElementById('next');if(!box)retur
   const r=await send(cur,v,em);const k=await r.json().catch(()=>({}));const m=document.getElementById('nextmsg');
   if(!r.ok){m.textContent=k.error||'Something went wrong.';m.className='fine err';return}
   if(em)track('vote_email',{choice:cur});e.target.hidden=true;m.className='fine ok';m.textContent=em?'Got it. I’ll email you when it ships.':'Got it, thanks.';};}
-async function post(form,url,msgEl){const d=Object.fromEntries(new FormData(form));if(url==='/api/feedback')d.query=f.query.value;
- const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
- msgEl.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');msgEl.className=r.ok?'fine ok':'fine err';if(r.ok)form.reset()}
-document.getElementById('fb').onsubmit=e=>{e.preventDefault();post(e.target,'/api/feedback',document.getElementById('fbmsg'))};
-const PRELOAD=__PRELOAD__;
-{const pq=new URLSearchParams(location.search).get('q');if(pq&&!PRELOAD){f.query.value=pq.slice(0,300);f.query.focus()}}  // from a /zoning/<place> search box
-if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan has expired.</b> Files are kept for 2 days. Enter the address above to build it again; it takes about 30 seconds.</p></div>'}
- else{f.query.value=PRELOAD.title||'';render(PRELOAD)}}
-</script>""".replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(tip_url())).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL).replace("__QUOTA__", "true" if os.environ.get("FREE_PLANS_PER_MONTH", "0") not in ("", "0") else "false")
+const PRELOAD=__PRELOAD__;let REBUILD='';
+const planbar=document.getElementById('planbar'),newplan=document.getElementById('newplan'),mine=document.getElementById('mine');
+function planView(){if(newplan)newplan.hidden=true;if(mine)mine.hidden=true;if(planbar)planbar.hidden=false}
+function rememberGuest(j){try{const a=JSON.parse(LS.get('bs-recent')||'[]').filter(x=>x.run_id!==j.run_id);a.unshift({run_id:j.run_id,title:j.title||'Site plan',at:Date.now()});LS.set('bs-recent',JSON.stringify(a.slice(0,20)))}catch(e){}}
+function onDone(j){if(!j.kept)rememberGuest(j);try{history.replaceState(null,'','/plans/'+j.run_id+(VIA_AI?'?via=ai':''))}catch(e){}planView();document.title=(j.title||'Base plan')+' · Basesheet'}
+{const pq=new URLSearchParams(location.search).get('q');if(pq&&!PRELOAD){f.query.value=pq.slice(0,300);f.query.focus();try{history.replaceState(null,'',location.pathname)}catch(e){}}}  // from a /zoning/<place> search box
+let PENDING=null;try{PENDING=JSON.parse(sessionStorage.getItem('bs-go')||'null');sessionStorage.removeItem('bs-go')}catch(e){}  // from the home page form or "Build it again"
+if(PRELOAD){planView();
+ if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="errline"><b>This base plan\\'s files have expired.</b> Files are kept for 2 days'+(PRELOAD.rebuild?'. It\\'s in your plans, so building it again doesn\\'t use up a plan':'')+'.</p>'+
+  (PRELOAD.query?'<p><button type="button" id="again">Build it again</button></p>':'<p><a href="/plans">Start a new plan</a></p>')+'</div>';
+  const ag=document.getElementById('again');if(ag)ag.onclick=()=>{try{sessionStorage.setItem('bs-go',JSON.stringify({q:PRELOAD.query,rebuild:PRELOAD.rebuild||''}))}catch(e){}location.href='/plans'}}
+ else render(PRELOAD)}
+else if(PENDING&&PENDING.q){f.query.value=String(PENDING.q).slice(0,300);REBUILD=PENDING.rebuild||'';setTimeout(()=>f.requestSubmit(),0)}
+else if(new URLSearchParams(location.search).has('new'))f.query.focus();
+</script>"""
+
+
+def _tool_script(needs_code: bool, preload: dict | None) -> str:
+    return TOOL_JS.replace("__TERMS_VERSION__", GATE_VERSION).replace("__PRELOAD__", json.dumps(preload).replace("</", "<\\/") if preload else "null").replace("__NEEDS_CODE__", "true" if needs_code else "false").replace("__TESTFIT__", "true" if testfit_available() else "false").replace("__TIP_URL__", escape(tip_url())).replace("__PRO__", "true" if FIRMS_PAGE else "false").replace("__PROLIVE__", "true" if pro_live() else "false").replace("__REPO__", REPO_URL).replace("__QUOTA__", "true" if os.environ.get("FREE_PLANS_PER_MONTH", "0") not in ("", "0") else "false")
+
+
+def _feedback_block() -> str:
+    actions = ['<button type="button" class="linkbtn" id="fbtoggle" aria-expanded="false" aria-controls="fb">Send feedback</button>']
+    if FIRMS_PAGE:
+        actions.append(firms_link())
+    if tip_url():
+        actions.append(f'<a href="{escape(tip_url())}" target="_blank" rel="noopener" data-ev="tip_click">Chip in for hosting</a>')
+    sep = ' <span class="sep" aria-hidden="true">·</span> '
+    return f"""<div class="afterblock">
+<p class="actions">{sep.join(actions)}</p>
+<form id="fb" hidden>
+<textarea name="message" required maxlength="4000" placeholder="What worked, what didn't, what should come next?" aria-label="Feedback"></textarea>
+<div class="inline"><input name="email" type="email" maxlength="254" placeholder="Email, if you'd like a reply" aria-label="Email (optional)"><button>Send</button></div>
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<span class="fine" id="fbmsg"></span>
+</form>
+</div>"""
+
+
+FB_JS = """<script>
+{const fbt=document.getElementById('fbtoggle'),fb=document.getElementById('fb');
+if(fbt&&fb){fbt.onclick=()=>{fb.hidden=!fb.hidden;fbt.setAttribute('aria-expanded',!fb.hidden);if(!fb.hidden)fb.message.focus()};
+ fb.onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(fb)),q=document.querySelector('input[name=query]');d.query=q?q.value:'';
+  const r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
+  const m=document.getElementById('fbmsg');m.textContent=r.ok?'Thanks, got it.':(j.error||'Something went wrong.');m.className=r.ok?'fine ok':'fine err';if(r.ok)fb.reset()}}}
+</script>"""
+
+
+def index(parcel_states: list[str], needs_code: bool, preload: dict | None = None) -> str:
+    """The public home page. Its form hands the address to the app at /plans, where the plan is built."""
+    s = _samples()
+    example_caption = (f'<a href="{escape(s["pdf"])}" target="_blank" rel="noopener">Example · Olympia, WA ↗</a>' if s else "Example · Olympia, WA")
+    from .parcel import county_sources
+
+    n = len(parcel_states)
+    _cs = county_sources()
+    county_txt = f" + {sum(len(v) for v in _cs.values())} counties in {len(_cs)} more" if _cs else ""
+    body = f"""
+<section class="hero"><div class="hl">
+<div class="mono tag">Sheet 01 · Site base map</div>
+<h1>Site context from any US address</h1>
+<p class="lede">{_hero_lede()}</p>
+<form id="hf" class="search" action="/plans" method="get">
+<input name="q" placeholder="Street address, parcel number or coordinates" required autofocus aria-label="Street address, parcel number or coordinates" autocomplete="street-address">
+<button>Build base plan</button>
+</form>
+<div class="formats mono" aria-label="Opens in"><span><b>AutoCAD</b>DXF</span><span><b>SketchUp</b>SKP</span><span><b>Civil 3D</b>LandXML</span><span><b>GIS</b>GeoJSON · TIF</span><span><b>PDF</b>Summary</span></div>
+</div>
+<figure><img src="/static/hero.jpg" width="1000" height="714" alt="Example base plan: a waterfront lot in Olympia, WA, with parcel line, contours, floodplain and wetlands" fetchpriority="high">
+<span class="callout mono k1">Parcel 1.09 ac</span><span class="callout mono k2">Zone UW · Olympia</span><span class="callout mono k3">Elev 7–64 ft · slope 6.4%</span>
+<figcaption class="mono">{example_caption}</figcaption></figure>
+</section>
+
+<div class="sheetbelow">
+<div class="strip">
+<div><span class="mono tag">Terrain</span><b>USGS 3DEP LiDAR</b><p>Elevation, contours at 1, 2 or 5 ft, slope</p></div>
+<div><span class="mono tag">Hazards</span><b>FEMA + USFWS</b><p>Flood zones and mapped wetlands</p></div>
+<div><span class="mono tag">Parcels</span><b>County assessors</b><p>Lines, parcel numbers, neighbors in {n} states{county_txt}</p></div>
+<div><span class="mono tag">Zoning</span><b>{_zoning_strip()}</b><p>District and rules where covered</p><p class="mono striplink"><a href="/sources">Accuracy and sources →</a></p></div>
+</div>
+<section class="sheetsec" id="how"><div class="no mono"><b>02</b>How it works</div><div class="body"><div class="steps">
+<div><div class="mono tag">A</div><h3>Enter an address</h3><p>Or a parcel number or coordinates. Combine up to five parcels into one site.</p></div>
+<div><div class="mono tag">B</div><h3>We assemble the site</h3><p>Every layer clipped to your site, in State Plane coordinates, on standard CAD layers or your own.</p></div>
+<div><div class="mono tag">C</div><h3>Download and draw</h3><p>DXF, SketchUp terrain, Civil 3D LandXML, GIS layers and a PDF summary sheet. Or ask for one in <a href="/guides/use-in-chatgpt-and-claude" data-ev="ai_setup">ChatGPT and Claude</a>.</p></div>
+</div></div></section>
+<section class="sheetsec"><div class="no mono"><b>03</b>What you get</div><div class="body"><div class="outs">
+<figure><img src="/static/out-sheet.jpg" width="900" height="582" loading="lazy" alt="PDF summary sheet for the Olympia example, with an office title block"><figcaption><b>PDF sheets</b>Map, legend, sources and your title block (Pro)</figcaption></figure>
+<figure><img src="/static/out-cad.jpg" width="900" height="685" loading="lazy" alt="The DXF drawing open in CAD, with parcel, contour, flood and wetland layers"><figcaption><b>DXF for CAD</b>Every feature on its own layer, in State Plane</figcaption></figure>
+<figure><img src="/static/out-terrain.jpg" width="700" height="322" loading="lazy" alt="The 3D terrain with aerial imagery draped over it"><figcaption><b>3D terrain</b>For SketchUp and Civil 3D, with the aerial draped</figcaption></figure>
+</div></div></section>
+{_plans_section()}
+</div>
+{_feedback_block()}
+"""
+    script = """<script>
+{const hf=document.getElementById('hf');
+ const legacy=new URLSearchParams(location.search).get('q');if(legacy)hf.q.value=legacy.slice(0,300);
+ hf.onsubmit=e=>{const q=hf.q.value.trim();if(!q)return;try{sessionStorage.setItem('bs-go',JSON.stringify({q:q}));e.preventDefault();location.href='/plans'}catch(err){}}}
+</script>""" + FB_JS
     app_ld = {
         "@context": "https://schema.org", "@type": "WebApplication", "name": "Basesheet",
         "url": SITE_URL or "/", "applicationCategory": "DesignApplication", "operatingSystem": "Web browser",
@@ -801,6 +878,70 @@ if(PRELOAD){if(PRELOAD.expired){out.innerHTML='<div class="result"><p class="err
     }
     return layout("Basesheet: free site context from any US address (DXF, SketchUp, Civil 3D, GIS)", "/", body, script,
                   jsonld=[app_ld, {"@context": "https://schema.org", "@type": "WebSite", "name": "Basesheet", "url": SITE_URL or "/"}])
+
+
+APP_LIST_JS = """<script>
+{const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const list=document.getElementById('plist'),msg=document.getElementById('pmsg'),sb=document.getElementById('signbox'),lede=document.getElementById('mlede');
+const q=new URLSearchParams(location.search);
+if(q.get('saved')==='1')msg.innerHTML='<span class="ok">Signed in. That plan is in your plans.</span>';
+if(q.get('saved')==='0')msg.innerHTML='<span class="err">Signed in, but that plan couldn\\'t be kept. Its files may have expired; build it again.</span>';
+if(q.get('link')==='expired')msg.innerHTML='<span class="err">That sign-in link has expired. Enter your email for a new one.</span>';
+if(q.get('link')==='bad')msg.innerHTML='<span class="err">That sign-in link didn\\'t work. Enter your email for a new one.</span>';
+const DAY=864e5,fmt=t=>new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+function again(qy,rb){try{sessionStorage.setItem('bs-go',JSON.stringify({q:qy,rebuild:rb||''}))}catch(e){}location.href='/plans'}
+function row(p){const files=p.files||{},meta=files.meta||{},at=Date.parse(p.saved_at||'')||0,temp=!!files.temp,gone=temp&&Date.now()-at>2*DAY;
+ const open=!gone&&(files.result||temp);
+ const title=open?'<a class="t" href="/plans/'+esc(p.run_id)+'">'+esc(p.title)+'</a>':'<span class="t">'+esc(p.title)+'</span>';
+ const status=gone?'Files expired':temp?'Files expire '+fmt(at+2*DAY):'Saved';
+ const acts=(gone?(meta.query?'<button type="button" class="again" data-q="'+esc(meta.query)+'" data-r="'+esc(p.run_id)+'">Build again</button>':''):
+  (files.zip?'<a href="'+esc(files.zip)+'">Download files (.zip)</a>':'')+(files.pdf?'<a href="'+esc(files.pdf)+'" target="_blank" rel="noopener">Open PDF</a>':''))+
+  '<button type="button" class="del">Delete</button>';
+ return '<div class="plan" data-id="'+esc(p.id)+'">'+title+'<span class="note">'+esc(fmt(at))+(p.state?' · '+esc(p.state):'')+' · '+status+'</span><span class="acts">'+acts+'</span></div>'}
+function guest(canSign){let a=[];try{a=JSON.parse(localStorage.getItem('bs-recent')||'[]').filter(x=>Date.now()-x.at<2*DAY)}catch(e){}
+ lede.textContent=a.length?'Plans built in this browser in the last 2 days. Sign in to keep them for good.':'Plans you build show up here.';
+ list.innerHTML=a.map(x=>'<div class="plan"><a class="t" href="/plans/'+esc(x.run_id)+'">'+esc(x.title)+'</a><span class="note">'+esc(fmt(x.at))+' · Files expire '+esc(fmt(x.at+2*DAY))+'</span></div>').join('');
+ if(!canSign)return;
+ sb.innerHTML='<form id="signin" class="savef"><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button><label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form>';
+ const si=document.getElementById('signin');
+ si.onsubmit=async e=>{e.preventDefault();
+  const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:si.email.value,website:si.website.value,news:!!(si.news&&si.news.checked)})});
+  const k=await r.json().catch(()=>({}));
+  if(r.ok){si.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(msg,si.email.value,{back:'/plans'})}
+  else msg.innerHTML='<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}}
+async function load(){const me=await (await fetch('/api/me')).json().catch(()=>({}));
+ if(!me.email)return guest(me.can_sign_up);
+ const r=await fetch('/api/plans');const d=await r.json().catch(()=>({plans:[]}));const ps=d.plans||[];
+ lede.textContent=ps.length?'':'No plans yet.';lede.hidden=!!ps.length;
+ list.innerHTML=ps.map(row).join('');
+ list.querySelectorAll('.again').forEach(b=>b.onclick=()=>again(b.dataset.q,b.dataset.r));
+ list.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{
+  if(!b.classList.contains('really')){b.classList.add('really');b.textContent='Delete for good?';setTimeout(()=>{b.classList.remove('really');b.textContent='Delete'},4000);return}
+  const el=b.closest('.plan');b.textContent='Deleting…';
+  const r=await fetch('/api/plans/'+encodeURIComponent(el.dataset.id),{method:'DELETE'});
+  if(r.ok)el.remove();else b.textContent='Couldn\\'t delete'})}
+if(list)load()}
+</script>"""
+
+
+def app_plans(parcel_states: list[str], needs_code: bool, preload: dict | None = None) -> str:
+    """The app: /plans (a new plan, and your plans) and /plans/<run_id> (one plan)."""
+    view = bool(preload)
+    hide = " hidden" if view else ""
+    body = f"""<div class="app">
+<div id="planbar" class="planbar"{"" if view else " hidden"}><a href="/plans">← Your plans</a><a class="pbtn" href="/plans?new">New plan</a></div>
+<section id="newplan" class="appsec"{hide}><h1>New base plan</h1>
+{_tool_form(parcel_states)}</section>
+<div id="out" class="appout"></div>
+<section id="mine" class="appsec"{hide}><h2>Your plans</h2><p class="note" id="mlede"></p><div id="pmsg" class="note" aria-live="polite"></div>
+<div id="plist"></div><div id="signbox"></div></section>
+</div>
+{"" if view else _feedback_block()}"""
+    title = (f"{preload.get('title') or 'Base plan'} · Basesheet" if view and not preload.get("expired") else
+             "Base plan · Basesheet" if view else "Your plans · Basesheet")
+    return layout(title, "/plans", body, _tool_script(needs_code, preload) + APP_LIST_JS + FB_JS, app="plans",
+                  description="Build a base plan from any US address, and see the plans you've built.")
+
 
 
 TF_SECTION_HTML = """<h2>Experimental: apartment test fit</h2>
@@ -1012,7 +1153,7 @@ def privacy() -> str:
     body = f"""
 <h1>Privacy policy</h1>
 <p class="sub">Effective {PRIVACY_UPDATED}. Short version: nothing is sold, addresses aren't kept in usage records, and plan files
-are deleted after two days unless you save them.</p>
+are deleted after two days unless you're signed in, when your plans are kept until you delete them.</p>
 <p>Basesheet (basesheet.site) is run by {who} ("we"). This policy explains what we collect, why, who it's shared with, how long
 it's kept, and the choices you have. Questions or requests: {contact}.</p>
 
@@ -1023,13 +1164,15 @@ it's kept, and the choices you have. Questions or requests: {contact}.</p>
 <li><b>Usage records.</b> For each run: the state, county and city or township it was in, whether a parcel was found, whether we had
 zoning for it, run time and which data sources failed. Never the address, coordinates or anything finer than the city or township.</li>
 <li><b>A plan count in your browser.</b> Your browser keeps the number of plans you've made (in total and this month) and the date of
-your first one, and sends just those numbers with each run. There's no ID; clearing site data resets it.</li>
+your first one, and sends just those numbers with each run. There's no ID; clearing site data resets it. Without an account, your
+browser also keeps a list of the plans you built in the last 2 days (title and link) so you can find them again. It stays in your
+browser and isn't sent to us.</li>
 <li><b>A monthly plan count per connection.</b> To keep free use fair, plans made without an account are also counted on our side,
 under a scrambled code made from your IP address and the month. The code can't be turned back into your IP address, and it
 changes every month.</li>
 <li><b>Clicks and votes.</b> Clicks on buttons like Download and Save, and "What should it do next?" votes, with the site's state and
 anything you type in the box. Nothing that identifies you.</li>
-<li><b>Account information</b>, if you sign in: your email address, the plans you save (address, files and date) and your monthly plan count.</li>
+<li><b>Account information</b>, if you sign in: your email address, the plans you build while signed in or save (address, options, files and date) and your monthly plan count.</li>
 <li><b>Pro subscription</b>, if you subscribe: your subscription status and Stripe customer ID, and the date you accepted the Terms.
 Stripe handles your card; we never see or store card numbers.</li>
 <li><b>Office settings</b>, if you add them (Pro): firm name, address lines, "prepared by", logo and CAD layer names.</li>
@@ -1047,7 +1190,7 @@ which we keep only as a scrambled code to count plans per month.</li>
 <li>To reply to you. Your email is used for sign-in links and occasional notes about your account (a welcome when you sign up,
 problems with signing in, and billing if you subscribe).</li>
 <li>Product news: if you have an account, we may email you occasionally (a few times a year) about new features, coverage and
-pricing. Every one has an unsubscribe link, and you can turn it off on My plans any time.</li>
+pricing. Every one has an unsubscribe link, and you can turn it off in Settings any time.</li>
 </ul>
 
 <h2>Who it's shared with</h2>
@@ -1072,7 +1215,8 @@ There are no advertising or cross-site tracking cookies.</p>
 <h2>How long we keep it</h2>
 <ul>
 <li>Plan files: <b>2 days</b>, then deleted. Anyone you share a link with can open it in that time.</li>
-<li>Saved plans: until you delete them.</li>
+<li>Plans you build while signed in, and plans you save: until you delete them. Past your account's limit (25 plans, or 500 with
+Pro), a new plan's files are kept for 2 days, but the plan stays in your list so you can build it again.</li>
 <li>Account information and office settings: until you ask us to delete your account.</li>
 <li>Subscription and payment records: as long as needed for accounting and tax.</li>
 <li>Feedback, firm details and vote emails: until you ask us to delete them.</li>
@@ -1081,7 +1225,7 @@ There are no advertising or cross-site tracking cookies.</p>
 
 <h2>Your choices and rights</h2>
 <ul>
-<li>Delete a saved plan from My plans any time.</li>
+<li>Delete a saved plan from your plans any time.</li>
 <li>Ask us to see, correct or delete your information, or to close your account: {contact}. We'll answer within 30 days.</li>
 <li>Disconnect ChatGPT or Claude by removing Basesheet in the assistant's settings.</li>
 <li>Clear your browser's site data to reset the plan count.</li>
@@ -1107,13 +1251,13 @@ perfectly secure, but we take reasonable steps to protect your information.</p>
                   description="What Basesheet collects, why, who it's shared with, how long it's kept, and your choices.")
 
 
-def plans() -> str:
-    body = """
-<h1>My plans</h1>
-<p class="lede" id="plede">Base plans you've saved, up to 25. Files stay here until you delete them.</p>
+def settings() -> str:
+    """/plans/settings: account, Pro and billing, office standards. Guests get the sign-in form."""
+    body = """<div class="app"><section class="appsec">
+<h1 id="sh">Settings</h1>
+<p class="lede" id="plede"></p>
 <div id="pmsg" class="note" aria-live="polite"></div>
 <div id="probar" class="probar" hidden></div>
-<div id="plist"></div>
 <form id="signin" class="savef" hidden><input type="email" name="email" required maxlength="254" placeholder="Your email" aria-label="Email">
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button>Email me a sign-in link</button>
 <label class="check fine news"><input type="checkbox" name="news" checked> Email me occasional product news</label></form>
@@ -1133,37 +1277,26 @@ def plans() -> str:
 </section>
 <p class="fine" id="signout-row" hidden><span id="who"></span> · <button type="button" class="linkbtn" id="signout" style="padding:0">Sign out</button></p>
 <p class="fine" id="news-row" hidden><label class="check"><input type="checkbox" id="newscb"> Email me occasional product news (a few times a year; unsubscribe any time)</label></p>
-"""
+</section></div>"""
     script = """<script>
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const msg=document.getElementById('pmsg'),list=document.getElementById('plist'),signin=document.getElementById('signin');
+const msg=document.getElementById('pmsg'),signin=document.getElementById('signin');
 const q=new URLSearchParams(location.search);
-if(q.get('saved')==='1')msg.innerHTML='<span class="ok">Saved to your plans.</span>';
-if(q.get('saved')==='0')msg.innerHTML='<span class="err">Signed in, but that plan couldn\\'t be saved. Its files may have expired; build it again and save.</span>';
 if(q.get('link')==='expired')msg.innerHTML='<span class="err">That sign-in link has expired. Enter your email for a new one.</span>';
 if(q.get('link')==='bad')msg.innerHTML='<span class="err">That sign-in link didn\\'t work. Enter your email for a new one.</span>';
 async function load(){
  const me=await (await fetch('/api/me')).json().catch(()=>({}));
- if(!me.email){document.getElementById('plede').textContent=me.can_sign_up?'Sign in with your email to see the plans you\\'ve saved. No password: we email you a link.':'Saving plans isn\\'t available yet.';signin.hidden=!me.can_sign_up;return}
+ if(!me.email){document.getElementById('sh').textContent='Sign in';document.title='Sign in · Basesheet';document.getElementById('plede').textContent=me.can_sign_up?'Sign in to keep every plan you build. No password: we email you a link and a code.':'Accounts aren\\'t available yet.';signin.hidden=!me.can_sign_up;return}
  document.getElementById('signout-row').hidden=false;document.getElementById('who').textContent='Signed in as '+me.email;
  fetch('/api/news').then(r=>r.json()).then(n=>{const cb=document.getElementById('newscb');cb.checked=!!n.on;document.getElementById('news-row').hidden=false;
   cb.onchange=()=>fetch('/api/news',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({on:cb.checked})})}).catch(()=>{});
- const r=await fetch('/api/plans');const d=await r.json().catch(()=>({plans:[]}));
- if(!d.plans||!d.plans.length){list.innerHTML='<p class="note">No saved plans yet. Build a base plan on the <a href="/">home page</a> and choose Save to my plans.</p>';return}
- list.innerHTML=d.plans.map(p=>'<div class="plan" data-id="'+esc(p.id)+'"><span class="t">'+esc(p.title)+'</span><span class="note">Saved '+esc((p.saved_at||'').slice(0,10))+'</span>'+
-  '<span class="acts"><a href="'+esc(p.files.zip)+'">Download files (.zip)</a>'+(p.files.pdf?'<a href="'+esc(p.files.pdf)+'" target="_blank" rel="noopener">Open PDF</a>':'')+
-  '<button type="button" class="del">Delete</button></span></div>').join('');
- list.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{
-  if(!b.classList.contains('really')){b.classList.add('really');b.textContent='Delete for good?';setTimeout(()=>{b.classList.remove('really');b.textContent='Delete'},4000);return}
-  const row=b.closest('.plan');b.textContent='Deleting…';
-  const r=await fetch('/api/plans/'+encodeURIComponent(row.dataset.id),{method:'DELETE'});
-  if(r.ok){row.remove();if(!list.children.length)load()}else{b.textContent='Couldn\\'t delete'}});}
+}
 signin.onsubmit=async e=>{e.preventDefault();
  const r=await fetch('/api/auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:signin.email.value,website:signin.website.value,news:!!(signin.news&&signin.news.checked)})});
  const k=await r.json().catch(()=>({}));
- if(r.ok){signin.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(msg,signin.email.value,{back:'/plans'})}
+ if(r.ok){signin.hidden=true;msg.innerHTML='<span class="ok">Check your email for the sign-in link. It works for 30 minutes.</span>'+(k.dev_link?' <a href="'+esc(k.dev_link)+'">Dev: open link</a> (code '+esc(k.dev_code)+')':'');window.bsCode&&bsCode(msg,signin.email.value,{back:'/plans/settings'})}
  else{msg.innerHTML='<span class="err">'+esc(k.error||'Something went wrong.')+'</span>'}};
-document.getElementById('signout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/plans'};
+document.getElementById('signout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/plans/settings'};
 load();
 const bar=document.getElementById('probar');
 async function proBar(tries){
@@ -1171,13 +1304,14 @@ async function proBar(tries){
  if(!s.signed_in||(!s.live&&!s.pro&&!s.has_billing))return;
  const when=s.period_end?new Date(s.period_end*1000).toLocaleDateString():'';
  if(s.pro){bar.innerHTML='<b>Basesheet Pro</b><span class="note">'+(s.cancel_at_period_end?'ends ':'renews ')+esc(when)+'</span>'+
-   '<a href="/batch">Batch runs</a><a href="#office">Office settings</a><button type="button" class="linkbtn" id="billing">Manage billing</button>';bar.hidden=false;office();
+   '<a href="/plans/batch">Batch runs</a><a href="#office">Office settings</a><button type="button" class="linkbtn" id="billing">Manage billing</button>';bar.hidden=false;office();
   document.getElementById('billing').onclick=async()=>{const r=await fetch('/api/billing/portal',{method:'POST'});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Billing isn\\'t reachable right now.')+'</span>'};
-  document.getElementById('plede').textContent='Base plans you\\'ve saved, up to 500 with Pro. Files stay here until you delete them.';
+  document.getElementById('plede').textContent='Pro keeps up to 500 plans. Your office settings go on every plan you build.';
   if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits, batch runs and office settings are on.</span>';return}
  if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
+ if(!s.pro)document.getElementById('plede').textContent='Every plan you build while signed in is kept in your plans, up to 25.';
  if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+(s.prices&&s.prices.year?' or '+esc(s.prices.year.label):'')+'</b><span class="note">Unlimited plans, batch runs, office standards, experimental test fits, 500 saved plans.</span>'+
-   '<a href="/pro">Details</a><label class="check fine"><input type="checkbox" id="agree"> I agree to the <a href="/terms" target="_blank">Terms</a> and will have everything checked by a licensed surveyor and the jurisdiction</label><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
+   '<a href="/pricing">Details</a><label class="check fine"><input type="checkbox" id="agree"> I agree to the <a href="/terms" target="_blank">Terms</a> and will have everything checked by a licensed surveyor and the jurisdiction</label><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
   document.getElementById('getpro').onclick=async()=>{if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
    const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:s.terms_version})});const k=await r.json().catch(()=>({}));if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}}}
 async function office(){const sec=document.getElementById('office'),ff=document.getElementById('firmf'),fm=document.getElementById('firmmsg');
@@ -1194,7 +1328,7 @@ async function office(){const sec=document.getElementById('office'),ff=document.
   if(r.ok){logo=null;if(!k.has_logo){prev.hidden=true;document.getElementById('rmlogo-row').hidden=true}else document.getElementById('rmlogo-row').hidden=false;ff.remove_logo.checked=false}}}
 proBar(0);
 </script>"""
-    return layout("My plans · Basesheet", "/plans", body, script, description="Your saved Basesheet base plans.")
+    return layout("Settings · Basesheet", "/plans/settings", body, script, app="settings", description="Your Basesheet account, Pro and office settings.")
 
 
 FIRMS_PAGE = os.environ.get("FIRMS_PAGE", "") not in ("", "0", "false")  # hosted site only
@@ -1216,7 +1350,7 @@ def pricing(prices: dict | None, anon: int, free: int) -> str:
 <li>Works the same in ChatGPT and Claude once you connect your Basesheet account.</li>
 </ul>
 <h2>Basesheet Pro · {price}</h2>
-{PRO_FEATURES}<p>To subscribe, sign in at basesheet.site and choose Pro on My plans. Cancel any time.</p>
+{PRO_FEATURES}<p>To subscribe, visit basesheet.site. Cancel any time.</p>
 <h2>Open source</h2>
 <p>The core tool is MIT-licensed, so you can <a href="{REPO_URL}">run your own copy</a> with no limits.</p>
 """
@@ -1252,11 +1386,16 @@ def pro(prices: dict | None) -> str:
     else:
         choice = f'<p class="price">{escape(m["label"]) if m else "Monthly"}</p>'
 
+    anon, acct = _allowances()
+    free = (f"{anon} plans a month, {acct} with a free account" if anon and acct else "Free for everyday use")
     body = f"""
-<h1>Basesheet Pro</h1>
+<h1>Plans and pricing</h1>
 <p class="lede">Basesheet is free for everyday use. Pro is for offices that run regular site studies: no monthly limit, plus
 the features that take real work to build and keep accurate. It also pays for the zoning research behind them.</p>
-<div class="procard">
+<div class="pricegrid">
+<div class="freecard"><div class="mono tag">Free</div><p class="price">$0</p><ul><li>{escape(free)}</li><li>Every file format</li>
+<li>Zoning lookup where covered</li><li>25 saved plans with a free account</li></ul><p><a class="btns" href="/plans">Build a plan</a></p></div>
+<div class="procard"><div class="mono tag">Pro</div>
 {choice}<p class="note">Cancel any time.</p>
 {PRO_FEATURES}<div id="probox"><div id="emailrow" class="proemail" hidden><label for="proemail">Email address</label>
 <input id="proemail" type="email" maxlength="254" autocomplete="email" required>
@@ -1264,11 +1403,11 @@ the features that take real work to build and keep accurate. It also pays for th
 <label class="check"><input type="checkbox" id="agree"> I've read the <a href="/terms" target="_blank">Terms</a>. I understand that test fits and everything else Basesheet makes are unverified, planning-level information, and I'll have them checked by a licensed surveyor and the jurisdiction before relying on them.</label>
 <p><button type="button" id="subscribe">Get Pro</button></p></div>
 <p id="promsg" class="note" aria-live="polite"></p>
-</div>
+</div></div>
 <h2>Fine print</h2>
 <ul>
 <li>Test fits are planning-level, from rule sheets that cite the zoning code. Each one says whether it's been checked by a professional. Confirm with the jurisdiction before relying on it.</li>
-<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews each month or year, depending on the plan you choose; cancel any time from My plans and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
+<li>Payments are handled by Stripe; Basesheet never sees your card. Pro renews each month or year, depending on the plan you choose; cancel any time from Settings and it ends at the end of the period you've paid for. See the <a href="/terms">Terms</a>.</li>
 <li>Prefer to run it yourself? The core tool is open source (MIT) and <a href="{REPO_URL}">always available on GitHub</a>, with no limits. The hosted zoning lookup and Pro features aren't part of it.</li>
 <li>Questions or a firm with several people? {CONTACT_HTML}</li>
 </ul>
@@ -1278,7 +1417,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const box=document.getElementById('probox'),msg=document.getElementById('promsg');
 if(new URLSearchParams(location.search).has('cancelled'))msg.textContent='Checkout cancelled. Nothing was charged.';
 fetch('/api/billing/status').then(r=>r.json()).then(s=>{
- if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans">My plans and billing</a>';return}
+ if(s.pro){box.innerHTML='<p class="ok">You have Pro.</p> <a href="/plans/settings">Billing and office settings</a>';return}
  const row=document.getElementById('emailrow');row.hidden=false;
  if(s.signed_in){row.innerHTML='<p class="fine">Your Pro subscription will be associated with <b>'+esc(s.email||'your account')+'</b>. Not you? <button type="button" class="linkbtn" id="proout" style="padding:0">Sign out</button></p>';
   document.getElementById('proout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.reload()}}
@@ -1301,8 +1440,8 @@ async function startCheckout(){let email='';
  const r=await fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accept_terms:TV,interval:iv,email:email})});const k=await r.json().catch(()=>({}));
  if(k.url)location.href=k.url;else msg.innerHTML='<span class="err">'+esc(k.error||'Checkout isn\\'t working right now.')+'</span>'}
 </script>"""
-    return layout("Basesheet Pro", "/pro", body, script,
-                  description="Basesheet Pro: zoning test fits, your office title block and CAD standards, and batch runs, on top of the free base plan tool.")
+    return layout("Plans and pricing · Basesheet", "/pricing", body, script,
+                  description="Basesheet is free for everyday use. Pro adds unlimited plans, your office title block and CAD standards, batch runs and zoning test fits.")
 
 
 def firms() -> str:
