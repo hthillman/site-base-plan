@@ -1309,7 +1309,6 @@ async function proBar(tries){
   document.getElementById('plede').textContent='Pro keeps up to 500 plans. Your office settings go on every plan you build.';
   if(q.get('pro')==='1')msg.innerHTML='<span class="ok">Welcome to Pro. Test fits, batch runs and office settings are on.</span>';return}
  if(q.get('pro')==='1'&&tries<6){bar.innerHTML='<span class="note">Payment received. Turning on Pro…</span>';bar.hidden=false;setTimeout(()=>proBar(tries+1),2000);return}
- if(!s.pro)document.getElementById('plede').textContent='Every plan you build while signed in is kept in your plans, up to 25.';
  if(s.live){bar.innerHTML='<b>Get Pro'+(s.price?' · '+esc(s.price.label):'')+(s.prices&&s.prices.year?' or '+esc(s.prices.year.label):'')+'</b><span class="note">Unlimited plans, batch runs, office standards, experimental test fits, 500 saved plans.</span>'+
    '<a href="/pricing">Details</a><label class="check fine"><input type="checkbox" id="agree"> I agree to the <a href="/terms" target="_blank">Terms</a> and will have everything checked by a licensed surveyor and the jurisdiction</label><button type="button" id="getpro">Get Pro</button>';bar.hidden=false;
   document.getElementById('getpro').onclick=async()=>{if(!document.getElementById('agree').checked){msg.innerHTML='<span class="err">Please tick the box to accept the Terms first.</span>';return}
