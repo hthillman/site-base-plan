@@ -424,7 +424,22 @@ def record_usage(rec: dict) -> None:
 # Monthly allowance (off unless FREE_PLANS_PER_MONTH is set): signed-in free accounts are counted on the server;
 # without an account the browser's own count applies (soft: it prompts a free sign-in rather than policing).
 # Pro accounts, batch runs and the live check are exempt; AI assistants have their own daily cap (mcp.py).
-FREE_PLANS_PER_MONTH = int(os.environ.get("FREE_PLANS_PER_MONTH", "0") or 0)
+# FREE_PLANS_FROM="YYYY-MM:N" changes the account allowance to N from that month on, so a change can be announced
+# ahead and take effect on the 1st without a deploy. Read it through free_allowance() (web.FREE_PLANS_PER_MONTH also works).
+def free_allowance() -> int:
+    n = int(os.environ.get("FREE_PLANS_PER_MONTH", "0") or 0)
+    month, _, later = os.environ.get("FREE_PLANS_FROM", "").partition(":")
+    if n and later.strip().isdigit() and _month() >= month.strip():
+        n = int(later)
+    return n
+
+
+def __getattr__(name):  # other modules read web.FREE_PLANS_PER_MONTH; keep it current across the month boundary
+    if name == "FREE_PLANS_PER_MONTH":
+        return free_allowance()
+    raise AttributeError(name)
+
+
 ANON_PLANS_PER_MONTH = int(os.environ.get("ANON_PLANS_PER_MONTH", "0") or 0)
 # The browser's own count is easy to reset (private window, another browser), so no-account plans are also counted
 # on the server per connection: a scrambled IP that changes every month and can't be turned back into the address.
@@ -473,7 +488,7 @@ def visitor_key() -> str:
 
 def plan_allowance(d: dict, live_check_header: str) -> dict | None:
     """None if this run may go ahead; otherwise the JSON for a 402 that the page turns into a sign-in / upgrade box."""
-    if not FREE_PLANS_PER_MONTH:
+    if not free_allowance():
         return None
     tok = os.environ.get("ADMIN_TOKEN", "")
     if (tok and hmac.compare_digest(live_check_header, tok)) or _is_pro():
@@ -484,10 +499,10 @@ def plan_allowance(d: dict, live_check_header: str) -> dict | None:
     nxt = _next_month_label()
     if u:
         used = count_private(f"planq/{u['id']}/{_month()}")
-        if used < FREE_PLANS_PER_MONTH:
+        if used < free_allowance():
             return None
-        return {"limit": "account", "allowance": FREE_PLANS_PER_MONTH, "resets": nxt,
-                "error": f"You've used this month's {FREE_PLANS_PER_MONTH} free plans. Your allowance resets on {nxt}."}
+        return {"limit": "account", "allowance": free_allowance(), "resets": nxt,
+                "error": f"You've used this month's {free_allowance()} free plans. Your allowance resets on {nxt}."}
     try:
         mprior = int(d.get("mprior") or 0)
     except (TypeError, ValueError):
@@ -498,9 +513,9 @@ def plan_allowance(d: dict, live_check_header: str) -> dict | None:
         key = visitor_key()
         if not key or count_private(f"anonip/{_month()}/{key}") < ANON_IP_PLANS_PER_MONTH:
             return None
-    return {"limit": "anon", "allowance": FREE_PLANS_PER_MONTH, "anon_allowance": ANON_PLANS_PER_MONTH,
+    return {"limit": "anon", "allowance": free_allowance(), "anon_allowance": ANON_PLANS_PER_MONTH,
             "error": f"You've made {ANON_PLANS_PER_MONTH} plan{'s' if ANON_PLANS_PER_MONTH != 1 else ''} this month. "
-                     f"Sign in free to keep going: {FREE_PLANS_PER_MONTH} plans a month, no password."}
+                     f"Sign in free to keep going: {free_allowance()} plans a month, no password."}
 
 
 def _next_month_label() -> str:
@@ -545,7 +560,7 @@ def _device_cookie(resp):
 
 def count_anon(key: str) -> None:
     """Record one successful no-account plan against this connection's monthly counter. Never raises."""
-    if not (FREE_PLANS_PER_MONTH and ANON_PLANS_PER_MONTH and key):
+    if not (free_allowance() and ANON_PLANS_PER_MONTH and key):
         return
     try:
         private_put(f"anonip/{_month()}/{key}", {"n": 1})
@@ -555,7 +570,7 @@ def count_anon(key: str) -> None:
 
 def count_plan(user_id: str | None) -> None:
     """Record one successful plan against a signed-in account's monthly allowance. Never raises."""
-    if not (FREE_PLANS_PER_MONTH and user_id):
+    if not (free_allowance() and user_id):
         return
     try:
         private_put(f"planq/{user_id}/{_month()}", {"n": 1})
@@ -766,7 +781,7 @@ def pricing_page():
         return redirect("/", code=302)
     from .billing import prices
 
-    return pricing(prices(), ANON_PLANS_PER_MONTH, FREE_PLANS_PER_MONTH)
+    return pricing(prices(), ANON_PLANS_PER_MONTH, free_allowance())
 
 
 @app.get("/pro")

@@ -362,7 +362,7 @@ ChatGPT warns that custom connectors aren't reviewed by OpenAI; Basesheet's conn
 <h2>Your Basesheet account</h2>
 <p>You can use Basesheet in chat without an account: 3 plans a month. When you need more, the assistant offers to
 <b>connect</b> your Basesheet account. You sign in with the emailed link, no password, and approve the connection. Plans built in chat
-then count toward your account: 10 a month free, unlimited with Pro. The assistant can't see, change or delete your saved
+then count toward your account's monthly plans, the same as on the site (unlimited with Pro). The assistant can't see, change or delete your saved
 plans. To disconnect, remove Basesheet in the assistant's settings.</p>
 <h2>Other MCP clients</h2>
 <p>Cursor, VS Code and other tools that support remote MCP servers over HTTP can add the same address. For clients that take JSON:</p>

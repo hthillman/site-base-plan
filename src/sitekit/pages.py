@@ -24,7 +24,9 @@ def _allowances() -> tuple[int, int]:
             return int(os.environ.get(k, "0") or 0)
         except ValueError:
             return 0
-    return n("ANON_PLANS_PER_MONTH"), n("FREE_PLANS_PER_MONTH")
+    from .web import free_allowance
+
+    return n("ANON_PLANS_PER_MONTH"), free_allowance()
 
 
 def allowance_line() -> str:

@@ -329,7 +329,9 @@ def maybe_welcome(user: dict) -> None:
         _priv_put(f"welcomed/{user['id']}", {"at": _now()})  # before sending, so a retry can't send twice
         from .http import session as http
 
-        allowance = int(os.environ.get("FREE_PLANS_PER_MONTH", "0") or 0)
+        from .web import free_allowance
+
+        allowance = free_allowance()
         r = http().post("https://api.resend.com/emails", json={"from": EMAIL_FROM, "to": [user["email"]], "subject": WELCOME_SUBJECT,
                                                                "text": welcome_text(allowance)},
                         headers={"authorization": f"Bearer {RESEND_API_KEY}"}, timeout=10)
